@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         );
 
-        panel.webview.html = getWebviewContent(panel.webview, context.extensionUri);
+        panel.webview.html = getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
     });
 
     context.subscriptions.push(disposable);
@@ -32,15 +32,28 @@ function getNonce() {
     return text;
 }
 
-function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
+function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, extensionPath: string) {
     const mediaPath = vscode.Uri.joinPath(extensionUri, 'media');
 
     // Create URIs for all assets
     const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'style.css'));
-    const blocklyCompressedUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly_compressed.js'));
-    const blocksCompressedUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blocks_compressed.js'));
+    const blocklyUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly.js'));
+    const blocksUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blocks.js'));
     const enUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'msg', 'en.js'));
+    const customBlocksUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'blocks.js'));
+    const customEnUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'en.js'));
+    const customZhHantUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'zh-hant.js'));
+    const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js'));
+    const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js'));
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js'));
+
+    // Read toolbox.xml content
+    const toolboxPath = path.join(extensionPath, '..', 'BlocklyDuino_simfonia', 'toolbox.xml');
+    let toolboxXml = fs.readFileSync(toolboxPath, 'utf8');
+    // Wrap the toolbox XML content with an <xml> tag
+    toolboxXml = `<xml>${toolboxXml}</xml>`;
+    // Escape the XML content for embedding in a JavaScript string
+    const escapedToolboxXml = toolboxXml.replace(/`/g, '\\`').replace(/\\/g, '\\\\').replace(/\$/g, '\\$').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
 
     // Using a more permissive CSP for debugging purposes.
     return `<!DOCTYPE html>
@@ -48,7 +61,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
 <head>
     <meta charset="UTF-8">
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src * data:; script-src 'unsafe-inline' ${webview.cspSource} vscode-webview-resource:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src * data:; script-src 'unsafe-inline' ${webview.cspSource} vscode-webview-resource:;">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>piBlockly Editor</title>
@@ -57,11 +70,19 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
 <body>
     <div id="blocklyDiv" style="height: 100vh; width: 100vw;"></div>
 
-    <script src="${blocklyCompressedUri}"></script>
-    <script src="${blocksCompressedUri}"></script>
+    <script src="${blocklyUri}"></script>
     <script src="${enUri}"></script>
+    <script src="${customEnUri}"></script>
+    <script src="${customZhHantUri}"></script>
+    <script src="${fieldColourUri}"></script>
+    <script src="${fieldMultilineInputUri}"></script>
     
+    <script>
+        window.initialToolboxXml = "${escapedToolboxXml}";
+    </script>
+
     <script src="${mainUri}"></script>
+    <script src="${customBlocksUri}"></script>
 </body>
 </html>`;
 }
