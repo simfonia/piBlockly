@@ -11,10 +11,20 @@ Blockly.Msg["SIMFONIA_HUE"] = "#5b33a5"; // for simfonia
 
 // Arduino Blocks
 Blockly.Msg["ARDUINO_HUE"] = "#016c8d"; // for Arduino
+
 Blockly.Msg["ARDUINO_CONTROL_HUE"] = "#016c8d"; // for Arduino I/O
+Blockly.Msg["ARDUINO_STRUCTURE_HUE"] = "#585858"; // for Arduino Structure
 Blockly.Msg["ARDUINO_DIGITAL_IO_HUE"] = "#0f960a"; // for Arduino Digital I/O
 Blockly.Msg["ARDUINO_ANALOG_IO_HUE"] = "#FF9800"; // for Arduino Analog I/O
 Blockly.Msg["ARDUINO_MATH_HUE"] = "#b13333"; // for Arduino math blocks (red-ish)
+
+// Initializes Blocks
+Blockly.Msg.INITIALIZES_SETUP_APPENDTEXT = "初始化 setup";
+Blockly.Msg.INITIALIZES_SETUP_TOOLTIP = "setup() 函式在程式開始時呼叫。用它來初始化變數、腳位模式、開始使用函式庫等。setup 函式只會在每次 Arduino 板上電或重置後執行一次。";
+Blockly.Msg.INITIALIZES_SETUP_HELPURL = "";
+Blockly.Msg.INITIALIZES_LOOP_APPENDTEXT = "主迴圈 loop";
+Blockly.Msg.INITIALIZES_LOOP_TOOLTIP = "loop() 函式會不斷地重複執行，讓您的程式可以改變和回應。使用它來主動控制 Arduino 板。";
+Blockly.Msg.INITIALIZES_LOOP_HELPURL = "";
 
 
 Blockly.Msg["ARDUINO_PIN_LABEL"] = "pin:";

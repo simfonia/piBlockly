@@ -10,7 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
         const panel = vscode.window.createWebviewPanel(
             'piblocklyEditor',
             'piBlockly Editor',
-            vscode.ViewColumn.One,
+            vscode.ViewColumn.Two,
             {
                 enableScripts: true,
                 localResourceRoots: [context.extensionUri]
@@ -18,6 +18,42 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         panel.webview.html = getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
+
+        let activeEditorUri: vscode.Uri | undefined = undefined;
+
+        // Handle messages from the webview
+        panel.webview.onDidReceiveMessage(
+            async message => {
+                switch (message.command) {
+                    case 'updateCode':
+                        const code = message.code;
+                        try {
+                            if (activeEditorUri) {
+                                const doc = await vscode.workspace.openTextDocument(activeEditorUri);
+                                const edit = new vscode.WorkspaceEdit();
+                                const fullRange = new vscode.Range(
+                                    doc.positionAt(0),
+                                    doc.positionAt(doc.getText().length)
+                                );
+                                edit.replace(doc.uri, fullRange, code);
+                                await vscode.workspace.applyEdit(edit);
+                            } else {
+                                const newDoc = await vscode.workspace.openTextDocument({
+                                    content: code,
+                                    language: 'arduino'
+                                });
+                                activeEditorUri = newDoc.uri;
+                                await vscode.window.showTextDocument(newDoc, vscode.ViewColumn.One);
+                            }
+                        } catch (error) {
+                            vscode.window.showErrorMessage('Failed to update Arduino code: ' + error);
+                        }
+                        return;
+                }
+            },
+            undefined,
+            context.subscriptions
+        );
     });
 
     context.subscriptions.push(disposable);
@@ -46,9 +82,10 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js'));
     const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js'));
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js'));
+    const customGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'generator.js'));
 
     // Read toolbox.xml content
-    const toolboxPath = path.join(extensionPath, '..', 'BlocklyDuino_simfonia', 'toolbox.xml');
+    const toolboxPath = path.join(extensionPath, 'media', 'toolbox.xml');
     let toolboxXml = fs.readFileSync(toolboxPath, 'utf8');
     // Wrap the toolbox XML content with an <xml> tag
     toolboxXml = `<xml>${toolboxXml}</xml>`;
@@ -81,6 +118,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
         window.initialToolboxXml = "${escapedToolboxXml}";
     </script>
 
+    <script src="${customGeneratorUri}"></script>
     <script src="${mainUri}"></script>
     <script src="${customBlocksUri}"></script>
 </body>

@@ -1,0 +1,252 @@
+<category id="category_simfonia" name="%{BKY_SIMFONIA_CATEGORY}" colour="%{BKY_SIMFONIA_HUE}">
+    <category id="category_arduino" name="%{BKY_ARDUINO_CATEGORY}" colour="%{BKY_ARDUINO_HUE}">
+        <block type="initializes_setup"></block>
+        <block type="initializes_loop"></block>
+        <block type="arduino_pin_mode">
+            <value name="PIN">
+                <shadow type="arduino_pin_shadow">
+                    <field name="PIN"></field>
+                </shadow>
+            </value>
+            <value name="MODE">
+                <shadow type="arduino_pin_mode_mode_shadow"></shadow>
+            </value>
+        </block>
+        <block type="arduino_pin_shadow"></block>
+        <block type="arduino_pin_mode_mode_shadow"></block>
+        <block type="arduino_digital_read">
+            <value name="PIN">
+                <shadow type="arduino_pin_shadow">
+                    <field name="PIN"></field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_digital_write">
+            <value name="PIN">
+                <shadow type="arduino_pin_shadow">
+                    <field name="PIN"></field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_analog_read">
+            <value name="PIN">
+                <shadow type="arduino_pin_shadow">
+                    <field name="PIN">A0</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_analog_write">
+            <value name="PIN">
+                <shadow type="arduino_pin_shadow">
+                    <field name="PIN">~</field>
+                </shadow>
+            </value>
+            <value name="VALUE">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_constrain">
+            <value name="VALUE">
+                <shadow type="math_number">
+                    <field name="NUM">變數</field>
+                </shadow>
+            </value>
+            <value name="LOW">
+                <shadow type="math_number">
+                    <field name="NUM">下限</field>
+                </shadow>
+            </value>
+            <value name="HIGH">
+                <shadow type="math_number">
+                    <field name="NUM">上限</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_map">
+            <value name="VALUE">
+                <shadow type="math_number">
+                    <field name="NUM">變數</field>
+                </shadow>
+            </value>
+            <value name="FROMLOW">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+            <value name="FROMHIGH">
+                <shadow type="math_number">
+                    <field name="NUM">1023</field>
+                </shadow>
+            </value>
+            <value name="TOLOW">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+            <value name="TOHIGH">
+                <shadow type="math_number">
+                    <field name="NUM">255</field>
+                </shadow>
+            </value>
+        </block>
+    </category>
+    <category id="category_picar" name="%{BKY_PICAR_CATEGORY}" colour="%{BKY_PICAR_HUE}">
+        <block type="picar_init"></block>
+        <block type="picar_resetPiCar"></block>
+        <block type="picar_drive">
+            <value name="POWER_L">
+                <shadow type="math_number">
+                    <field name="NUM">255</field>
+                </shadow>
+            </value>
+            <value name="POWER_R">
+                <shadow type="math_number">
+                    <field name="NUM">255</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="picar_stop"></block>
+        <block type="picar_checkDistance"></block>
+        <block type="picar_checkColor"></block>
+        <block type="picar_checkGray"></block>
+        <block type="picar_inPosition"></block>
+        <!-- <block type="picar_set_left_hand_angle">
+            <value name="ANGLE">
+                <shadow type="math_number">
+                    <field name="NUM">180</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="picar_set_right_hand_angle">
+            <value name="ANGLE">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="picar_closeHands"></block>
+        <block type="picar_openHands"></block> -->
+        <block type="picar_set_hand_range">
+            <value name="RANGE">
+                <shadow type="math_number">
+                    <field name="NUM">170</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="picar_move_hands">
+            <value name="PERCENT">
+                <shadow type="math_number">
+                    <field name="NUM">50</field>
+                </shadow>
+            </value>
+            <value name="SPEED">
+                <shadow type="math_number">
+                    <field name="NUM">8</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="picar_set_led_color"></block>
+        <block type="picar_flashingLight"></block>
+        <block type="picar_easterEgg">
+            <value name="TEMPO">
+                <shadow type="math_number">
+                    <field name="NUM">1000</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="picar_tone">
+            <value name="PIN">
+                <shadow type="math_number">
+                    <field name="NUM">22</field>
+                </shadow>
+            </value>
+            <value name="FREQUENCY">
+                <shadow type="math_number">
+                    <field name="NUM">440</field>
+                </shadow>
+            </value>
+            <value name="DURATION">
+                <shadow type="math_number">
+                    <field name="NUM">200</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="picar_no_tone">
+            <value name="PIN">
+                <shadow type="math_number">
+                    <field name="NUM">22</field>
+                </shadow>
+            </value>
+        </block>
+    </category>
+    <category id="category_coding" name="%{BKY_CODING_CATEGORY}" colour="%{BKY_CODING_HUE}">
+        <block type="coding_raw_statement"></block>
+        <block type="coding_raw_input"></block>
+        <block type="coding_raw_definition"></block>
+        <block type="coding_raw_wrapper"></block>
+    </category>
+</category>
+<sep></sep>
+<category name="Logic" colour="#5C81A6">
+    <block type="controls_if"></block>
+    <block type="logic_compare"></block>
+    <block type="logic_operation"></block>
+    <block type="logic_negate"></block>
+    <block type="logic_boolean"></block>
+</category>
+<category name="Loops" colour="#5CA65C">
+    <block type="controls_repeat_ext">
+        <value name="TIMES">
+            <shadow type="math_number">
+                <field name="NUM">10</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="controls_whileUntil"></block>
+    <block type="controls_for">
+        <value name="FROM">
+            <shadow type="math_number">
+                <field name="NUM">1</field>
+            </shadow>
+        </value>
+        <value name="TO">
+            <shadow type="math_number">
+                <field name="NUM">10</field>
+            </shadow>
+        </value>
+        <value name="BY">
+            <shadow type="math_number">
+                <field name="NUM">1</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="controls_flow_statements"></block>
+</category>
+<category name="Math" colour="#5C68A6">
+    <block type="math_number"></block>
+    <block type="math_arithmetic"></block>
+    <block type="math_single"></block>
+</category>
+<category name="Text" colour="#A6745C">
+    <block type="text"></block>
+    <block type="text_join"></block>
+    <block type="text_append">
+        <value name="TEXT">
+            <shadow type="text"></shadow>
+        </value>
+    </block>
+</category>
+<category name="Lists" colour="#745CA6">
+    <block type="lists_create_with"></block>
+    <block type="lists_repeat"></block>
+    <block type="lists_length"></block>
+    <block type="lists_isEmpty"></block>
+    <block type="lists_indexOf"></block>
+    <block type="lists_getIndex"></block>
+    <block type="lists_setIndex"></block>
+</category>
+<sep></sep>
+<category name="Variables" colour="#A65C81" custom="VARIABLE"></category>
+<category name="Functions" colour="#9A5CA6" custom="PROCEDURE"></category>

@@ -11,11 +11,20 @@ Blockly.Msg["SIMFONIA_HUE"] = "#5b33a5"; // for simfonia
 
 // Arduino Blocks
 Blockly.Msg["ARDUINO_HUE"] = "#016c8d"; // for Arduino
+Blockly.Msg["ARDUINO_STRUCTURE_HUE"] = "#585858"; // for Arduino I/O
 Blockly.Msg["ARDUINO_CONTROL_HUE"] = "#016c8d"; // for Arduino I/O
 Blockly.Msg["ARDUINO_DIGITAL_IO_HUE"] = "#0f960a"; // for Arduino Digital I/O
 Blockly.Msg["ARDUINO_ANALOG_IO_HUE"] = "#FF9800"; // for Arduino Analog I/O
 Blockly.Msg["ARDUINO_MATH_HUE"] = "#b13333"; // for Arduino math blocks (red-ish)
 
+
+// Initializes Blocks
+Blockly.Msg.INITIALIZES_SETUP_APPENDTEXT = "setup";
+Blockly.Msg.INITIALIZES_SETUP_TOOLTIP = "The setup() function is called when a sketch starts. Use it to initialize variables, pin modes, start using libraries, etc. The setup function will only run once, after each powerup or reset of the Arduino board.";
+Blockly.Msg.INITIALIZES_SETUP_HELPURL = "";
+Blockly.Msg.INITIALIZES_LOOP_APPENDTEXT = "loop";
+Blockly.Msg.INITIALIZES_LOOP_TOOLTIP = "The loop() function does precisely what its name suggests, and loops consecutively, allowing your program to change and respond. Use it to actively control the Arduino board.";
+Blockly.Msg.INITIALIZES_LOOP_HELPURL = "";
 
 Blockly.Msg["ARDUINO_PIN_LABEL"] = "pin:";
 Blockly.Msg["ARDUINO_MODE_LABEL"] = "mode:";
@@ -129,3 +138,4 @@ Blockly.Msg["CODING_RAW_WRAPPER"] = "Raw Wrapper";
 Blockly.Msg["CODING_RAW_WRAPPER_TOOLTIP"] = "Allows wrapping other blocks with custom code (e.g., custom loops or conditionals).";
 Blockly.Msg["CODING_RAW_WRAPPER_TOP"] = "Top Code:";
 Blockly.Msg["CODING_RAW_WRAPPER_BOTTOM"] = "Bottom Code:";
+

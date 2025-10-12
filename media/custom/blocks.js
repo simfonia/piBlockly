@@ -645,4 +645,43 @@ Blockly.Blocks['coding_raw_wrapper'] = {
   }
 };
 
+// Add modern definitions for setup and loop blocks
+Blockly.Blocks['initializes_setup'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_INITIALIZES_SETUP_APPENDTEXT}",
+      "message1": "%1",
+      "args1": [
+        {
+          "type": "input_statement",
+          "name": "CONTENT"
+        }
+      ],
+      "nextStatement": null,
+      "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
+      "tooltip": "%{BKY_INITIALIZES_SETUP_TOOLTIP}",
+      "helpUrl": "%{BKY_INITIALIZES_SETUP_HELPURL}"
+    });
+  }
+};
+
+Blockly.Blocks['initializes_loop'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_INITIALIZES_LOOP_APPENDTEXT}",
+      "message1": "%1",
+      "args1": [
+        {
+          "type": "input_statement",
+          "name": "CONTENT"
+        }
+      ],
+      "previousStatement": null,
+      "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
+      "tooltip": "%{BKY_INITIALIZES_LOOP_TOOLTIP}",
+      "helpUrl": "%{BKY_INITIALIZES_LOOP_HELPURL}"
+    });
+  }
+};
+
 }(Blockly));
