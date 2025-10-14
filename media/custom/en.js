@@ -3,6 +3,10 @@
 Blockly.Msg["SIMFONIA_CATEGORY"] = "simfonia";
 Blockly.Msg["PICAR_CATEGORY"] = "πCar";
 Blockly.Msg["ARDUINO_CATEGORY"] = "Arduino";
+Blockly.Msg["ARDUINO_STRUCTURE_CATEGORY"] = "Structure";
+Blockly.Msg["ARDUINO_IO_CATEGORY"] = "IO";
+Blockly.Msg["ARDUINO_TIME_CATEGORY"] = "Time";
+Blockly.Msg["ARDUINO_SERIAL_CATEGORY"] = "Serial";
 Blockly.Msg["CODING_CATEGORY"] = "Coding";
 
 // simfonia Blocks

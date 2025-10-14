@@ -10,22 +10,47 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:piblockly.start"
+    "onLanguage:arduino"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "piblockly.start",
-        "title": "Start piBlockly Editor"
+        "title": "Start piBlockly Editor",
+        "category": "piBlockly",
+        "icon": {
+          "light": "media/icon.svg",
+          "dark": "media/icon.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "piblockly.start",
+          "group": "navigation@1"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "arduino",
+        "aliases": [
+          "Arduino",
+          "arduino"
+        ],
+        "extensions": [
+          ".ino"
+        ]
       }
     ]
   },
+  "publisher": "piblockly",
   "scripts": {
-    "vscode:prepublish": "npm run package",
     "compile": "webpack",
     "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
+    "package": "vsce package",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
@@ -40,9 +65,11 @@
     "@typescript-eslint/parser": "^8.45.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.2",
     "eslint": "^9.36.0",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
+    "vsce": "^2.15.0",
     "webpack": "^5.102.0",
     "webpack-cli": "^6.0.1"
   },

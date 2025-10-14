@@ -71,18 +71,20 @@ function getNonce() {
 function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, extensionPath: string) {
     const mediaPath = vscode.Uri.joinPath(extensionUri, 'media');
 
-    // Create URIs for all assets
-    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'style.css'));
-    const blocklyUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly.js'));
-    const blocksUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blocks.js'));
-    const enUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'msg', 'en.js'));
-    const customBlocksUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'blocks.js'));
-    const customEnUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'en.js'));
-    const customZhHantUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'zh-hant.js'));
-    const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js'));
-    const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js'));
-    const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js'));
-    const customGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'generator.js'));
+    const nonce = getNonce();
+
+    // Create cache-busting URIs for all assets
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'style.css')).with({ query: `nonce=${nonce}` });
+    const blocklyUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly.js')).with({ query: `nonce=${nonce}` });
+    const enUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'msg', 'en.js')).with({ query: `nonce=${nonce}` });
+    const customBlocksUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'blocks.js')).with({ query: `nonce=${nonce}` });
+    const customEnUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'en.js')).with({ query: `nonce=${nonce}` });
+    const customZhHantUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'zh-hant.js')).with({ query: `nonce=${nonce}` });
+    const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js')).with({ query: `nonce=${nonce}` });
+    const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
+    const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
+    const arduinoGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'arduino_generator.js')).with({ query: `nonce=${nonce}` });
+    const customGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'custom_generator.js')).with({ query: `nonce=${nonce}` });
 
     // Read toolbox.xml content
     const toolboxPath = path.join(extensionPath, 'media', 'toolbox.xml');
@@ -113,14 +115,15 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     <script src="${customZhHantUri}"></script>
     <script src="${fieldColourUri}"></script>
     <script src="${fieldMultilineInputUri}"></script>
+    <script src="${customBlocksUri}"></script>
+    <script src="${arduinoGeneratorUri}"></script>
+    <script src="${customGeneratorUri}"></script>
     
     <script>
         window.initialToolboxXml = "${escapedToolboxXml}";
     </script>
 
-    <script src="${customGeneratorUri}"></script>
     <script src="${mainUri}"></script>
-    <script src="${customBlocksUri}"></script>
 </body>
 </html>`;
 }

@@ -21,15 +21,21 @@ const workspace = Blockly.inject('blocklyDiv', {
 // --- Code Generation and Communication ---
 const vscode = acquireVsCodeApi();
 
+let debounceTimer;
+
 function updateCode() {
-    // Generate Arduino code from the workspace.
-    const code = Blockly.Arduino.workspaceToCode(workspace);
-    
-    // Post the generated code to the extension host.
-    vscode.postMessage({
-        command: 'updateCode',
-        code: code
-    });
+    // Clear any existing timer.
+    clearTimeout(debounceTimer);
+
+    // Set a new timer to run the code generation after a short delay.
+    debounceTimer = setTimeout(() => {
+        const code = Blockly.MyArduino.workspaceToCode(workspace);
+        
+        vscode.postMessage({
+            command: 'updateCode', 
+            code: code
+        });
+    }, 250); // 250ms delay
 }
 
 // Add a change listener to the workspace to automatically update the code.
