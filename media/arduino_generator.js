@@ -154,9 +154,10 @@ Blockly.MyArduino.forBlock['arduino_map'] = function(block) {
 // CATEGORY: MATH
 
 Blockly.MyArduino.forBlock['math_number'] = function(block) {
-  var number = parseFloat(block.getFieldValue('NUM'));
+  var number = String(parseFloat(block.getFieldValue('NUM')));
   return [number, Blockly.MyArduino.ORDER_ATOMIC];
 };
+
 
 Blockly.MyArduino.forBlock['math_arithmetic'] = function(block) {
   var OPERATORS = {
@@ -345,4 +346,189 @@ Blockly.MyArduino.forBlock['controls_if'] = function(block) {
     code += ' else {\n' + branchCode + '}';
   }
   return code + '\n';
+};
+
+Blockly.MyArduino.forBlock['controls_repeat_ext'] = function(block) {
+  // Repeat n times.
+  var repeats = Blockly.MyArduino.valueToCode(block, 'TIMES',
+      Blockly.MyArduino.ORDER_ASSIGNMENT) || '0';
+  var branch = Blockly.MyArduino.statementToCode(block, 'DO');
+  var code = '';
+  var loopVar = Blockly.MyArduino.variableDB_.getDistinctName(
+      'count', 'Variables');
+  var endVar = repeats;
+  // If repeats is not a legal variable name or a number, cache it in a variable.
+  if (!repeats.match(/^\w+$/) && !/^\d+(\.\d+)?$/.test(repeats)) {
+    endVar = Blockly.MyArduino.variableDB_.getDistinctName(
+        'repeat_end', 'Variables');
+    code += 'int ' + endVar + ' = ' + repeats + ';\n';
+  }
+  code += 'for (int ' + loopVar + ' = 0; ' + loopVar + ' < ' + endVar + '; ' +
+          loopVar + '++) {\n' + branch + '}\n';
+  return code;
+};
+
+Blockly.MyArduino.forBlock['controls_whileUntil'] = function(block) {
+  // While/until loop.
+  var until = block.getFieldValue('MODE') === 'UNTIL';
+  var argument0 = Blockly.MyArduino.valueToCode(block, 'BOOL',
+      until ? Blockly.MyArduino.ORDER_LOGICAL_NOT :
+      Blockly.MyArduino.ORDER_NONE) || 'false';
+  var branch = Blockly.MyArduino.statementToCode(block, 'DO');
+  if (until) {
+    argument0 = '!' + argument0;
+  }
+  return 'while (' + argument0 + ') {\n' + branch + '}\n';
+};
+
+Blockly.MyArduino.forBlock['controls_for'] = function(block) {
+  var variable0 = Blockly.MyArduino.variableDB_.getName(
+      block.getFieldValue('VAR'), 'VARIABLE');
+  var argument0 = Blockly.MyArduino.valueToCode(block, 'FROM',
+      Blockly.MyArduino.ORDER_ASSIGNMENT) || '0';
+  var argument1 = Blockly.MyArduino.valueToCode(block, 'TO',
+      Blockly.MyArduino.ORDER_ASSIGNMENT) || '0';
+  var increment = Blockly.MyArduino.valueToCode(block, 'BY',
+      Blockly.MyArduino.ORDER_ASSIGNMENT) || '1';
+  var branch = Blockly.MyArduino.statementToCode(block, 'DO');
+  var code = '';
+  
+  var isNumber = function(str) {
+    return /^-?\d+(\.\d+)?$/.test(str);
+  };
+
+  // If all inputs are number literals, generate a simple loop
+  if (isNumber(argument0) && isNumber(argument1) && isNumber(increment)) {
+    var fromNum = parseFloat(argument0);
+    var toNum = parseFloat(argument1);
+    var byNum = Math.abs(parseFloat(increment));
+
+    var up = fromNum <= toNum;
+    code = 'for (int ' + variable0 + ' = ' + fromNum + '; ' +
+           variable0 + (up ? ' <= ' : ' >= ') + toNum + '; ' +
+           variable0;
+    
+    if (byNum === 1) {
+        code += (up ? '++' : '--');
+    } else {
+        code += (up ? ' += ' : ' -= ') + byNum;
+    }
+    code += ') {\n' + branch + '}\n';
+
+  } else {
+    // Generic case with variables
+    var startVar = argument0;
+    if (!argument0.match(/^\w+$/)) {
+      startVar = Blockly.MyArduino.variableDB_.getDistinctName(
+          variable0 + '_start', 'VARIABLE');
+      code += 'int ' + startVar + ' = ' + argument0 + ';\n';
+    }
+    var endVar = argument1;
+    if (!argument1.match(/^\w+$/)) {
+      endVar = Blockly.MyArduino.variableDB_.getDistinctName(
+          variable0 + '_end', 'VARIABLE');
+      code += 'int ' + endVar + ' = ' + argument1 + ';\n';
+    }
+    var incVar = increment;
+    if (!increment.match(/^\w+$/)) {
+      incVar = Blockly.MyArduino.variableDB_.getDistinctName(
+          variable0 + '_inc', 'VARIABLE');
+      code += 'int ' + incVar + ' = ' + increment + ';\n';
+    }
+
+    code += 'for (int ' + variable0 + ' = ' + startVar + '; ';
+    code += '(' + incVar + ' > 0) ? ' +
+            variable0 + ' <= ' + endVar + ' : ' +
+            variable0 + ' >= ' + endVar + '; ';
+    code += variable0 + ' += ' + incVar + ') {\n' +
+            branch + '}\n';
+  }
+
+  return code;
+};
+
+Blockly.MyArduino.forBlock['controls_flow_statements'] = function(block) {
+  // Flow statements: break, continue.
+  switch (block.getFieldValue('FLOW')) {
+    case 'BREAK':
+      return 'break;\n';
+    case 'CONTINUE':
+      return 'continue;\n';
+  }
+  throw new Error('Unknown flow statement.');
+};
+
+
+// CATEGORY: TEXT
+Blockly.MyArduino.forBlock['text'] = function(block) {
+  // Text value.
+  var code = Blockly.MyArduino.quote_(block.getFieldValue('TEXT'));
+  return [code, Blockly.MyArduino.ORDER_ATOMIC];
+};
+
+Blockly.MyArduino.forBlock['text_join'] = function(block) {
+  // Create a string made up of any number of elements of any type.
+  if (block.itemCount_ === 0) {
+    return ['""', Blockly.MyArduino.ORDER_ATOMIC];
+  } else if (block.itemCount_ === 1) {
+    var element = Blockly.MyArduino.valueToCode(block, 'ADD0',
+        Blockly.MyArduino.ORDER_NONE) || '""';
+    var code = 'String(' + element + ')';
+    return [code, Blockly.MyArduino.ORDER_FUNCTION_CALL];
+  } else {
+    var elements = new Array(block.itemCount_);
+    for (var i = 0; i < block.itemCount_; i++) {
+      elements[i] = 'String(' + (Blockly.MyArduino.valueToCode(block, 'ADD' + i,
+          Blockly.MyArduino.ORDER_NONE) || '""') + ')';
+    }
+    var code = elements.join(' + ');
+    return [code, Blockly.MyArduino.ORDER_ADDITION];
+  }
+};
+
+Blockly.MyArduino.forBlock['text_append'] = function(block) {
+  // Append to a variable in place.
+  var varName = Blockly.MyArduino.variableDB_.getName(
+      block.getFieldValue('VAR'), 'VARIABLE');
+  var text = Blockly.MyArduino.valueToCode(block, 'TEXT',
+      Blockly.MyArduino.ORDER_NONE) || '""';
+  return varName + ' += ' + text + ';\n';
+};
+
+
+// CATEGORY: VARIABLES
+Blockly.MyArduino.forBlock['variables_get'] = function(block) {
+  // Variable getter.
+  var varName = Blockly.MyArduino.variableDB_.getName(
+      block.getFieldValue('VAR'), 'VARIABLE'); // 使用 'VARIABLE' 作為類型
+  return [varName, Blockly.MyArduino.ORDER_ATOMIC];
+};
+
+
+Blockly.MyArduino.forBlock['variables_set'] = function(block) {
+  // Variable setter.
+  var varPosition = block.getFieldValue('POSITION'); // 'global' or 'local'
+  var varType = block.getFieldValue('TYPE'); // e.g., 'int', 'String'
+  var varName = Blockly.MyArduino.variableDB_.getName(
+      block.getFieldValue('VAR'), 'VARIABLE');
+  var argument0 = Blockly.MyArduino.valueToCode(block, 'VALUE',
+      Blockly.MyArduino.ORDER_ASSIGNMENT);
+  var code = '';
+  if (varPosition === "global") {
+    // Global variables are defined outside setup/loop
+    if (argument0 !== "") {
+      Blockly.MyArduino.definitions_[varName] = varType + ' ' + varName + ' = ' + argument0 +
+';';
+    } else {
+      Blockly.MyArduino.definitions_[varName] = varType + ' ' + varName + ';';
+    }
+    code = ''; // No code returned for the current block, it's a definition.
+  } else { // local
+    if (argument0 !== "") {
+      code = varType + ' ' + varName + ' = ' + argument0 + ';\n';
+    } else {
+      code = varType + ' ' + varName + ';\n';
+    }
+  }
+  return code;
 };

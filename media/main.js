@@ -18,25 +18,67 @@ const workspace = Blockly.inject('blocklyDiv', {
     sounds: false,  // 關閉音效模組
 });
 
-// --- Code Generation and Communication ---
+// --- State and Communication ---
 const vscode = acquireVsCodeApi();
-
 let debounceTimer;
+let isFirstModification = true; // Flag for first "real" change
 
-function updateCode() {
-    // Clear any existing timer.
+// --- Functions ---
+function updateCode(event) {
+    // Don't generate code for UI events.
+    if (event && event.isUiEvent) {
+        return;
+    }
     clearTimeout(debounceTimer);
-
-    // Set a new timer to run the code generation after a short delay.
     debounceTimer = setTimeout(() => {
         const code = Blockly.MyArduino.workspaceToCode(workspace);
-        
         vscode.postMessage({
-            command: 'updateCode', 
-            code: code
+            command: 'updateCode',
+            code: code,
+            isFirstUpdate: isFirstModification
         });
-    }, 250); // 250ms delay
+    }, 250);
 }
 
-// Add a change listener to the workspace to automatically update the code.
+// --- Event Listeners ---
+
+// Listen for changes in the workspace
 workspace.addChangeListener(updateCode);
+
+// Listen for messages from the extension
+window.addEventListener('message', event => {
+    const message = event.data;
+    switch (message.command) {
+        case 'undo':
+            Blockly.Events.disable();
+            try {
+                workspace.undo(false);
+            } finally {
+                Blockly.Events.enable();
+            }
+            break;
+        case 'firstUpdateDone':
+            isFirstModification = false;
+            break;
+    }
+});
+
+// --- Initial Load ---
+
+// Load initial blocks without firing events
+Blockly.Events.disable();
+try {
+    const initialXml = `
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="initializes_setup" id="setup_block" x="100" y="50">
+    <next>
+      <block type="initializes_loop" id="loop_block"></block>
+    </next>
+  </block>
+</xml>
+`;
+    const xmlDom = (Blockly.utils && Blockly.utils.xml) ? Blockly.utils.xml.textToDom(initialXml) : Blockly.Xml.textToDom(initialXml);
+    Blockly.Xml.domToWorkspace(xmlDom, workspace);
+} finally {
+    Blockly.Events.enable();
+}

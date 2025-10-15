@@ -8,16 +8,16 @@ This file tracks the porting status of block generators from the old format to t
 - [x] `logic_operation`
 - [x] `logic_negate`
 - [x] `logic_boolean`
-- [ ] `controls_repeat_ext`
-- [ ] `controls_whileUntil`
-- [ ] `controls_for`
-- [ ] `controls_flow_statements`
+- [x] `controls_repeat_ext`
+- [x] `controls_whileUntil`
+- [x] `controls_for`
+- [x] `controls_flow_statements`
 - [x] `math_number`
 - [x] `math_arithmetic`
 - [x] `math_single`
-- [ ] `text`
-- [ ] `text_join`
-- [ ] `text_append`
+- [x] `text`
+- [x] `text_join`
+- [x] `text_append`
 - [ ] `lists_create_with`
 - [ ] `lists_repeat`
 - [ ] `lists_length`

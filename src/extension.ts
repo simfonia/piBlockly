@@ -6,10 +6,27 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log('Congratulations, your extension "piblockly" is now active!');
 
+    const panels = new Map<string, vscode.WebviewPanel>();
+
     const disposable = vscode.commands.registerCommand('piblockly.start', () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || !editor.document.fileName.endsWith('.ino')) {
+            vscode.window.showInformationMessage('Please open an Arduino (.ino) file to use piBlockly.');
+            return;
+        }
+
+        const fileUri = editor.document.uri.toString();
+
+        // If we already have a panel for this file, show it.
+        if (panels.has(fileUri)) {
+            panels.get(fileUri)?.reveal(vscode.ViewColumn.Two);
+            return;
+        }
+
+        // Otherwise, create a new panel.
         const panel = vscode.window.createWebviewPanel(
             'piblocklyEditor',
-            'piBlockly Editor',
+            `piBlockly: ${path.basename(editor.document.fileName)}`,
             vscode.ViewColumn.Two,
             {
                 enableScripts: true,
@@ -17,9 +34,15 @@ export function activate(context: vscode.ExtensionContext) {
             }
         );
 
-        panel.webview.html = getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
+        panels.set(fileUri, panel);
 
-        let activeEditorUri: vscode.Uri | undefined = undefined;
+        // When the panel is closed, remove it from our map
+        panel.onDidDispose(() => {
+            panels.delete(fileUri);
+        }, null, context.subscriptions);
+
+
+        panel.webview.html = getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
 
         // Handle messages from the webview
         panel.webview.onDidReceiveMessage(
@@ -27,9 +50,11 @@ export function activate(context: vscode.ExtensionContext) {
                 switch (message.command) {
                     case 'updateCode':
                         const code = message.code;
-                        try {
-                            if (activeEditorUri) {
-                                const doc = await vscode.workspace.openTextDocument(activeEditorUri);
+                        const isFirstUpdate = message.isFirstUpdate;
+
+                        const overwriteFile = async () => {
+                            try {
+                                const doc = await vscode.workspace.openTextDocument(editor.document.uri);
                                 const edit = new vscode.WorkspaceEdit();
                                 const fullRange = new vscode.Range(
                                     doc.positionAt(0),
@@ -37,16 +62,25 @@ export function activate(context: vscode.ExtensionContext) {
                                 );
                                 edit.replace(doc.uri, fullRange, code);
                                 await vscode.workspace.applyEdit(edit);
-                            } else {
-                                const newDoc = await vscode.workspace.openTextDocument({
-                                    content: code,
-                                    language: 'arduino'
-                                });
-                                activeEditorUri = newDoc.uri;
-                                await vscode.window.showTextDocument(newDoc, vscode.ViewColumn.One);
+                            } catch (error) {
+                                vscode.window.showErrorMessage('Failed to update Arduino code: ' + error);
                             }
-                        } catch (error) {
-                            vscode.window.showErrorMessage('Failed to update Arduino code: ' + error);
+                        };
+
+                        if (isFirstUpdate) {
+                            const choice = await vscode.window.showWarningMessage(
+                                'This will overwrite the existing content of your .ino file. Are you sure you want to continue?',
+                                { modal: true },
+                                'Yes'
+                            );
+                            if (choice === 'Yes') {
+                                await overwriteFile();
+                                panel.webview.postMessage({ command: 'firstUpdateDone' });
+                            } else {
+                                panel.webview.postMessage({ command: 'undo' });
+                            }
+                        } else {
+                            await overwriteFile();
                         }
                         return;
                 }
