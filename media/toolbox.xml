@@ -250,5 +250,11 @@
     <block type="lists_setIndex"></block>
 </category>
 <sep></sep>
-<category name="Variables" colour="#A65C81" custom="VARIABLE"></category>
+<category name="Variables" colour="#A65C81">
+    <button text="%{BKY_NEW_VARIABLE}" callbackKey="CREATE_VARIABLE"></button>
+    <block type="variables_declare"></block>
+    <block type="variables_get"></block>
+    <block type="variables_set"></block>
+</category>
+
 <category name="Functions" colour="#9A5CA6" custom="PROCEDURE"></category>

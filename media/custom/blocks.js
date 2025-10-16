@@ -684,4 +684,78 @@ Blockly.Blocks['initializes_loop'] = {
   }
 };
 
+
+Blockly.Blocks['variables_declare'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%1 %2 %3 = %4",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "SCOPE",
+          "options": [
+            ["Global", "GLOBAL"],
+            ["Local", "LOCAL"]
+          ]
+        },
+        {
+          "type": "field_dropdown",
+          "name": "TYPE",
+          "options": [
+            ["int", "int"],
+            ["float", "float"],
+            ["String", "String"],
+            ["bool", "bool"]
+          ]
+        },
+        {
+          "type": "field_variable",
+          "name": "VAR",
+          "variable": "%{BKY_VARIABLES_DEFAULT_NAME}"
+        },
+        {
+          "type": "input_value",
+          "name": "VALUE"
+        }
+      ],
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": "%{BKY_VARIABLES_HUE}",
+      "tooltip": "Declare a variable with a type and scope.",
+      "helpUrl": ""
+    });
+  }
+};
+
+Blockly.Blocks['variables_set'] = {
+  /**
+   * Block for setting the value of a variable.
+   * @this {Blockly.Block}
+   */
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_VARIABLES_SET}",
+      "args0": [
+        {
+          "type": "field_variable",
+          "name": "VAR",
+          "variable": "%{BKY_VARIABLES_DEFAULT_NAME}"
+        },
+        {
+          "type": "input_value",
+          "name": "VALUE"
+        }
+      ],
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": "%{BKY_VARIABLES_HUE}",
+      "tooltip": "%{BKY_VARIABLES_SET_TOOLTIP}",
+      "helpUrl": "%{BKY_VARIABLES_SET_HELPURL}"
+    });
+    this.contextMenuMsg_ = Blockly.Msg['VARIABLES_SET_CREATE_GET'];
+  },
+  contextMenuType_: 'variables_get'
+};
+
+
 }(Blockly));

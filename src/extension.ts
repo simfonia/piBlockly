@@ -30,7 +30,8 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.ViewColumn.Two,
             {
                 enableScripts: true,
-                localResourceRoots: [context.extensionUri]
+                localResourceRoots: [context.extensionUri],
+                enableForms: true
             }
         );
 
@@ -82,6 +83,16 @@ export function activate(context: vscode.ExtensionContext) {
                         } else {
                             await overwriteFile();
                         }
+                        return;
+                    case 'prompt':
+                        const input = await vscode.window.showInputBox({
+                            prompt: message.message,
+                            value: message.defaultValue
+                        });
+                        panel.webview.postMessage({
+                            command: 'promptResponse',
+                            value: input // input can be undefined if user cancels
+                        });
                         return;
                 }
             },

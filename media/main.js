@@ -18,10 +18,16 @@ const workspace = Blockly.inject('blocklyDiv', {
     sounds: false,  // 關閉音效模組
 });
 
+// Register the button callback for creating a variable
+workspace.registerButtonCallback('CREATE_VARIABLE', function(button) {
+    Blockly.Variables.createVariableButtonHandler(workspace);
+});
+
 // --- State and Communication ---
 const vscode = acquireVsCodeApi();
 let debounceTimer;
 let isFirstModification = true; // Flag for first "real" change
+window.promptCallback = null; // Store callback for prompt response
 
 // --- Functions ---
 function updateCode(event) {
@@ -31,7 +37,7 @@ function updateCode(event) {
     }
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-        const code = Blockly.MyArduino.workspaceToCode(workspace);
+        const code = Blockly.Arduino.workspaceToCode(workspace);
         vscode.postMessage({
             command: 'updateCode',
             code: code,
@@ -60,6 +66,12 @@ window.addEventListener('message', event => {
         case 'firstUpdateDone':
             isFirstModification = false;
             break;
+        case 'promptResponse':
+            if (window.promptCallback) {
+                window.promptCallback(message.value);
+                window.promptCallback = null; // Clear the callback
+            }
+            break;
     }
 });
 
@@ -82,3 +94,13 @@ try {
 } finally {
     Blockly.Events.enable();
 }
+
+// Override Blockly's default prompt to use VS Code's input box via the extension.
+Blockly.dialog.setPrompt(function(message, defaultValue, callback) {
+    vscode.postMessage({
+        command: 'prompt',
+        message: message,
+        defaultValue: defaultValue
+    });
+    window.promptCallback = callback;
+});
