@@ -27,7 +27,7 @@ This file tracks the porting status of block generators from the old format to t
 - [ ] `lists_setIndex`
 
 - [x] `Variables`
-- [ ] `Functions`
+- [x] `Functions`
 
 
 ## Custom Blocks
@@ -36,14 +36,14 @@ This file tracks the porting status of block generators from the old format to t
 - [x] `initializes_setup`
 - [x] `initializes_loop`
 - [x] `arduino_pin_mode`
-- [x] `arduino_pin_shadow`
-- [x] `arduino_pin_mode_mode_shadow`
 - [x] `arduino_digital_read`
 - [x] `arduino_digital_write`
 - [x] `arduino_analog_read`
 - [x] `arduino_analog_write`
 - [x] `arduino_constrain`
 - [x] `arduino_map`
+- [x] `Time`
+- [x] `Serial`
 
 ### PiCar Category
 - [x] `picar_init`

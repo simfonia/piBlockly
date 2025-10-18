@@ -1,8 +1,8 @@
 {
   "name": "piblockly",
   "displayName": "πBlockly",
-  "description": "A VS Code extension for Blockly",
-  "version": "0.0.1",
+  "description": "A Arduino IDE 2 extension for Blockly",
+  "version": "0.5.0",
   "engines": {
     "vscode": "^1.104.0"
   },

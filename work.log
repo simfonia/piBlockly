@@ -1,5 +1,28 @@
 工作日誌 (piblockly/work.log)
 
+  日期：2025年10月18日
+
+  已完成事項：
+   * 修正 Functions 積木的程式碼產生器： 解決了 custom_procedures_defnoreturn 和 custom_procedures_defreturn
+     積木在 custom_generator.js 中因換行符逸出問題導致的「Unterminated string literal」錯誤。
+   * 新增手動呼叫函式積木： 根據使用者需求，在 toolbox.xml 中新增了 custom_procedures_callnoreturn_manual 和
+     custom_procedures_callreturn_manual 積木。
+   * 定義手動呼叫函式積木的外觀與行為： 在 media/custom/blocks.js 中定義了
+     custom_procedures_callnoreturn_manual 和 custom_procedures_callreturn_manual
+     積木，包括函數名稱輸入欄位和參數變異器。
+   * 定義手動呼叫函式積木的程式碼產生器： 在 media/custom/custom_generator.js 中定義了
+     custom_procedures_callnoreturn_manual 和 custom_procedures_callreturn_manual
+     積木的程式碼產生器，使其能正確生成 C++ 函數呼叫。
+
+  討論與解決方案：
+   * Functions 積木呼叫問題： 由於 Blockly 預設的 Blockly.Procedures.flyoutCategory
+     可能與自訂程序積木不完全相容，且動態生成呼叫積木較為複雜，因此改為提供手動輸入函數名稱的呼叫積木。
+   * VSIX 版本更新問題： 說明了 VSIX 版本號碼由 package.json 控制，並提供了更新 VSIX
+     的正確步驟（解除安裝舊版、重啟 IDE、安裝新版、再次重啟 IDE）。
+   * Blockly 數學函數與 Arduino 相容性： 解釋了 Blockly 的數學函數積木在 Arduino (C++)
+     環境中大多可以直接使用，但需注意資料型別和資源限制。
+
+
 日期： 2025年10月17日
   錯誤訊息：
   第一個積木拉進時，在覆寫警告視窗按yes確定覆蓋時:

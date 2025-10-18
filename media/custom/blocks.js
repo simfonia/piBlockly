@@ -189,6 +189,158 @@ Blockly.Blocks['arduino_map'] = {
   }
 };
 
+Blockly.Blocks['arduino_delay'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "delay(%1)",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "DELAY_TIME",
+          "check": "Number"
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "%{BKY_ARDUINO_TIME_HUE}",
+      "tooltip": "%{BKY_ARDUINO_DELAY_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_delay_microseconds'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "delayMicroseconds(%1)",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "DELAY_TIME",
+          "check": "Number"
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "%{BKY_ARDUINO_TIME_HUE}",
+      "tooltip": "%{BKY_ARDUINO_DELAY_MICROSECONDS_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_millis'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "millis()",
+      "output": "Number",
+      "colour": "%{BKY_ARDUINO_TIME_HUE}",
+      "tooltip": "%{BKY_ARDUINO_MILLIS_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_micros'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "micros()",
+      "output": "Number",
+      "colour": "%{BKY_ARDUINO_TIME_HUE}",
+      "tooltip": "%{BKY_ARDUINO_MICROS_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_serial_begin'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_ARDUINO_SERIAL_BEGIN}",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "SPEED",
+          "options": [
+            ["9600", "9600"],
+            ["300", "300"],
+            ["600", "600"],
+            ["1200", "1200"],
+            ["2400", "2400"],
+            ["4800", "4800"],
+            ["14400", "14400"],
+            ["19200", "19200"],
+            ["28800", "28800"],
+            ["38400", "38400"],
+            ["57600", "57600"],
+            ["115200", "115200"]
+          ]
+        }
+      ],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "%{BKY_ARDUINO_SERIAL_HUE}",
+      "tooltip": "%{BKY_ARDUINO_SERIAL_BEGIN_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_serial_print'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_ARDUINO_SERIAL_PRINT}",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "CONTENT"
+        }
+      ],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "%{BKY_ARDUINO_SERIAL_HUE}",
+      "tooltip": "%{BKY_ARDUINO_SERIAL_PRINT_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_serial_println'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_ARDUINO_SERIAL_PRINTLN}",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "CONTENT"
+        }
+      ],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "%{BKY_ARDUINO_SERIAL_HUE}",
+      "tooltip": "%{BKY_ARDUINO_SERIAL_PRINTLN_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_serial_available'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_ARDUINO_SERIAL_AVAILABLE}",
+      "output": "Number",
+      "colour": "%{BKY_ARDUINO_SERIAL_HUE}",
+      "tooltip": "%{BKY_ARDUINO_SERIAL_AVAILABLE_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_serial_read'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_ARDUINO_SERIAL_READ}",
+      "output": "Number",
+      "colour": "%{BKY_ARDUINO_SERIAL_HUE}",
+      "tooltip": "%{BKY_ARDUINO_SERIAL_READ_TOOLTIP}"
+    });
+  }
+};
+
 
 // piCar Blocks
 Blockly.Blocks['picar_init'] = {

@@ -151,6 +151,52 @@ Blockly.Arduino.forBlock['arduino_map'] = function(block) {
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };
 
+Blockly.Arduino.forBlock['arduino_delay'] = function(block) {
+  var delay_time = Blockly.Arduino.valueToCode(block, 'DELAY_TIME', Blockly.Arduino.ORDER_ATOMIC) || '1000';
+  var code = 'delay(' + delay_time + ');\n';
+  return code;
+};
+
+Blockly.Arduino.forBlock['arduino_delay_microseconds'] = function(block) {
+  var delay_time = Blockly.Arduino.valueToCode(block, 'DELAY_TIME', Blockly.Arduino.ORDER_ATOMIC) || '1000';
+  var code = 'delayMicroseconds(' + delay_time + ');\n';
+  return code;
+};
+
+Blockly.Arduino.forBlock['arduino_millis'] = function(block) {
+  var code = 'millis()';
+  return [code, Blockly.Arduino.ORDER_ATOMIC];
+};
+
+Blockly.Arduino.forBlock['arduino_micros'] = function(block) {
+  var code = 'micros()';
+  return [code, Blockly.Arduino.ORDER_ATOMIC];
+};
+
+Blockly.Arduino.forBlock['arduino_serial_begin'] = function(block) {
+  var speed = block.getFieldValue('SPEED');
+  Blockly.Arduino.setups_['serial_begin'] = 'Serial.begin(' + speed + ');\n';
+  return '';
+};
+
+Blockly.Arduino.forBlock['arduino_serial_print'] = function(block) {
+  var content = Blockly.Arduino.valueToCode(block, 'CONTENT', Blockly.Arduino.ORDER_ATOMIC) || '""';
+  return 'Serial.print(' + content + ');\n';
+};
+
+Blockly.Arduino.forBlock['arduino_serial_println'] = function(block) {
+  var content = Blockly.Arduino.valueToCode(block, 'CONTENT', Blockly.Arduino.ORDER_ATOMIC) || '""';
+  return 'Serial.println(' + content + ');\n';
+};
+
+Blockly.Arduino.forBlock['arduino_serial_available'] = function(block) {
+  return ['Serial.available()', Blockly.Arduino.ORDER_ATOMIC];
+};
+
+Blockly.Arduino.forBlock['arduino_serial_read'] = function(block) {
+  return ['Serial.read()', Blockly.Arduino.ORDER_ATOMIC];
+};
+
 // CATEGORY: MATH
 
 Blockly.Arduino.forBlock['math_number'] = function(block) {

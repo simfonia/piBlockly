@@ -4,7 +4,7 @@ Blockly.Msg["SIMFONIA_CATEGORY"] = "simfonia";
 Blockly.Msg["PICAR_CATEGORY"] = "πCar";
 Blockly.Msg["ARDUINO_CATEGORY"] = "Arduino";
 Blockly.Msg["ARDUINO_STRUCTURE_CATEGORY"] = "Structure";
-Blockly.Msg["ARDUINO_IO_CATEGORY"] = "IO";
+Blockly.Msg["ARDUINO_IO_CATEGORY"] = "I/O";
 Blockly.Msg["ARDUINO_TIME_CATEGORY"] = "Time";
 Blockly.Msg["ARDUINO_SERIAL_CATEGORY"] = "Serial";
 Blockly.Msg["CODING_CATEGORY"] = "Coding";
@@ -15,19 +15,22 @@ Blockly.Msg["SIMFONIA_HUE"] = "#5b33a5"; // for simfonia
 
 // Arduino Blocks
 Blockly.Msg["ARDUINO_HUE"] = "#016c8d"; // for Arduino
+
 Blockly.Msg["ARDUINO_STRUCTURE_HUE"] = "#585858"; // for Arduino I/O
 Blockly.Msg["ARDUINO_CONTROL_HUE"] = "#016c8d"; // for Arduino I/O
 Blockly.Msg["ARDUINO_DIGITAL_IO_HUE"] = "#0f960a"; // for Arduino Digital I/O
 Blockly.Msg["ARDUINO_ANALOG_IO_HUE"] = "#FF9800"; // for Arduino Analog I/O
+Blockly.Msg["ARDUINO_TIME_HUE"] = "#1f039b"; // for Arduino time
+Blockly.Msg["ARDUINO_SERIAL_HUE"] = "#359AFF"; // for Arduino Serial
 Blockly.Msg["ARDUINO_MATH_HUE"] = "#b13333"; // for Arduino math blocks (red-ish)
 
 
 // Initializes Blocks
 Blockly.Msg.INITIALIZES_SETUP_APPENDTEXT = "setup";
-Blockly.Msg.INITIALIZES_SETUP_TOOLTIP = "The setup() function is called when a sketch starts. Use it to initialize variables, pin modes, start using libraries, etc. The setup function will only run once, after each powerup or reset of the Arduino board.";
+Blockly.Msg.INITIALIZES_SETUP_TOOLTIP = "The setup() is called when a sketch starts. Use it to initialize variables, pin modes, start using libraries, etc. The setup function will only run once, after each powerup or reset of the Arduino board.";
 Blockly.Msg.INITIALIZES_SETUP_HELPURL = "";
 Blockly.Msg.INITIALIZES_LOOP_APPENDTEXT = "loop";
-Blockly.Msg.INITIALIZES_LOOP_TOOLTIP = "The loop() function does precisely what its name suggests, and loops consecutively, allowing your program to change and respond. Use it to actively control the Arduino board.";
+Blockly.Msg.INITIALIZES_LOOP_TOOLTIP = "The loop() does precisely what its name suggests, and loops consecutively, allowing your program to change and respond. Use it to actively control the Arduino board.";
 Blockly.Msg.INITIALIZES_LOOP_HELPURL = "";
 
 Blockly.Msg["ARDUINO_PIN_LABEL"] = "pin:";
@@ -62,6 +65,22 @@ Blockly.Msg["ARDUINO_MAP_FROMHIGH"] = "high";
 Blockly.Msg["ARDUINO_MAP_TOLOW"] = "to low";
 Blockly.Msg["ARDUINO_MAP_TOHIGH"] = "high";
 Blockly.Msg["ARDUINO_MAP_TOOLTIP"] = "Re-maps a number from one range to another.";
+
+Blockly.Msg["ARDUINO_DELAY_TOOLTIP"] = "Waits for the specified number of milliseconds.";
+Blockly.Msg["ARDUINO_DELAY_MICROSECONDS_TOOLTIP"] = "Waits for the specified number of microseconds.";
+Blockly.Msg["ARDUINO_MILLIS_TOOLTIP"] = "Returns the number of milliseconds since the Arduino board began running the current program.";
+Blockly.Msg["ARDUINO_MICROS_TOOLTIP"] = "Returns the number of microseconds since the Arduino board began running the current program.";
+
+Blockly.Msg["ARDUINO_SERIAL_BEGIN"] = "Serial.begin(speed: %1)";
+Blockly.Msg["ARDUINO_SERIAL_BEGIN_TOOLTIP"] = "Sets the data rate in bits per second (baud) for serial data transmission.";
+Blockly.Msg["ARDUINO_SERIAL_PRINT"] = "Serial.print(%1)";
+Blockly.Msg["ARDUINO_SERIAL_PRINT_TOOLTIP"] = "Prints data to the serial port.";
+Blockly.Msg["ARDUINO_SERIAL_PRINTLN"] = "Serial.println(%1)";
+Blockly.Msg["ARDUINO_SERIAL_PRINTLN_TOOLTIP"] = "Prints data to the serial port, followed by a carriage return and newline.";
+Blockly.Msg["ARDUINO_SERIAL_AVAILABLE"] = "Serial.available()";
+Blockly.Msg["ARDUINO_SERIAL_AVAILABLE_TOOLTIP"] = "Get the number of bytes (characters) available for reading from the serial port.";
+Blockly.Msg["ARDUINO_SERIAL_READ"] = "Serial.read()";
+Blockly.Msg["ARDUINO_SERIAL_READ_TOOLTIP"] = "Reads incoming serial data (one byte).";
 
 
 // piCar Blocks
@@ -143,3 +162,6 @@ Blockly.Msg["CODING_RAW_WRAPPER_TOOLTIP"] = "Allows wrapping other blocks with c
 Blockly.Msg["CODING_RAW_WRAPPER_TOP"] = "Top Code:";
 Blockly.Msg["CODING_RAW_WRAPPER_BOTTOM"] = "Bottom Code:";
 
+
+// Functions Blocks
+Blockly.Msg["PROCEDURES_HUE"] = "#d22f73"; // for Functions

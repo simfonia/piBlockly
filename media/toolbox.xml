@@ -1,9 +1,9 @@
 <category id="category_arduino" name="%{BKY_ARDUINO_CATEGORY}" colour="%{BKY_ARDUINO_HUE}">
-    <category id="category_arduino_structure" name="%{BKY_ARDUINO_STRUCTURE_CATEGORY}" colour="%{BKY_ARDUINO_HUE}">
+    <category id="category_arduino_structure" name="%{BKY_ARDUINO_STRUCTURE_CATEGORY}" colour="%{BKY_ARDUINO_STRUCTURE_HUE}">
         <block type="initializes_setup"></block>
         <block type="initializes_loop"></block>
     </category>
-    <category id="category_arduino_io" name="%{BKY_ARDUINO_IO_CATEGORY}" colour="%{BKY_ARDUINO_HUE}">
+    <category id="category_arduino_io" name="%{BKY_ARDUINO_IO_CATEGORY}" colour="%{BKY_ARDUINO_CONTROL_HUE}">
         <block type="arduino_pin_mode">
             <value name="PIN">
                 <shadow type="arduino_pin_shadow">
@@ -48,8 +48,43 @@
             </value>
         </block>
     </category>
-    <category id="category_arduino_time" name="%{BKY_ARDUINO_TIME_CATEGORY}" colour="%{BKY_ARDUINO_HUE}"></category>
-    <category id="category_arduino_serial" name="%{BKY_ARDUINO_SERIAL_CATEGORY}" colour="%{BKY_ARDUINO_HUE}"></category>
+    <category id="category_arduino_time" name="%{BKY_ARDUINO_TIME_CATEGORY}" colour="%{BKY_ARDUINO_TIME_HUE}">
+        <block type="arduino_delay">
+            <value name="DELAY_TIME">
+                <shadow type="math_number">
+                    <field name="NUM">1000</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_delay_microseconds">
+            <value name="DELAY_TIME">
+                <shadow type="math_number">
+                    <field name="NUM">1000</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_millis"></block>
+        <block type="arduino_micros"></block>
+    </category>
+    <category id="category_arduino_serial" name="%{BKY_ARDUINO_SERIAL_CATEGORY}" colour="%{BKY_ARDUINO_SERIAL_HUE}">
+        <block type="arduino_serial_begin"></block>
+        <block type="arduino_serial_print">
+            <value name="CONTENT">
+                <shadow type="text">
+                    <field name="TEXT">Hello, World!</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_serial_println">
+            <value name="CONTENT">
+                <shadow type="text">
+                    <field name="TEXT">Hello, World!</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="arduino_serial_available"></block>
+        <block type="arduino_serial_read"></block>
+    </category>
 </category>
 <category id="category_picar" name="%{BKY_PICAR_CATEGORY}" colour="%{BKY_PICAR_HUE}">
     <block type="picar_init"></block>
@@ -189,7 +224,7 @@
     <block type="arduino_constrain">
         <value name="VALUE">
             <shadow type="math_number">
-                <field name="NUM">100</field>
+                <field name="NUM"></field>
             </shadow>
         </value>
         <value name="LOW">
@@ -206,7 +241,7 @@
     <block type="arduino_map">
         <value name="VALUE">
             <shadow type="math_number">
-                <field name="NUM">512</field>
+                <field name="NUM"></field>
             </shadow>
         </value>
         <value name="FROMLOW">

@@ -3,10 +3,10 @@
 Blockly.Msg["SIMFONIA_CATEGORY"] = "simfonia";
 Blockly.Msg["PICAR_CATEGORY"] = "πCar";
 Blockly.Msg["ARDUINO_CATEGORY"] = "Arduino";
-Blockly.Msg["ARDUINO_STRUCTURE_CATEGORY"] = "結構";
-Blockly.Msg["ARDUINO_IO_CATEGORY"] = "輸入/輸出";
-Blockly.Msg["ARDUINO_TIME_CATEGORY"] = "時間";
-Blockly.Msg["ARDUINO_SERIAL_CATEGORY"] = "序列埠";
+Blockly.Msg["ARDUINO_STRUCTURE_CATEGORY"] = "Structure";
+Blockly.Msg["ARDUINO_IO_CATEGORY"] = "I/O";
+Blockly.Msg["ARDUINO_TIME_CATEGORY"] = "Time";
+Blockly.Msg["ARDUINO_SERIAL_CATEGORY"] = "Serial";
 Blockly.Msg["CODING_CATEGORY"] = "Coding";
 
 // simfonia Blocks
@@ -20,14 +20,16 @@ Blockly.Msg["ARDUINO_CONTROL_HUE"] = "#016c8d"; // for Arduino I/O
 Blockly.Msg["ARDUINO_STRUCTURE_HUE"] = "#585858"; // for Arduino Structure
 Blockly.Msg["ARDUINO_DIGITAL_IO_HUE"] = "#0f960a"; // for Arduino Digital I/O
 Blockly.Msg["ARDUINO_ANALOG_IO_HUE"] = "#FF9800"; // for Arduino Analog I/O
+Blockly.Msg["ARDUINO_TIME_HUE"] = "#1f039b"; // for Arduino time
+Blockly.Msg["ARDUINO_SERIAL_HUE"] = "#359AFF"; // for Arduino Serial
 Blockly.Msg["ARDUINO_MATH_HUE"] = "#b13333"; // for Arduino math blocks (red-ish)
 
 // Initializes Blocks
 Blockly.Msg.INITIALIZES_SETUP_APPENDTEXT = "初始化 setup";
-Blockly.Msg.INITIALIZES_SETUP_TOOLTIP = "setup() 函式在程式開始時呼叫。用它來初始化變數、腳位模式、開始使用函式庫等。setup 函式只會在每次 Arduino 板上電或重置後執行一次。";
+Blockly.Msg.INITIALIZES_SETUP_TOOLTIP = "setup() 在程式開始時呼叫。用它來初始化變數、腳位模式、開始使用函式庫等。setup 函式只會在每次 Arduino 板上電或重置後執行一次。";
 Blockly.Msg.INITIALIZES_SETUP_HELPURL = "";
 Blockly.Msg.INITIALIZES_LOOP_APPENDTEXT = "主迴圈 loop";
-Blockly.Msg.INITIALIZES_LOOP_TOOLTIP = "loop() 函式會不斷地重複執行，讓您的程式可以改變和回應。使用它來主動控制 Arduino 板。";
+Blockly.Msg.INITIALIZES_LOOP_TOOLTIP = "loop() 會不斷地重複執行，讓您的程式可以改變和回應。使用它來主動控制 Arduino 板。";
 Blockly.Msg.INITIALIZES_LOOP_HELPURL = "";
 
 
@@ -50,7 +52,7 @@ Blockly.Msg["ARDUINO_LOW"] = "LOW";
 Blockly.Msg["ARDUINO_ANALOG_READ"] = "analogRead(%1)";
 Blockly.Msg["ARDUINO_ANALOG_READ_TOOLTIP"] = "讀入指定類比腳位(analog in / ADC)的狀態(0-1023 for 10-bit)。";
 Blockly.Msg["ARDUINO_ANALOG_WRITE"] = "analogWrite(%1, 值: %2)";
-Blockly.Msg["ARDUINO_ANALOG_WRITE_TOOLTIP"] = "將類比值 (PWM, 0-255 for 8-bit) 寫出腳位(~)。";
+Blockly.Msg["ARDUINO_ANALOG_WRITE_TOOLTIP"] = "將類比值 (PWM, 0-255 for 8-bit) 寫出~腳位。";
 
 Blockly.Msg["ARDUINO_CONSTRAIN_VALUE"] = "constrain ";
 Blockly.Msg["ARDUINO_CONSTRAIN_LOW"] = "介於";
@@ -63,6 +65,22 @@ Blockly.Msg["ARDUINO_MAP_FROMHIGH"] = "上限";
 Blockly.Msg["ARDUINO_MAP_TOLOW"] = "到下限";
 Blockly.Msg["ARDUINO_MAP_TOHIGH"] = "上限";
 Blockly.Msg["ARDUINO_MAP_TOOLTIP"] = "將數字從一個範圍重新映射到另一個範圍。";
+
+Blockly.Msg["ARDUINO_DELAY_TOOLTIP"] = "暫停指定的毫秒數。";
+Blockly.Msg["ARDUINO_DELAY_MICROSECONDS_TOOLTIP"] = "暫停指定的微秒數。";
+Blockly.Msg["ARDUINO_MILLIS_TOOLTIP"] = "回傳從 Arduino 開機到現在的毫秒數。";
+Blockly.Msg["ARDUINO_MICROS_TOOLTIP"] = "回傳從 Arduino 開機到現在的微秒數。";
+
+Blockly.Msg["ARDUINO_SERIAL_BEGIN"] = "Serial.begin(speed: %1)";
+Blockly.Msg["ARDUINO_SERIAL_BEGIN_TOOLTIP"] = "設定序列埠通訊的傳輸速率（鮑率）。";
+Blockly.Msg["ARDUINO_SERIAL_PRINT"] = "Serial.print(%1)";
+Blockly.Msg["ARDUINO_SERIAL_PRINT_TOOLTIP"] = "將資料傳送到序列埠。";
+Blockly.Msg["ARDUINO_SERIAL_PRINTLN"] = "Serial.println(%1)";
+Blockly.Msg["ARDUINO_SERIAL_PRINTLN_TOOLTIP"] = "將資料傳送到序列埠，並在結尾換行。";
+Blockly.Msg["ARDUINO_SERIAL_AVAILABLE"] = "Serial.available()";
+Blockly.Msg["ARDUINO_SERIAL_AVAILABLE_TOOLTIP"] = "獲取序列埠緩衝區中可讀取的位元組數，傳回整數。";
+Blockly.Msg["ARDUINO_SERIAL_READ"] = "Serial.read()";
+Blockly.Msg["ARDUINO_SERIAL_READ_TOOLTIP"] = "讀取一個位元組的序列埠資料, 傳回整數。";
 
 
 // piCar Blocks
@@ -133,18 +151,19 @@ Blockly.Msg["PICAR_NO_TONE_TOOLTIP"] = "停止在指定腳位上播放的音調�
 // Coding Blocks
 Blockly.Msg["CODING_HUE"] = "#585858"; // for coding
 
-Blockly.Msg["CODING_RAW_STATEMENT"] = "自由寫 (指令)";
+Blockly.Msg["CODING_RAW_STATEMENT"] = "自由寫 ";
 Blockly.Msg["CODING_RAW_STATEMENT_TOOLTIP"] = "可填入任意程式碼作為一個指令";
 
-Blockly.Msg["CODING_RAW_INPUT"] = "自由寫 (嵌入)";
+Blockly.Msg["CODING_RAW_INPUT"] = "自由寫 ";
 Blockly.Msg["CODING_RAW_INPUT_TOOLTIP"] = "可填入任意回傳值 (如：數字、文字、布林) 的程式碼";
 
-Blockly.Msg["CODING_RAW_DEFINITION"] = "自由寫 (定義)";
+Blockly.Msg["CODING_RAW_DEFINITION"] = "自由寫 (全域)";
 Blockly.Msg["CODING_RAW_DEFINITION_TOOLTIP"] = "可填入全域定義、函式庫引用或自訂函式等程式碼";
 Blockly.Msg["CODING_RAW_WRAPPER"] = "自由寫 (包覆)";
 Blockly.Msg["CODING_RAW_WRAPPER_TOOLTIP"] = "可使用自訂程式碼包覆其他積木 (例如：自訂迴圈或條件判斷)";
 Blockly.Msg["CODING_RAW_WRAPPER_TOP"] = "上方程式碼：";
 Blockly.Msg["CODING_RAW_WRAPPER_BOTTOM"] = "下方程式碼：";
+
 
 // Functions Blocks
 Blockly.Msg["PROCEDURES_HUE"] = "#d22f73"; // for Functions
