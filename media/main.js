@@ -98,6 +98,61 @@ window.addEventListener('message', event => {
     }
 });
 
+// --- Orphan Block Handling ---
+function updateOrphanBlocks(event) {
+    // If the event is a change to a block's disabled state, ignore it to prevent infinite loops.
+    if (event.type === 'change' && event.element === 'disabled') {
+        return;
+    }
+
+    // We are interested in events that change the block layout or field values.
+    if (event.type !== 'move' &&
+        event.type !== 'create' &&
+        event.type !== 'delete' &&
+        event.type !== 'change') {
+        return;
+    }
+
+    const allBlocks = workspace.getAllBlocks(true);
+
+    // First, enable all blocks by removing the 'orphan' reason.
+    allBlocks.forEach(block => {
+        block.setDisabledReason(false, 'orphan');
+    });
+
+    const allowedRootBlocks = [
+        'initializes_setup',
+        'initializes_loop',
+        'custom_procedures_defreturn',
+        'custom_procedures_defnoreturn',
+        'coding_raw_definition' // This is for global raw code, so it can be a root.
+    ];
+
+    const topBlocks = workspace.getTopBlocks(true);
+
+    topBlocks.forEach(topBlock => {
+        let isAllowedRoot = false;
+
+        if (allowedRootBlocks.includes(topBlock.type)) {
+            isAllowedRoot = true;
+        } else if (topBlock.type === 'variables_declare') {
+            if (topBlock.getFieldValue('SCOPE') === 'GLOBAL') {
+                isAllowedRoot = true;
+            }
+        }
+
+        if (!isAllowedRoot) {
+            // This is a true orphan, disable it and its descendants.
+            const descendants = topBlock.getDescendants(false);
+            descendants.forEach(descendant => {
+                descendant.setDisabledReason(true, 'orphan');
+            });
+        }
+    });
+}
+
+workspace.addChangeListener(updateOrphanBlocks);
+
 // --- Initial Load ---
 // Signal to the extension that the webview is ready to be initialized.
 vscode.postMessage({ command: 'webviewReady' });

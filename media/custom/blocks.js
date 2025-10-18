@@ -754,7 +754,6 @@ Blockly.Blocks['coding_raw_definition'] = {
           "text": ""
         }
       ],
-      "nextStatement": true,
       "colour": Blockly.Msg["CODING_HUE"],
       "tooltip": Blockly.Msg["CODING_RAW_DEFINITION_TOOLTIP"],
       "helpUrl": ""
@@ -870,12 +869,26 @@ Blockly.Blocks['variables_declare'] = {
           "name": "VALUE"
         }
       ],
-      "previousStatement": null,
-      "nextStatement": null,
       "colour": "%{BKY_VARIABLES_HUE}",
       "tooltip": "Declare a variable with a type and scope.",
       "helpUrl": ""
     });
+    // Set initial shape based on the default value
+    this.updateShape_(this.getFieldValue('SCOPE'));
+  },
+  onchange: function(event) {
+    if (event.type === 'change' && event.blockId === this.id && event.name === 'SCOPE') {
+      this.updateShape_(event.newValue);
+    }
+  },
+  updateShape_: function(scope) {
+    if (scope === 'GLOBAL') {
+      this.setPreviousStatement(false, null);
+      this.setNextStatement(false, null);
+    } else { // LOCAL
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+    }
   }
 };
 

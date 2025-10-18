@@ -511,8 +511,15 @@ Blockly.Arduino.forBlock['picar_no_tone'] = function(block) {
 
 // 自由寫
 Blockly.Arduino.forBlock['coding_raw_statement'] = function(block) {
-  var code = block.getFieldValue('CODE');
-  return code + '\n'; // Output the text as-is, with a newline
+  var code = block.getFieldValue('CODE') + '\n';
+  if (!block.getParent()) {
+    // It's a top-level block, add to definitions
+    Blockly.Arduino.definitions_['raw_statement_' + block.id] = code;
+    return ''; // Return nothing for the main loop
+  } else {
+    // It's connected to something, return code normally
+    return code;
+  }
 };
 
 
@@ -532,7 +539,15 @@ Blockly.Arduino.forBlock['coding_raw_wrapper'] = function(block) {
   var statementsDo = Blockly.Arduino.statementToCode(block, 'DO');
   var codeBottom = block.getFieldValue('CODE_BOTTOM');
   var code = codeTop + '\n' + statementsDo + codeBottom + '\n';
-  return code;
+
+  if (!block.getParent()) {
+    // It's a top-level block, add to definitions
+    Blockly.Arduino.definitions_['raw_wrapper_' + block.id] = code;
+    return ''; // Return nothing for the main loop
+  } else {
+    // It's connected to something, return code normally
+    return code;
+  }
 };
 
 

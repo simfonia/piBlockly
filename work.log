@@ -1,5 +1,47 @@
 工作日誌 (piblockly/work.log)
 
+
+  日期： 2025年10月18日
+
+  孤兒積木處理與系統優化
+
+  已完成事項：
+   * 實現孤兒積木失效邏輯：
+       * 在 main.js 中建立了 updateOrphanBlocks 函式，用於處理未連接到根積木（如 setup, loop）的孤兒積木。
+       * 經歷多次迭代，最終的邏輯為：在工作區發生變動時，先啟用所有積木，再找出真正的孤兒積木（不被允許的頂層
+         積木），並明確地將其本身及其所有子積木都設為停用狀態。
+
+   * 修正 `variables_declare` 積木的根積木規則：
+       * 更新了 updateOrphanBlocks 函式，增加了對 variables_declare 積木的特殊判斷。
+       * 現在只有當其 SCOPE 欄位為 GLOBAL 時，它才能作為一個合法的根積木存在；若為
+         LOCAL，則會被視為孤兒積木而失效。
+
+   * 修正「定義型」積木的連接點問題：
+       * 為了解決全域定義積木下方可拼接陳述句積木的邏輯問題，修改了 blocks.js 中的積木定義。
+       * `variables_declare`：改為動態形狀，當 SCOPE 為 GLOBAL 時，透過 onchange 事件監聽，以程式碼
+         setNextStatement(false) 移除下方接點。
+       * `coding_raw_definition`：發現 jsonInit 中使用 "nextStatement": null 無法移除接點，最終透過完全刪除
+         `nextStatement` 屬性的方式成功解決了問題。
+
+   * 修正 `coding` 積木的根積木規則：
+       * 根據您的最終決策，將 coding_raw_statement 與 coding_raw_wrapper
+         從允許的根積木清單中移除，它們現在必須依附於其他積木才能生效。
+
+  解決的重大問題：
+   * 修正了無限迴圈導致的系統崩潰：
+       * 問題原因：updateOrphanBlocks
+         函式會回應「積木改變」事件，但其自身的「停用/啟用」操作又會觸發此事件，導致無限迴圈。
+       * 解決方案：修改了 main.js 中的事件監聽器，讓它明確忽略由 disabled
+         狀態改變所觸發的事件，從而斬斷了迴圈。
+
+   * 診斷並解決了 `blocks.js` 修改不生效的頑固快取問題：
+       * 透過將檔案重新命名 (blocks.js -> blocks_new.js)，確認了問題並非 Webpack 打包或 nonce
+         快取清除失敗，而是與檔案本身有關。
+       * 在重新命名過程中發現了全形/半形底線的打字錯誤，修正後成功載入新檔案。
+       * 最終確認 replace 工具的修改是成功的，但 Blockly 對 jsonInit 中 nextStatement: null
+         的解析行為不如預期，必須直接刪除該屬性才能解決問題。
+
+
   日期：2025年10月18日
 
   已完成事項：
