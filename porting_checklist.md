@@ -18,13 +18,17 @@ This file tracks the porting status of block generators from the old format to t
 - [x] `text`
 - [x] `text_join`
 - [x] `text_append`
-- [ ] `lists_create_with`
+- [x] `lists_create_with`
 - [ ] `lists_repeat`
 - [ ] `lists_length`
 - [ ] `lists_isEmpty`
 - [ ] `lists_indexOf`
 - [ ] `lists_getIndex`
 - [ ] `lists_setIndex`
+
+- [x] `Variables`
+- [ ] `Functions`
+
 
 ## Custom Blocks
 
@@ -42,24 +46,24 @@ This file tracks the porting status of block generators from the old format to t
 - [x] `arduino_map`
 
 ### PiCar Category
-- [ ] `picar_init`
-- [ ] `picar_resetPiCar`
-- [ ] `picar_drive`
-- [ ] `picar_stop`
-- [ ] `picar_checkDistance`
-- [ ] `picar_checkColor`
-- [ ] `picar_checkGray`
-- [ ] `picar_inPosition`
-- [ ] `picar_set_hand_range`
-- [ ] `picar_move_hands`
-- [ ] `picar_set_led_color`
-- [ ] `picar_flashingLight`
-- [ ] `picar_easterEgg`
-- [ ] `picar_tone`
-- [ ] `picar_no_tone`
+- [x] `picar_init`
+- [x] `picar_resetPiCar`
+- [x] `picar_drive`
+- [x] `picar_stop`
+- [x] `picar_checkDistance`
+- [x] `picar_checkColor`
+- [x] `picar_checkGray`
+- [x] `picar_inPosition`
+- [x] `picar_set_hand_range`
+- [x] `picar_move_hands`
+- [x] `picar_set_led_color`
+- [x] `picar_flashingLight`
+- [x] `picar_easterEgg`
+- [x] `picar_tone`
+- [x] `picar_no_tone`
 
 ### Coding Category
-- [ ] `coding_raw_statement`
-- [ ] `coding_raw_input`
-- [ ] `coding_raw_definition`
-- [ ] `coding_raw_wrapper`
+- [x] `coding_raw_statement`
+- [x] `coding_raw_input`
+- [x] `coding_raw_definition`
+- [x] `coding_raw_wrapper`

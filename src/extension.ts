@@ -16,6 +16,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const fileUri = editor.document.uri.toString();
+        const inoFilePath = editor.document.fileName;
+        const inoFileContent = fs.readFileSync(inoFilePath, 'utf8');
+
+        const shouldConfirmOverwrite = inoFileContent.trim().length > 0;
 
         // If we already have a panel for this file, show it.
         if (panels.has(fileUri)) {
@@ -36,6 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         panels.set(fileUri, panel);
+        (panel as any).shouldConfirmOverwrite = shouldConfirmOverwrite; // Store shouldConfirmOverwrite as a property of the panel
 
         // When the panel is closed, remove it from our map
         panel.onDidDispose(() => {
@@ -49,9 +54,22 @@ export function activate(context: vscode.ExtensionContext) {
         panel.webview.onDidReceiveMessage(
             async message => {
                 switch (message.command) {
+                    case 'webviewReady':
+                        // The webview is ready to receive the initial workspace state.
+                        const initialXml = `
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="initializes_setup" id="setup_block" x="100" y="50">
+    <next>
+      <block type="initializes_loop" id="loop_block"></block>
+    </next>
+  </block>
+</xml>
+`;
+                        panel.webview.postMessage({ command: 'initializeWorkspace', xml: initialXml, shouldConfirmOverwrite: (panel as any).shouldConfirmOverwrite });
+                        return;
                     case 'updateCode':
                         const code = message.code;
-                        const isFirstUpdate = message.isFirstUpdate;
+                        const shouldConfirmOverwrite = message.shouldConfirmOverwrite; // Use the new flag
 
                         const overwriteFile = async () => {
                             try {
@@ -68,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
                             }
                         };
 
-                        if (isFirstUpdate) {
+                        if (shouldConfirmOverwrite) { // Use the new flag
                             const choice = await vscode.window.showWarningMessage(
                                 'This will overwrite the existing content of your .ino file. Are you sure you want to continue?',
                                 { modal: true },
@@ -76,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
                             );
                             if (choice === 'Yes') {
                                 await overwriteFile();
-                                panel.webview.postMessage({ command: 'firstUpdateDone' });
+                                panel.webview.postMessage({ command: 'overwriteConfirmed' }); // Send new command
                             } else {
                                 panel.webview.postMessage({ command: 'undo' });
                             }
@@ -149,9 +167,26 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>piBlockly Editor</title>
+    <style>
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            z-index: 1000;
+        }
+    </style>
     <link href="${styleUri}" rel="stylesheet">
 </head>
 <body>
+    <div id="loading-overlay">Loading...</div>
     <div id="blocklyDiv" style="height: 100vh; width: 100vw;"></div>
 
     <script src="${blocklyUri}"></script>

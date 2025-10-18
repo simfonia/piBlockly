@@ -26,7 +26,7 @@ workspace.registerButtonCallback('CREATE_VARIABLE', function(button) {
 // --- State and Communication ---
 const vscode = acquireVsCodeApi();
 let debounceTimer;
-let isFirstModification = true; // Flag for first "real" change
+window.shouldConfirmOverwrite = false; // Global flag to control overwrite confirmation
 window.promptCallback = null; // Store callback for prompt response
 
 // --- Functions ---
@@ -35,13 +35,17 @@ function updateCode(event) {
     if (event && event.isUiEvent) {
         return;
     }
+    // NEW: Don't generate code if a drag gesture is in progress.
+    if (workspace.isDragging()) {
+        return;
+    }
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         const code = Blockly.Arduino.workspaceToCode(workspace);
         vscode.postMessage({
             command: 'updateCode',
             code: code,
-            isFirstUpdate: isFirstModification
+            shouldConfirmOverwrite: window.shouldConfirmOverwrite
         });
     }, 250);
 }
@@ -55,6 +59,25 @@ workspace.addChangeListener(updateCode);
 window.addEventListener('message', event => {
     const message = event.data;
     switch (message.command) {
+        case 'initializeWorkspace':
+            Blockly.Events.disable();
+            try {
+                const xml = Blockly.utils.xml.textToDom(message.xml);
+                Blockly.Xml.domToWorkspace(xml, workspace);
+                window.shouldConfirmOverwrite = message.shouldConfirmOverwrite; // Store the flag
+            } finally {
+                Blockly.Events.enable();
+            }
+            // Hide the loading overlay
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+            break;
+        case 'overwriteConfirmed':
+            // The extension has confirmed the overwrite, so we don't need to ask again.
+            window.shouldConfirmOverwrite = false;
+            break;
         case 'undo':
             Blockly.Events.disable();
             try {
@@ -76,24 +99,8 @@ window.addEventListener('message', event => {
 });
 
 // --- Initial Load ---
-
-// Load initial blocks without firing events
-Blockly.Events.disable();
-try {
-    const initialXml = `
-<xml xmlns="https://developers.google.com/blockly/xml">
-  <block type="initializes_setup" id="setup_block" x="100" y="50">
-    <next>
-      <block type="initializes_loop" id="loop_block"></block>
-    </next>
-  </block>
-</xml>
-`;
-    const xmlDom = (Blockly.utils && Blockly.utils.xml) ? Blockly.utils.xml.textToDom(initialXml) : Blockly.Xml.textToDom(initialXml);
-    Blockly.Xml.domToWorkspace(xmlDom, workspace);
-} finally {
-    Blockly.Events.enable();
-}
+// Signal to the extension that the webview is ready to be initialized.
+vscode.postMessage({ command: 'webviewReady' });
 
 // Override Blockly's default prompt to use VS Code's input box via the extension.
 Blockly.dialog.setPrompt(function(message, defaultValue, callback) {

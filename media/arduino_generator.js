@@ -495,6 +495,17 @@ Blockly.Arduino.forBlock['text_append'] = function(block) {
   return varName + ' += ' + text + ';\n';
 };
 
+// CATEGORY: LISTS
+Blockly.Arduino.forBlock['lists_create_with'] = function(block) {
+  var elements = new Array(block.itemCount_);
+  for (var i = 0; i < block.itemCount_; i++) {
+    elements[i] = Blockly.Arduino.valueToCode(block, 'ADD' + i,
+        Blockly.Arduino.ORDER_NONE) || 'null';
+  }
+  var code = '{' + elements.join(', ') + '}';
+  return [code, Blockly.Arduino.ORDER_ATOMIC];
+};
+
 
 // CATEGORY: VARIABLES
 Blockly.Arduino.forBlock['variables_get'] = function(block) {
@@ -509,7 +520,8 @@ Blockly.Arduino.forBlock['variables_set'] = function(block) {
   // Variable setter.
   var argument0 = Blockly.Arduino.valueToCode(block, 'VALUE',
       Blockly.Arduino.ORDER_ASSIGNMENT) || '0';
-  var varName = Blockly.Arduino.variableDB_.getName(
-      block.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
+  var varId = block.getFieldValue('VAR');
+  var variable = block.workspace.getVariableById(varId);
+  var varName = variable.name;
   return varName + ' = ' + argument0 + ';\n';
 };

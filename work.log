@@ -1,5 +1,43 @@
 工作日誌 (piblockly/work.log)
 
+日期： 2025年10月17日
+  錯誤訊息：
+  第一個積木拉進時，在覆寫警告視窗按yes確定覆蓋時:
+  Tried to start the same gesture twice.
+
+  問題分析：
+  這個錯誤的根源在於：
+   1. 當您拖曳積木時，Blockly 內部會啟動一個「手勢 (gesture)」。
+   2. 拖曳積木的動作觸發了 updateCode 事件，進而彈出了「覆寫確認」對話框。
+   3. 這個對話框是模態的，它會暫停所有 UI 互動。
+   4. 當您點擊「是」關閉對話框後，Blockly
+      的手勢系統可能因為被中斷而混亂，導致它嘗試重新啟動一個已經在進行中的手勢，從而拋出錯誤。
+
+  解決方案：
+  最直接的解決方法是，在拖曳積木的過程中，不要觸發 `updateCode` 事件。
+
+  Blockly 提供了 workspace.isDragging() 這個方法來判斷目前是否有拖曳手勢正在進行。我將修改 main.js 中的
+  updateCode 函式，在發送 updateCode 訊息之前，先檢查 workspace.isDragging()。如果正在拖曳，就暫時不發送更新
+  訊息。這樣可以避免對話框在不恰當的時機彈出，干擾手勢。
+
+  
+   * 問題描述：Tried to start the same gesture twice 錯誤及積木跳移現象。
+   * 根本原因：
+       1. Blockly API 變更 (Blockly.Mutator -> Blockly.icons.MutatorIcon)。
+       2. validateName_ 函式過早觸發 Blockly.Procedures.rename 導致事件衝突。
+       3. domToMutation 函式中錯誤呼叫 Blockly.Procedures.mutateCallers。
+       4. Webview 初始化流程與使用者操作之間的競爭條件。
+   * 解決方案：
+       1. 更新 Blockly.Mutator 的使用方式。
+       2. 從 domToMutation 中移除 Blockly.Procedures.mutateCallers 呼叫。
+       3. 在 updateCode 函式中加入 workspace.isDragging() 檢查。
+       4. 重新設計 Webview 初始化流程，確保 shouldConfirmOverwrite 旗標的正確傳遞與使用。
+   * 其他修正：
+       * TypeError: Blockly.Xml.textToDom is not a function 的修正。
+       * ReferenceError: Cannot access 'shouldConfirmOverwrite' before initialization 的修正。
+       * 「無回傳值」函式積木外觀問題的修正。
+
+
 日期： 2025年10月16日
 
 已完成事項：

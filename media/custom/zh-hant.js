@@ -146,3 +146,5 @@ Blockly.Msg["CODING_RAW_WRAPPER_TOOLTIP"] = "可使用自訂程式碼包覆其�
 Blockly.Msg["CODING_RAW_WRAPPER_TOP"] = "上方程式碼：";
 Blockly.Msg["CODING_RAW_WRAPPER_BOTTOM"] = "下方程式碼：";
 
+// Functions Blocks
+Blockly.Msg["PROCEDURES_HUE"] = "#d22f73"; // for Functions

@@ -27,7 +27,7 @@
 /`initializes_loop`）如何轉換為 Arduino C++ 程式碼。這個檔案最初是 `simfonia` 中的
 `javascript.js`，經過複製和更名。
 
-- `piblockly/work.log` 本專案工作日誌，當我下"記錄工作重點"之類的話時，請寫入此檔。
+- `piblockly/work.log` 本專案工作日誌，當我下"記錄工作重點"之類的話時，請以相同格式輸出本次重點，我會自己複製寫入此檔。
 - 讀取本todo檔案之後，請讀取上述的 work.log 以了解上次進度。
 
 

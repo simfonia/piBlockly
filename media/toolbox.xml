@@ -257,4 +257,9 @@
     <block type="variables_set"></block>
 </category>
 
-<category name="Functions" colour="#9A5CA6" custom="PROCEDURE"></category>
+<category name="Functions" colour="#d22f73">
+        <block type="custom_procedures_defnoreturn"></block>
+        <block type="custom_procedures_defreturn"></block>
+        <block type="custom_procedures_callnoreturn_manual"></block>
+        <block type="custom_procedures_callreturn_manual"></block>
+    </category>
