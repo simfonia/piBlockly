@@ -16,6 +16,22 @@ const workspace = Blockly.inject('blocklyDiv', {
     toolbox: window.initialToolboxXml, // Pass the XML string directly
     media: '',      // 不載入外部媒體
     sounds: false,  // 關閉音效模組
+    zoom: {
+        controls: true, // 顯示 +/- 按鈕
+        wheel: false,    // 關閉滾輪縮放
+        startScale: 1.0,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2
+    },
+    move: {
+        scrollbars: {
+            vertical: true,
+            horizontal: true,  // 啟用水平滾動
+        },
+        drag: true,      // 可用滑鼠拖動整個畫面
+        wheel: true      // 啟用滾輪可滾動畫面
+    }
 });
 
 // Register the button callback for creating a variable
@@ -45,7 +61,8 @@ function updateCode(event) {
         vscode.postMessage({
             command: 'updateCode',
             code: code,
-            shouldConfirmOverwrite: window.shouldConfirmOverwrite
+            shouldConfirmOverwrite: window.shouldConfirmOverwrite,
+            inoUri: window.currentInoUri // Include the current .ino URI
         });
     }, 250);
 }
@@ -62,12 +79,16 @@ window.addEventListener('message', event => {
         case 'initializeWorkspace':
             Blockly.Events.disable();
             try {
+                workspace.clear(); // Clear existing blocks
                 const xml = Blockly.utils.xml.textToDom(message.xml);
                 Blockly.Xml.domToWorkspace(xml, workspace);
                 window.shouldConfirmOverwrite = message.shouldConfirmOverwrite; // Store the flag
+                window.currentInoUri = message.inoUri; // Store the current .ino URI
             } finally {
                 Blockly.Events.enable();
             }
+            // Force an update after loading
+            updateCode();
             // Hide the loading overlay
             const overlay = document.getElementById('loading-overlay');
             if (overlay) {
@@ -88,6 +109,22 @@ window.addEventListener('message', event => {
             break;
         case 'firstUpdateDone':
             isFirstModification = false;
+            break;
+        case 'resetWorkspace':
+            Blockly.Events.disable();
+            try {
+                workspace.clear();
+                const xml = Blockly.utils.xml.textToDom(message.xml);
+                Blockly.Xml.domToWorkspace(xml, workspace);
+            } finally {
+                Blockly.Events.enable();
+            }
+            break;
+        case 'confirmResponse':
+            if (window.confirmCallback) {
+                window.confirmCallback(message.value);
+                window.confirmCallback = null; // Clear the callback
+            }
             break;
         case 'promptResponse':
             if (window.promptCallback) {
@@ -157,6 +194,30 @@ workspace.addChangeListener(updateOrphanBlocks);
 // Signal to the extension that the webview is ready to be initialized.
 vscode.postMessage({ command: 'webviewReady' });
 
+document.getElementById('saveButton').addEventListener('click', () => {
+    const xml = Blockly.Xml.workspaceToDom(workspace);
+    const xmlText = Blockly.Xml.domToText(xml);
+    const code = Blockly.Arduino.workspaceToCode(workspace);
+    vscode.postMessage({
+        command: 'saveProject',
+        xml: xmlText,
+        code: code
+    });
+});
+
+document.getElementById('loadButton').addEventListener('click', () => {
+    Blockly.dialog.confirm(
+        'Loading a new project will overwrite your current work. Do you want to continue?',
+        (confirmed) => {
+            if (confirmed) {
+                vscode.postMessage({
+                    command: 'loadProject'
+                });
+            }
+        }
+    );
+});
+
 // Override Blockly's default prompt to use VS Code's input box via the extension.
 Blockly.dialog.setPrompt(function(message, defaultValue, callback) {
     vscode.postMessage({
@@ -165,4 +226,12 @@ Blockly.dialog.setPrompt(function(message, defaultValue, callback) {
         defaultValue: defaultValue
     });
     window.promptCallback = callback;
+});
+
+Blockly.dialog.setConfirm(function(message, callback) {
+    vscode.postMessage({
+        command: 'confirm',
+        message: message
+    });
+    window.confirmCallback = callback;
 });

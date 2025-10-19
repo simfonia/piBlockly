@@ -9,13 +9,22 @@ export function activate(context: vscode.ExtensionContext) {
     const panels = new Map<string, vscode.WebviewPanel>();
 
     const disposable = vscode.commands.registerCommand('piblockly.start', () => {
+        const initialXml = `
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="initializes_setup" id="setup_block" x="100" y="50">
+    <next>
+      <block type="initializes_loop" id="loop_block"></block>
+    </next>
+  </block>
+</xml>
+`;
         const editor = vscode.window.activeTextEditor;
         if (!editor || !editor.document.fileName.endsWith('.ino')) {
             vscode.window.showInformationMessage('Please open an Arduino (.ino) file to use piBlockly.');
             return;
         }
 
-        const fileUri = editor.document.uri.toString();
+        const fileUri: string = editor.document.uri.toString();
         const inoFilePath = editor.document.fileName;
         const inoFileContent = fs.readFileSync(inoFilePath, 'utf8');
 
@@ -41,6 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         panels.set(fileUri, panel);
         (panel as any).shouldConfirmOverwrite = shouldConfirmOverwrite; // Store shouldConfirmOverwrite as a property of the panel
+        (panel as any).currentInoUri = editor.document.uri; // Store the current .ino URI in the panel
 
         // When the panel is closed, remove it from our map
         panel.onDidDispose(() => {
@@ -56,16 +66,9 @@ export function activate(context: vscode.ExtensionContext) {
                 switch (message.command) {
                     case 'webviewReady':
                         // The webview is ready to receive the initial workspace state.
-                        const initialXml = `
-<xml xmlns="https://developers.google.com/blockly/xml">
-  <block type="initializes_setup" id="setup_block" x="100" y="50">
-    <next>
-      <block type="initializes_loop" id="loop_block"></block>
-    </next>
-  </block>
-</xml>
-`;
-                        panel.webview.postMessage({ command: 'initializeWorkspace', xml: initialXml, shouldConfirmOverwrite: (panel as any).shouldConfirmOverwrite });
+                        // initialXml is now declared in a higher scope.
+
+                        panel.webview.postMessage({ command: 'initializeWorkspace', xml: initialXml, shouldConfirmOverwrite: (panel as any).shouldConfirmOverwrite, inoUri: (panel as any).currentInoUri.toString() });
                         return;
                     case 'updateCode':
                         const code = message.code;
@@ -73,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                         const overwriteFile = async () => {
                             try {
-                                const doc = await vscode.workspace.openTextDocument(editor.document.uri);
+                                const doc = await vscode.workspace.openTextDocument(vscode.Uri.parse(message.inoUri)); // Use the URI from the message
                                 const edit = new vscode.WorkspaceEdit();
                                 const fullRange = new vscode.Range(
                                     doc.positionAt(0),
@@ -96,11 +99,22 @@ export function activate(context: vscode.ExtensionContext) {
                                 await overwriteFile();
                                 panel.webview.postMessage({ command: 'overwriteConfirmed' }); // Send new command
                             } else {
-                                panel.webview.postMessage({ command: 'undo' });
+                                panel.webview.postMessage({ command: 'resetWorkspace', xml: initialXml });
                             }
                         } else {
                             await overwriteFile();
                         }
+                        return;
+                    case 'confirm':
+                        const confirmChoice = await vscode.window.showWarningMessage(
+                            message.message,
+                            { modal: true },
+                            'Yes', 'No'
+                        );
+                        panel.webview.postMessage({
+                            command: 'confirmResponse',
+                            value: confirmChoice === 'Yes'
+                        });
                         return;
                     case 'prompt':
                         const input = await vscode.window.showInputBox({
@@ -111,6 +125,63 @@ export function activate(context: vscode.ExtensionContext) {
                             command: 'promptResponse',
                             value: input // input can be undefined if user cancels
                         });
+                        return;
+
+                    case 'saveProject':
+                        const inoFilePath = editor.document.fileName; // Get the current .ino file path
+                        const options: vscode.SaveDialogOptions = {
+                            filters: {
+                                'Arduino Files': ['ino'],
+                                'All Files': ['*']
+                            },
+                            defaultUri: vscode.Uri.file(inoFilePath.replace(/\.ino$/, '')) // Suggest base name of current .ino
+                        };
+                        const fileUri = await vscode.window.showSaveDialog(options);
+
+                        if (fileUri) {
+                            const inoSavePath = fileUri.fsPath;
+                            const xmlSavePath = inoSavePath.replace(/\.ino$/, '.xml'); // Derive .xml path
+
+                            try {
+                                fs.writeFileSync(inoSavePath, message.code);
+                                fs.writeFileSync(xmlSavePath, message.xml);
+                                vscode.window.showInformationMessage(`Project saved to ${path.basename(inoSavePath)} and ${path.basename(xmlSavePath)}`);
+                            } catch (error: any) {
+                                vscode.window.showErrorMessage(`Failed to save project: ${error.message}`);
+                            }
+                        }
+                        return;
+                    case 'loadProject':
+                        const openOptions: vscode.OpenDialogOptions = {
+                            canSelectMany: false,
+                            openLabel: 'Open Blockly XML',
+                            filters: {
+                                'Blockly XML Files': ['xml'],
+                                'All Files': ['*']
+                            }
+                        };
+                        const selectedFiles = await vscode.window.showOpenDialog(openOptions);
+
+                        if (selectedFiles && selectedFiles.length > 0) {
+                            const xmlLoadPath = selectedFiles[0].fsPath;
+                            try {
+                                const xmlContent = fs.readFileSync(xmlLoadPath, 'utf8');
+                                const inoPath = xmlLoadPath.replace(/\.xml$/, '.ino');
+
+                                // Open the corresponding .ino file
+                                const document = await vscode.workspace.openTextDocument(inoPath);
+                                await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+
+                                // Update the webview panel title
+                                panel.title = `piBlockly: ${path.basename(inoPath)}`;
+                                (panel as any).currentInoUri = document.uri; // Update currentInoUri
+
+                                panel.webview.postMessage({ command: 'initializeWorkspace', xml: xmlContent, shouldConfirmOverwrite: false, inoUri: (panel as any).currentInoUri.toString() });
+                                (panel as any).shouldConfirmOverwrite = false;
+                            } catch (error: any) {
+                                vscode.window.showErrorMessage(`Failed to load project: ${error.message}`);
+                            }
+                        }
                         return;
                 }
             },
@@ -182,12 +253,26 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
             font-size: 2em;
             z-index: 1000;
         }
+        #toolbar {
+            padding: 5px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+        }
+        #toolbar button {
+            margin-right: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
     </style>
     <link href="${styleUri}" rel="stylesheet">
 </head>
 <body>
     <div id="loading-overlay">Loading...</div>
-    <div id="blocklyDiv" style="height: 100vh; width: 100vw;"></div>
+    <div id="toolbar">
+        <button id="saveButton">儲存專案</button>
+        <button id="loadButton">開啟專案</button>
+    </div>
+    <div id="blocklyDiv" style="height: calc(100vh - 40px); width: 100vw;"></div>
 
     <script src="${blocklyUri}"></script>
     <script src="${enUri}"></script>
