@@ -37,21 +37,23 @@ Blockly.Arduino.forBlock['custom_procedures_defreturn'] = function(block) {
   // Return type
   var returnType = block.getFieldValue('TYPE');
   var branch = Blockly.Arduino.statementToCode(block, 'STACK');
-  var returnValue = Blockly.Arduino.valueToCode(block, 'RETURN', Blockly.Arduino.ORDER_NONE) || '';
   // Construct parameter list
   var args = [];
   for (var i = 0; i < block.arguments_.length; i++) {
     args[i] = block.argTypes_[i] + ' ' + block.arguments_[i];
   }
   var argsStr = args.join(', ');
-  var code = returnType + ' ' + funcName + '(' + argsStr + ') {\n' + branch;
-  if (returnValue) {
-    code += '  return ' + returnValue + ';\n';
-  }
-  code += '}\n';
+  // The 'return' is now handled by a separate block inside the 'STACK'.
+  var code = returnType + ' ' + funcName + '(' + argsStr + ') {\n' + branch + '}\n';
   Blockly.Arduino.definitions_['func_' + funcName] = code;
   return null;
 };
+
+Blockly.Arduino.forBlock['custom_procedures_return'] = function(block) {
+  var value_return = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '';
+  return '  return ' + value_return + ';\n';
+};
+
 
 Blockly.Arduino.forBlock['custom_procedures_callnoreturn_manual'] = function(block) {
   var funcName = block.getFieldValue('NAME');

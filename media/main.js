@@ -12,8 +12,9 @@ if (FieldMultilineInput) {
 }
 
 // Initializing a basic Blockly workspace
+const toolboxXml = document.getElementById('toolbox-xml').textContent;
 const workspace = Blockly.inject('blocklyDiv', {
-    toolbox: window.initialToolboxXml, // Pass the XML string directly
+    toolbox: toolboxXml,
     media: '',      // 不載入外部媒體
     sounds: false,  // 關閉音效模組
     zoom: {
@@ -42,7 +43,7 @@ workspace.registerButtonCallback('CREATE_VARIABLE', function(button) {
 // --- State and Communication ---
 const vscode = acquireVsCodeApi();
 let debounceTimer;
-window.shouldConfirmOverwrite = false; // Global flag to control overwrite confirmation
+let isDirty = false;
 window.promptCallback = null; // Store callback for prompt response
 
 // --- Functions ---
@@ -55,13 +56,15 @@ function updateCode(event) {
     if (workspace.isDragging()) {
         return;
     }
+
+    isDirty = true; // Mark as dirty on any effective change
+
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         const code = Blockly.Arduino.workspaceToCode(workspace);
         vscode.postMessage({
             command: 'updateCode',
             code: code,
-            shouldConfirmOverwrite: window.shouldConfirmOverwrite,
             inoUri: window.currentInoUri // Include the current .ino URI
         });
     }, 250);
@@ -79,25 +82,57 @@ window.addEventListener('message', event => {
         case 'initializeWorkspace':
             Blockly.Events.disable();
             try {
-                workspace.clear(); // Clear existing blocks
+                workspace.clear();
                 const xml = Blockly.utils.xml.textToDom(message.xml);
                 Blockly.Xml.domToWorkspace(xml, workspace);
-                window.shouldConfirmOverwrite = message.shouldConfirmOverwrite; // Store the flag
                 window.currentInoUri = message.inoUri; // Store the current .ino URI
+                isDirty = false; // Initial state is clean
             } finally {
                 Blockly.Events.enable();
             }
-            // Force an update after loading
             updateCode();
-            // Hide the loading overlay
             const overlay = document.getElementById('loading-overlay');
             if (overlay) {
                 overlay.style.display = 'none';
             }
             break;
-        case 'overwriteConfirmed':
-            // The extension has confirmed the overwrite, so we don't need to ask again.
-            window.shouldConfirmOverwrite = false;
+        case 'loadWorkspace':
+            Blockly.Events.disable();
+            try {
+                workspace.clear();
+                const xml = Blockly.utils.xml.textToDom(message.xml);
+                Blockly.Xml.domToWorkspace(xml, workspace);
+                isDirty = false; // Loaded state is clean
+            } finally {
+                Blockly.Events.enable();
+            }
+            updateCode();
+            break;
+        case 'saveComplete':
+            isDirty = false;
+            break;
+        case 'requestDirtyState':
+            vscode.postMessage({
+                command: 'dirtyStateResponse',
+                isDirty: isDirty
+            });
+            break;
+        case 'requestSave':
+            {
+                const xml = Blockly.Xml.workspaceToDom(workspace);
+                const xmlText = Blockly.Xml.domToText(xml);
+                vscode.postMessage({
+                    command: 'saveProject',
+                    xml: xmlText,
+                    inoUri: window.currentInoUri
+                });
+            }
+            break;
+        case 'requestUpdate':
+            updateCode();
+            break;
+        case 'updateInoUri':
+            window.currentInoUri = message.inoUri;
             break;
         case 'undo':
             Blockly.Events.disable();
@@ -107,29 +142,16 @@ window.addEventListener('message', event => {
                 Blockly.Events.enable();
             }
             break;
-        case 'firstUpdateDone':
-            isFirstModification = false;
-            break;
-        case 'resetWorkspace':
-            Blockly.Events.disable();
-            try {
-                workspace.clear();
-                const xml = Blockly.utils.xml.textToDom(message.xml);
-                Blockly.Xml.domToWorkspace(xml, workspace);
-            } finally {
-                Blockly.Events.enable();
-            }
-            break;
         case 'confirmResponse':
             if (window.confirmCallback) {
                 window.confirmCallback(message.value);
-                window.confirmCallback = null; // Clear the callback
+                window.confirmCallback = null;
             }
             break;
         case 'promptResponse':
             if (window.promptCallback) {
                 window.promptCallback(message.value);
-                window.promptCallback = null; // Clear the callback
+                window.promptCallback = null;
             }
             break;
     }
@@ -201,22 +223,12 @@ document.getElementById('saveButton').addEventListener('click', () => {
     vscode.postMessage({
         command: 'saveProject',
         xml: xmlText,
-        code: code
+        code: code,
+        inoUri: window.currentInoUri // Add this line
     });
 });
 
-document.getElementById('loadButton').addEventListener('click', () => {
-    Blockly.dialog.confirm(
-        'Loading a new project will overwrite your current work. Do you want to continue?',
-        (confirmed) => {
-            if (confirmed) {
-                vscode.postMessage({
-                    command: 'loadProject'
-                });
-            }
-        }
-    );
-});
+
 
 // Override Blockly's default prompt to use VS Code's input box via the extension.
 Blockly.dialog.setPrompt(function(message, defaultValue, callback) {

@@ -175,8 +175,7 @@ Blockly.Arduino.forBlock['arduino_micros'] = function(block) {
 
 Blockly.Arduino.forBlock['arduino_serial_begin'] = function(block) {
   var speed = block.getFieldValue('SPEED');
-  Blockly.Arduino.setups_['serial_begin'] = 'Serial.begin(' + speed + ');\n';
-  return '';
+  return 'Serial.begin(' + speed + ');\n';
 };
 
 Blockly.Arduino.forBlock['arduino_serial_print'] = function(block) {
@@ -195,6 +194,12 @@ Blockly.Arduino.forBlock['arduino_serial_available'] = function(block) {
 
 Blockly.Arduino.forBlock['arduino_serial_read'] = function(block) {
   return ['Serial.read()', Blockly.Arduino.ORDER_ATOMIC];
+};
+
+Blockly.Arduino.forBlock['text_length'] = function(block) {
+  const value = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_MEMBER) || '""';
+  const code = value + '.length()';
+  return [code, Blockly.Arduino.ORDER_MEMBER];
 };
 
 // CATEGORY: MATH

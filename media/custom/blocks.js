@@ -1006,6 +1006,16 @@ const CUSTOM_PROCEDURES_CALL_MANUAL_COMMON = {
    * @this {Blockly.Block}
    */
   compose: function(containerBlock) {
+    // Store connections before arguments are changed
+    const connections = {};
+    for (let i = 0; i < this.arguments_.length; i++) {
+      const argName = this.arguments_[i];
+      const input = this.getInput('ARG' + i);
+      if (input && input.connection && input.connection.targetConnection) {
+        connections[argName] = input.connection.targetConnection;
+      }
+    }
+    // Get new arguments
     this.arguments_ = [];
     this.argTypes_ = [];
     let block = containerBlock.getInputTargetBlock('STACK');
@@ -1014,35 +1024,58 @@ const CUSTOM_PROCEDURES_CALL_MANUAL_COMMON = {
       this.argTypes_.push(block.getFieldValue('TYPE'));
       block = block.nextConnection && block.nextConnection.targetBlock();
     }
-    this.updateShape_();
+    // Update shape and reconnect
+    this.updateShape_(connections);
   },
   /**
    * Modify this block to have the correct number of arguments.
    * @private
    * @this {Blockly.Block}
    */
-  updateShape_: function() {
-    // Delete everything.
+  updateShape_: function(connections) {
+    // Clean up old argument inputs and parentheses
     let i = 0;
     while (this.getInput('ARG' + i)) {
       this.removeInput('ARG' + i);
       i++;
     }
-    // Add new inputs.
-    for (i = 0; i < this.arguments_.length; i++) {
-      const input = this.appendValueInput('ARG' + i)
-          .setAlign(Blockly.ALIGN_RIGHT)
-          .appendField(this.argTypes_[i] + ' ' + this.arguments_[i]);
+    if (this.getInput('END_ROW')) {
+        this.removeInput('END_ROW');
     }
+    // Rebuild inputs and reconnect
+    for (i = 0; i < this.arguments_.length; i++) {
+      const argName = this.arguments_[i];
+      const input = this.appendValueInput('ARG' + i)
+          .setAlign(Blockly.ALIGN_RIGHT);
+      if (i === 0) {
+        input.appendField('(');
+      } else {
+        input.appendField(',');
+      }
+      // Reconnect the old block if it exists
+      if (connections && connections[argName]) {
+        input.connection.connect(connections[argName]);
+      }
+    }
+    // Add closing parenthesis
+    const endRow = this.appendDummyInput('END_ROW');
+    if (this.arguments_.length === 0) {
+      endRow.appendField('()');
+    } else {
+      endRow.appendField(')');
+    }
+    // Add semicolon for noreturn version
+    if (!this.outputConnection) {
+      endRow.appendField(';');
+    }
+    this.setInputsInline(true);
   }
 };
 
 Blockly.Blocks['custom_procedures_callnoreturn_manual'] = Object.assign({}, CUSTOM_PROCEDURES_CALL_MANUAL_COMMON, {
   init: function() {
-    this.appendDummyInput()
-        .appendField('call')
+    this.appendDummyInput('TOPROW')
         .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
-    this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour('%{BKY_PROCEDURES_HUE}');
@@ -1050,23 +1083,26 @@ Blockly.Blocks['custom_procedures_callnoreturn_manual'] = Object.assign({}, CUST
     this.setHelpUrl('');
     this.arguments_ = [];
     this.argTypes_ = [];
+    this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
+    this.updateShape_();
   }
 });
 
 Blockly.Blocks['custom_procedures_callreturn_manual'] = Object.assign({}, CUSTOM_PROCEDURES_CALL_MANUAL_COMMON, {
   init: function() {
-    this.appendDummyInput()
-        .appendField('call')
+    this.appendDummyInput('TOPROW')
         .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
-    this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
     this.setOutput(true, null);
     this.setColour('%{BKY_PROCEDURES_HUE}');
     this.setTooltip('Calls a procedure with a return value.');
     this.setHelpUrl('');
     this.arguments_ = [];
     this.argTypes_ = [];
+    this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
+    this.updateShape_();
   }
 });
+
 // Custom, typed procedure blocks
 
 Blockly.Blocks['custom_procedures_mutatorcontainer'] = {
@@ -1193,6 +1229,7 @@ const CUSTOM_PROCEDURES_DEF_COMMON = {
     this.setFieldValue(paramString, 'PARAMS');
   },
   mutatorRebuild_: function(containerBlock) {
+    const oldVarModels = this.argumentVarModels_; // Keep a reference to the old variables
     this.arguments_ = [];
     this.argTypes_ = [];
     this.argumentVarModels_ = [];
@@ -1206,6 +1243,16 @@ const CUSTOM_PROCEDURES_DEF_COMMON = {
     }
     this.updateParams_();
     Blockly.Procedures.mutateCallers(this);
+    // Now, find which variables from the old list are no longer present in the new list
+    // (either because they were removed or their type changed, resulting in a new variable/ID).
+    for (const oldVar of oldVarModels) {
+      const isStillPresent = this.argumentVarModels_.some(
+        newVar => newVar.getId() === oldVar.getId()
+      );
+      if (!isStillPresent) {
+        this.workspace.deleteVariableById(oldVar.getId());
+      }
+    }
   },
   decompose: function(workspace) {
     const containerBlock = workspace.newBlock('custom_procedures_mutatorcontainer');
@@ -1288,45 +1335,129 @@ const CUSTOM_PROCEDURES_DEF_COMMON = {
   callType_: 'procedures_callnoreturn',
 };
 
-Blockly.Blocks['custom_procedures_defnoreturn'] = 
-    Object.assign({defType_: 'procedures_defnoreturn'}, CUSTOM_PROCEDURES_DEF_COMMON);
+Blockly.Blocks['custom_procedures_defnoreturn'] =
+    Object.assign({}, CUSTOM_PROCEDURES_DEF_COMMON, {
+        defType_: 'procedures_defnoreturn',
+        init: function() {
+            this.nameField_ = new Blockly.FieldTextInput('', this.validateName_.bind(this));
+            this.appendDummyInput('TOPROW')
+                .appendField('void')
+                .appendField(this.nameField_, 'NAME')
+                .appendField('(')
+                .appendField('', 'PARAMS')
+                .appendField(') {');
+            this.setInputsInline(true);
+            this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
+            if ((this.workspace.options.comments ||
+                 (this.workspace.options.parentWorkspace &&
+                  this.workspace.options.parentWorkspace.options.comments)) &&
+                Blockly.Msg['PROCEDURES_DEFNORETURN_COMMENT']) {
+              this.setCommentText(Blockly.Msg['PROCEDURES_DEFNORETURN_COMMENT']);
+            }
+            this.setColour('%{BKY_PROCEDURES_HUE}');
+            this.setTooltip(Blockly.Msg['PROCEDURES_DEFNORETURN_TOOLTIP']);
+            this.setHelpUrl(Blockly.Msg['PROCEDURES_DEFNORETURN_HELPURL']);
+            this.arguments_ = [];
+            this.argTypes_ = [];
+            this.argumentVarModels_ = [];
+            this.setStatements_(true);
+            this.statementConnection_ = null;
+            this.appendDummyInput('BOTTOMROW').appendField('}');
+        },
+        setStatements_: function(hasStatements) {
+            if (this.hasStatements_ === hasStatements) {
+              return;
+            }
+            if (hasStatements) {
+              this.appendStatementInput('STACK'); // No "do"
+              if (this.getInput('RETURN')) {
+                this.moveInputBefore('STACK', 'RETURN');
+              }
+            } else {
+              this.removeInput('STACK', true);
+            }
+            this.hasStatements_ = hasStatements;
+        },
+        updateParams_: function() {
+            let params = [];
+            for (let i = 0; i < this.arguments_.length; i++) {
+                params.push(this.argTypes_[i] + ' ' + this.arguments_[i]);
+            }
+            const paramString = params.join(', ');
+            if (this.getField('PARAMS')) {
+                this.setFieldValue(paramString, 'PARAMS');
+            }
+        },
+    });
 
-Blockly.Blocks['custom_procedures_defreturn'] = 
-    Object.assign({defType_: 'procedures_defreturn'}, CUSTOM_PROCEDURES_DEF_COMMON, {
-      init: function() {
-        this.nameField_ = new Blockly.FieldTextInput('', this.validateName_.bind(this));
-        const nameInput = this.appendDummyInput('TOPROW')
-            .appendField(Blockly.Msg['PROCEDURES_DEFRETURN_TITLE'])
-            .appendField(this.nameField_, 'NAME')
-            .appendField('', 'PARAMS');
-        this.appendValueInput('RETURN')
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField(Blockly.Msg['PROCEDURES_DEFRETURN_RETURN']);
-        this.appendDummyInput('RETURN_TYPE')
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField('as')
-            .appendField(new Blockly.FieldDropdown([
-              ['int', 'int'],
-              ['float', 'float'],
-              ['String', 'String'],
-              ['bool', 'bool']
-            ]), 'TYPE');
-        this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
-        if ((this.workspace.options.comments ||
-            (this.workspace.options.parentWorkspace &&
-             this.workspace.options.parentWorkspace.options.comments)) &&
-            Blockly.Msg['PROCEDURES_DEFRETURN_COMMENT']) {
-          this.setCommentText(Blockly.Msg['PROCEDURES_DEFRETURN_COMMENT']);
+Blockly.Blocks['custom_procedures_defreturn'] =
+    Object.assign({}, CUSTOM_PROCEDURES_DEF_COMMON, {
+        defType_: 'procedures_defreturn',
+        init: function() {
+            this.nameField_ = new Blockly.FieldTextInput('', this.validateName_.bind(this));
+            this.appendDummyInput('TOPROW')
+                .appendField(new Blockly.FieldDropdown([
+                    ['int', 'int'],
+                    ['float', 'float'],
+                    ['String', 'String'],
+                    ['bool', 'bool']
+                ]), 'TYPE')
+                .appendField(' ')
+                .appendField(this.nameField_, 'NAME')
+                .appendField('(')
+                .appendField('', 'PARAMS')
+                .appendField(') {');
+            this.setInputsInline(true);
+            this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
+            if ((this.workspace.options.comments ||
+                (this.workspace.options.parentWorkspace &&
+                 this.workspace.options.parentWorkspace.options.comments)) &&
+                Blockly.Msg['PROCEDURES_DEFRETURN_COMMENT']) {
+              this.setCommentText(Blockly.Msg['PROCEDURES_DEFRETURN_COMMENT']);
+            }
+            this.setColour('%{BKY_PROCEDURES_HUE}');
+            this.setTooltip(Blockly.Msg['PROCEDURES_DEFRETURN_TOOLTIP']);
+            this.setHelpUrl(Blockly.Msg['PROCEDURES_DEFRETURN_HELPURL']);
+            this.arguments_ = [];
+            this.argTypes_ = [];
+            this.argumentVarModels_ = [];
+            this.setStatements_(true);
+            this.statementConnection_ = null;
+            this.appendDummyInput('BOTTOMROW').appendField('}');
+        },
+        setStatements_: function(hasStatements) {
+            if (this.hasStatements_ === hasStatements) {
+              return;
+            }
+            if (hasStatements) {
+              this.appendStatementInput('STACK');
+            } else {
+              this.removeInput('STACK', true);
+            }
+            this.hasStatements_ = hasStatements;
+        },
+        updateParams_: function() {
+            let params = [];
+            for (let i = 0; i < this.arguments_.length; i++) {
+                params.push(this.argTypes_[i] + ' ' + this.arguments_[i]);
+            }
+            const paramString = params.join(', ');
+            if (this.getField('PARAMS')) {
+                this.setFieldValue(paramString, 'PARAMS');
+            }
+        },
+        mutationToDom: function() {
+            const container = CUSTOM_PROCEDURES_DEF_COMMON.mutationToDom.call(this);
+            container.setAttribute('returntype', this.getFieldValue('TYPE'));
+            return container;
+        },
+        domToMutation: function(xmlElement) {
+            CUSTOM_PROCEDURES_DEF_COMMON.domToMutation.call(this, xmlElement);
+            const returnType = xmlElement.getAttribute('returntype');
+            if (returnType) {
+                this.setFieldValue(returnType, 'TYPE');
+            }
         }
-        this.setColour('%{BKY_PROCEDURES_HUE}');
-        this.setTooltip(Blockly.Msg['PROCEDURES_DEFRETURN_TOOLTIP']);
-        this.setHelpUrl(Blockly.Msg['PROCEDURES_DEFRETURN_HELPURL']);
-        this.arguments_ = [];
-        this.argTypes_ = [];
-        this.argumentVarModels_ = [];
-        this.setStatements_(true);
-        this.statementConnection_ = null;
-      },
     });
 
 const CUSTOM_PROCEDURES_CALL_COMMON = {
@@ -1524,6 +1655,280 @@ Blockly.Blocks['custom_procedures_callreturn'] =
       },
       defType_: 'procedures_defreturn',
     });
+
+
+
+Blockly.Blocks['logic_compare'] = {
+  init: function() {
+    this.appendValueInput('A')
+        .setCheck(null);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['==', 'EQ'],
+          ['!=', 'NEQ'],
+          ['<', 'LT'],
+          ['<=', 'LTE'],
+          ['>', 'GT'],
+          ['>=', 'GTE']
+        ]), 'OP');
+    this.appendValueInput('B')
+        .setCheck(null);
+    this.setInputsInline(true);
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_COMPARE_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_COMPARE_HELPURL);
+  }
+};
+
+Blockly.Blocks['logic_operation'] = {
+  init: function() {
+    this.appendValueInput('A')
+        .setCheck('Boolean');
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['&& (and)', 'AND'],
+          ['|| (or)', 'OR']
+        ]), 'OP');
+    this.appendValueInput('B')
+        .setCheck('Boolean');
+    this.setInputsInline(true);
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_OPERATION_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_OPERATION_HELPURL);
+  }
+};
+
+Blockly.Blocks['logic_negate'] = {
+  init: function() {
+    this.appendValueInput('BOOL')
+        .setCheck('Boolean')
+        .appendField('!(not)');
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_NEGATE_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_NEGATE_HELPURL);
+  }
+};
+
+Blockly.Blocks['logic_boolean'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['true', 'TRUE'],
+          ['false', 'FALSE']
+        ]), 'BOOL');
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_BOOLEAN_HELPURL);
+  }
+};
+
+
+// Loops
+
+Blockly.Blocks['controls_whileUntil'] = {
+  init: function() {
+    this.appendDummyInput() // For "while ("
+        .appendField('while (');
+    this.appendValueInput('BOOL') // For the actual input slot
+        .setCheck('Boolean');
+    this.appendDummyInput() // For ") {"
+        .appendField(') {');
+    this.appendStatementInput('DO')
+        .appendField('  '); // Indent for code feel
+    this.appendDummyInput()
+        .appendField('}');
+    this.setInputsInline(true); // Crucial: allow inputs to be inline
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle('loop_blocks');
+    this.setTooltip(Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL);
+  }
+};
+
+
+Blockly.Blocks['controls_for'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField('for (int ')
+        .appendField(new Blockly.FieldVariable('i'), 'VAR')
+        .appendField(' = ');
+    this.appendValueInput('FROM').setCheck('Number');
+    this.appendDummyInput('COMPARE_INPUT')
+        .appendField('; ')
+        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_1')
+        .appendField(' <= ', 'COMPARE_OP');
+    this.appendValueInput('TO').setCheck('Number');
+    this.appendDummyInput('STEP_INPUT')
+        .appendField('; ')
+        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_2')
+        .appendField(' += ', 'STEP_OP');
+    this.appendValueInput('BY').setCheck('Number');
+    this.appendDummyInput().appendField(') {');
+    this.appendStatementInput('DO');
+    this.appendDummyInput().appendField('}');
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle('loop_blocks');
+    const updateLabels = (block) => {
+      const varName = block.getField('VAR').getText();
+      block.setFieldValue(varName, 'VAR_LABEL_1');
+      block.setFieldValue(varName, 'VAR_LABEL_2');
+    };
+    // ✅ 變數重新命名時同步更新 Label（不延遲、不落後、不亂碼）
+    this.getField('VAR').setValidator(function(newVarId) {
+      const block = this.getSourceBlock();
+      setTimeout(() => {
+        updateLabels(block);
+        block.render();
+      }, 0);
+      return newVarId; // *必須回傳 ID*
+    });
+    // ✅ 初始顯示變數 i（解決你最後遇到的問題）
+    setTimeout(() => {
+      updateLabels(this);
+      this.render();
+    }, 0);
+  },
+  // ✅ 自動切換 <= / >= 與 += / -=
+  onchange: function(event) {
+    if (!this.workspace || this.workspace.isFlyout || !event.recordUndo) {
+      return;
+    }
+    if (event.type === Blockly.Events.BLOCK_CHANGE &&
+        (event.blockId === this.getInputTargetBlock('FROM')?.id ||
+         event.blockId === this.getInputTargetBlock('TO')?.id)) {
+      const fromBlock = this.getInputTargetBlock('FROM');
+      const toBlock = this.getInputTargetBlock('TO');
+      let fromValue = NaN;
+      let toValue = NaN;
+      if (fromBlock && fromBlock.type === 'math_number') {
+        fromValue = parseFloat(fromBlock.getFieldValue('NUM'));
+      }
+      if (toBlock && toBlock.type === 'math_number') {
+        toValue = parseFloat(toBlock.getFieldValue('NUM'));
+      }
+      if (!isNaN(fromValue) && !isNaN(toValue)) {
+        if (fromValue < toValue) {
+          this.setFieldValue(' <= ', 'COMPARE_OP');
+          this.setFieldValue(' += ', 'STEP_OP');
+        } else if (fromValue > toValue) {
+          this.setFieldValue(' >= ', 'COMPARE_OP');
+          this.setFieldValue(' -= ', 'STEP_OP');
+        } else {
+          this.setFieldValue(' <= ', 'COMPARE_OP');
+          this.setFieldValue(' += ', 'STEP_OP');
+        }
+      } else {
+        this.setFieldValue(' <= ', 'COMPARE_OP');
+        this.setFieldValue(' += ', 'STEP_OP');
+      }
+      this.render();
+    }
+  }
+};
+
+
+
+
+Blockly.Blocks['controls_flow_statements'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['break;', 'BREAK'],
+          ['continue;', 'CONTINUE']
+        ]), 'FLOW');
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle('loop_blocks');
+    this.setTooltip(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_HELPURL);
+  }
+};
+
+
+
+// Text
+// text_append
+Blockly.Blocks['text_append'] = {
+  init: function() {
+    this.appendValueInput('TEXT')
+        .setCheck(['String', 'Number'])
+        .appendField(new Blockly.FieldVariable('myString'), 'VAR') // Use FieldVariable
+        .appendField(' += ');
+    this.appendDummyInput()
+        .appendField(';');
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle('text_blocks');
+    this.setTooltip(Blockly.Msg.TEXT_APPEND_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.TEXT_APPEND_HELPURL);
+  }
+};
+
+//text_length
+Blockly.Blocks['text_length'] = {
+  init: function() {
+    this.appendValueInput('VALUE')
+        .setCheck(['String', 'Array'])
+        .appendField(''); // Empty field to allow input to be first
+    this.appendDummyInput()
+        .appendField('.length()');
+    this.setInputsInline(true);
+    this.setOutput(true, 'Number');
+    this.setStyle('text_blocks');
+    this.setTooltip(Blockly.Msg.TEXT_LENGTH_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.TEXT_LENGTH_HELPURL);
+  }
+};
+
+
+
+// Functions
+Blockly.Blocks['custom_procedures_return'] = {
+  init: function() {
+    this.appendValueInput('VALUE')
+        .appendField('return');
+    this.appendDummyInput()
+        .appendField(';');
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    // No next statement because return terminates the function.
+    this.setColour('%{BKY_PROCEDURES_HUE}');
+    this.setTooltip('Returns a value from a function.');
+    this.setHelpUrl('');
+    this.setOnChange(function(event) {
+      if (!this.workspace || this.isInFlyout) {
+        return;
+      }
+      var legal = false;
+      var block = this;
+      do {
+        if (this.FUNCTION_TYPES.indexOf(block.type) !== -1) {
+          legal = true;
+          break;
+        }
+        block = block.getSurroundParent();
+      } while (block);
+      if (legal) {
+        if (block.type === 'custom_procedures_defnoreturn') {
+            this.setWarningText('Return blocks cannot be used in a function with no return value (void).');
+        } else {
+            this.setWarningText(null);
+        }
+      } else {
+        this.setWarningText('This block may only be used within a function.');
+      }
+    });
+  },
+  FUNCTION_TYPES: ['custom_procedures_defreturn', 'custom_procedures_defnoreturn'],
+};
 
 
 }(Blockly));

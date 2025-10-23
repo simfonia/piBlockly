@@ -190,13 +190,7 @@
     <block type="logic_boolean"></block>
 </category>
 <category name="Loops" colour="#5CA65C">
-    <block type="controls_repeat_ext">
-        <value name="TIMES">
-            <shadow type="math_number">
-                <field name="NUM">10</field>
-            </shadow>
-        </value>
-    </block>
+
     <block type="controls_whileUntil"></block>
     <block type="controls_for">
         <value name="FROM">
@@ -274,6 +268,7 @@
             <shadow type="text"></shadow>
         </value>
     </block>
+    <block type="text_length"></block>
 </category>
 <category name="Lists" colour="#745CA6">
     <block type="lists_create_with"></block>
@@ -295,6 +290,7 @@
 <category name="Functions" colour="#d22f73">
         <block type="custom_procedures_defnoreturn"></block>
         <block type="custom_procedures_defreturn"></block>
+        <block type="custom_procedures_return"></block>
         <block type="custom_procedures_callnoreturn_manual"></block>
         <block type="custom_procedures_callreturn_manual"></block>
     </category>
