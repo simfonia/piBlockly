@@ -166,7 +166,7 @@ window.addEventListener('message', event => {
             break;
         case 'panelInactive': {
             const overlay = document.getElementById('inactive-overlay');
-            overlay.textContent = `請切換至與 [piBlockly: ${window.currentXmlName}] 對應的程式碼頁面以啟用編輯`;
+            overlay.textContent = `請切換至與 [${window.currentXmlName}] 對應的程式碼頁面以啟用編輯`;
             overlay.style.display = 'flex';
             break;
         }

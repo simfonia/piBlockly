@@ -68,6 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const onDidCloseDocumentSubscription = vscode.workspace.onDidCloseTextDocument(async (document) => {
+        console.log(`[onDidCloseTextDocument] Event fired at: ${new Date().toLocaleTimeString()} for: ${document.uri.toString()}`);
         const closedUriString = document.uri.toString();
         let panelToClose: vscode.WebviewPanel | null = null;
 
@@ -251,6 +252,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                     panel.webview.postMessage({ command: 'confirmResponse', value: choice === '是' });
                     return;
                 case 'dirtyStateChanged':
+                    console.log(`[dirtyStateChanged] Panel ${(panel as any).xmlName} dirty state is now: ${message.isDirty}`);
                     (panel as any).isDirty = message.isDirty;
                     return;
                 case 'saveProject':
@@ -344,8 +346,6 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
     const arduinoGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'arduino_generator.js')).with({ query: `nonce=${nonce}` });
     const customGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'custom_generator.js')).with({ query: `nonce=${nonce}` });
-    const saveIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'save_24dp_1F1F1F.svg'));
-    const saveAsIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'save_as_24dp_1F1F1F.svg'));
 
     const toolboxPath = path.join(extensionPath, 'media', 'toolbox.xml');
     const toolboxXml = fs.readFileSync(toolboxPath, 'utf8');
@@ -392,14 +392,11 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
             padding: 5px;
             background-color: #f0f0f0;
             border-bottom: 1px solid #ccc;
-            display: flex;
-            align-items: center;
         }
-        #toolbar img {
+        #toolbar button {
+            margin-right: 5px;
+            padding: 8px 12px;
             cursor: pointer;
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
         }
     </style>
     <link href="${styleUri}" rel="stylesheet">
@@ -408,8 +405,8 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     <div id="loading-overlay">載入中...</div>
     <div id="inactive-overlay" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); color: white; font-size: 2em; z-index: 1000; text-align: center; padding: 20px;"></div>
     <div id="toolbar">
-        <img id="saveButton" src="${saveIconUri}" alt="儲存積木" title="儲存積木">
-        <img id="saveAsButton" src="${saveAsIconUri}" alt="另存積木" title="另存積木">
+        <button id="saveButton">儲存積木</button>
+        <button id="saveAsButton">另存積木</button>
     </div>
     <div id="blocklyDiv" style="height: calc(100vh - 40px); width: 100vw;"></div>
 

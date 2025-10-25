@@ -29,7 +29,8 @@
       "editor/title": [
         {
           "command": "piblockly.start",
-          "group": "navigation@1"
+          "group": "navigation@1",
+          "when": "!piblockly.panelOpen"
         }
       ]
     },
