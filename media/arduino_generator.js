@@ -546,16 +546,6 @@ Blockly.Arduino.forBlock['text_append'] = function(block) {
   return varName + ' += ' + text + ';\n';
 };
 
-// CATEGORY: LISTS
-Blockly.Arduino.forBlock['lists_create_with'] = function(block) {
-  var elements = new Array(block.itemCount_);
-  for (var i = 0; i < block.itemCount_; i++) {
-    elements[i] = Blockly.Arduino.valueToCode(block, 'ADD' + i,
-        Blockly.Arduino.ORDER_NONE) || 'null';
-  }
-  var code = '{' + elements.join(', ') + '}';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
 
 
 // CATEGORY: VARIABLES

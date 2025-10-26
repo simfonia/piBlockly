@@ -200,7 +200,8 @@ function updateOrphanBlocks(event) {
         'initializes_loop',
         'custom_procedures_defreturn',
         'custom_procedures_defnoreturn',
-        'coding_raw_definition' // This is for global raw code, so it can be a root.
+        'coding_raw_definition', // This is for global raw code, so it can be a root.
+        'array_declare' // Allow global array declarations as root blocks.
     ];
 
     const topBlocks = workspace.getTopBlocks(true);
@@ -209,7 +210,12 @@ function updateOrphanBlocks(event) {
         let isAllowedRoot = false;
 
         if (allowedRootBlocks.includes(topBlock.type)) {
-            isAllowedRoot = true;
+            // For array_declare, only allow as root if scope is GLOBAL
+            if (topBlock.type === 'array_declare' && topBlock.getFieldValue('SCOPE') === 'LOCAL') {
+                isAllowedRoot = false;
+            } else {
+                isAllowedRoot = true;
+            }
         } else if (topBlock.type === 'variables_declare') {
             if (topBlock.getFieldValue('SCOPE') === 'GLOBAL') {
                 isAllowedRoot = true;
@@ -252,6 +258,28 @@ document.getElementById('saveAsButton').addEventListener('click', () => {
         xml: xmlText,
     });
 });
+
+document.getElementById('closeButton').addEventListener('click', () => {
+    vscode.postMessage({ command: 'closeEditor' });
+});
+
+function setupHoverEffects(buttonId) {
+    const button = document.getElementById(buttonId);
+    const defaultSrc = button.getAttribute('data-src');
+    const hoverSrc = button.getAttribute('data-hover-src');
+
+    button.addEventListener('mouseover', () => {
+        button.src = hoverSrc;
+    });
+
+    button.addEventListener('mouseout', () => {
+        button.src = defaultSrc;
+    });
+}
+
+setupHoverEffects('saveButton');
+setupHoverEffects('saveAsButton');
+setupHoverEffects('closeButton');
 
 
 

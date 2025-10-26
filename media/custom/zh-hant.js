@@ -25,10 +25,10 @@ Blockly.Msg["ARDUINO_SERIAL_HUE"] = "#359AFF"; // for Arduino Serial
 Blockly.Msg["ARDUINO_MATH_HUE"] = "#b13333"; // for Arduino math blocks (red-ish)
 
 // Initializes Blocks
-Blockly.Msg.INITIALIZES_SETUP_APPENDTEXT = "初始化 setup";
+Blockly.Msg.INITIALIZES_SETUP_APPENDTEXT = "setup";
 Blockly.Msg.INITIALIZES_SETUP_TOOLTIP = "setup() 在程式開始時呼叫。用它來初始化變數、腳位模式、開始使用函式庫等。setup 函式只會在每次 Arduino 板上電或重置後執行一次。";
 Blockly.Msg.INITIALIZES_SETUP_HELPURL = "";
-Blockly.Msg.INITIALIZES_LOOP_APPENDTEXT = "主迴圈 loop";
+Blockly.Msg.INITIALIZES_LOOP_APPENDTEXT = "loop";
 Blockly.Msg.INITIALIZES_LOOP_TOOLTIP = "loop() 會不斷地重複執行，讓您的程式可以改變和回應。使用它來主動控制 Arduino 板。";
 Blockly.Msg.INITIALIZES_LOOP_HELPURL = "";
 
@@ -151,19 +151,30 @@ Blockly.Msg["PICAR_NO_TONE_TOOLTIP"] = "停止在指定腳位上播放的音調�
 // Coding Blocks
 Blockly.Msg["CODING_HUE"] = "#585858"; // for coding
 
-Blockly.Msg["CODING_RAW_STATEMENT"] = "自由寫 ";
+Blockly.Msg["CODING_RAW_STATEMENT"] = "Coding ";
 Blockly.Msg["CODING_RAW_STATEMENT_TOOLTIP"] = "可填入任意程式碼作為一個指令";
 
-Blockly.Msg["CODING_RAW_INPUT"] = "自由寫 ";
+Blockly.Msg["CODING_RAW_INPUT"] = "Coding ";
 Blockly.Msg["CODING_RAW_INPUT_TOOLTIP"] = "可填入任意回傳值 (如：數字、文字、布林) 的程式碼";
 
-Blockly.Msg["CODING_RAW_DEFINITION"] = "自由寫 (全域)";
+Blockly.Msg["CODING_RAW_DEFINITION"] = "Coding (global)";
 Blockly.Msg["CODING_RAW_DEFINITION_TOOLTIP"] = "可填入全域定義、函式庫引用或自訂函式等程式碼";
-Blockly.Msg["CODING_RAW_WRAPPER"] = "自由寫 (包覆)";
+Blockly.Msg["CODING_RAW_WRAPPER"] = "Coding (wrapper)";
 Blockly.Msg["CODING_RAW_WRAPPER_TOOLTIP"] = "可使用自訂程式碼包覆其他積木 (例如：自訂迴圈或條件判斷)";
-Blockly.Msg["CODING_RAW_WRAPPER_TOP"] = "上方程式碼：";
-Blockly.Msg["CODING_RAW_WRAPPER_BOTTOM"] = "下方程式碼：";
+Blockly.Msg["CODING_RAW_WRAPPER_TOP"] = "Coding ";
+Blockly.Msg["CODING_RAW_WRAPPER_BOTTOM"] = "Coding ";
 
+
+// Text Blocks
+Blockly.Msg["TEXT_HUE"] = "#6a8871";  // for Text
 
 // Functions Blocks
 Blockly.Msg["PROCEDURES_HUE"] = "#d22f73"; // for Functions
+
+// Array Blocks
+Blockly.Msg.ARRAY_HUE = "#d1972b";  // for Arrays
+Blockly.Msg.ARRAY_DECLARE_TITLE = "宣告陣列";
+Blockly.Msg.ARRAY_DECLARE_TOOLTIP = "宣告一個指定類型和大小的陣列。";
+Blockly.Msg.ARRAY_GET_TOOLTIP = "從陣列中獲取指定索引的元素。";
+Blockly.Msg.ARRAY_SET_TOOLTIP = "設定陣列中指定索引的元素值。";
+Blockly.Msg.ARRAY_LENGTH_TOOLTIP = "獲取陣列的元素數量。";

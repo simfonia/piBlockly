@@ -1866,7 +1866,7 @@ Blockly.Blocks['text_append'] = {
     this.setInputsInline(true);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setStyle('text_blocks');
+    this.setColour(Blockly.Msg.TEXT_HUE);
     this.setTooltip(Blockly.Msg.TEXT_APPEND_TOOLTIP);
     this.setHelpUrl(Blockly.Msg.TEXT_APPEND_HELPURL);
   }
@@ -1882,7 +1882,7 @@ Blockly.Blocks['text_length'] = {
         .appendField('.length()');
     this.setInputsInline(true);
     this.setOutput(true, 'Number');
-    this.setStyle('text_blocks');
+    this.setColour(Blockly.Msg.TEXT_HUE);
     this.setTooltip(Blockly.Msg.TEXT_LENGTH_TOOLTIP);
     this.setHelpUrl(Blockly.Msg.TEXT_LENGTH_HELPURL);
   }
@@ -1930,5 +1930,118 @@ Blockly.Blocks['custom_procedures_return'] = {
   FUNCTION_TYPES: ['custom_procedures_defreturn', 'custom_procedures_defnoreturn'],
 };
 
+
+Blockly.Blocks['array_declare'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['Global', 'GLOBAL'],
+          ['Local', 'LOCAL']
+        ]), 'SCOPE')
+        .appendField(Blockly.Msg.ARRAY_DECLARE_TITLE)
+        .appendField(new Blockly.FieldDropdown([
+          ['int', 'int'],
+          ['float', 'float'],
+          ['String', 'String'],
+          ['bool', 'bool']
+        ]), 'TYPE');
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
+        .appendField('[');
+    this.appendValueInput('SIZE')
+        .setCheck('Number')
+        .setShadowDom(Blockly.utils.xml.textToDom(
+            '<shadow type="math_number"><field name="NUM">10</field></shadow>'
+        ));
+    this.appendDummyInput()
+        .appendField('];');
+    this.setInputsInline(true);
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_DECLARE_TOOLTIP);
+    this.setHelpUrl(""); // 幫助連結留空
+    // Set initial shape based on the default value
+    this.updateShape_(this.getFieldValue('SCOPE'));
+  },
+  onchange: function(event) {
+    if (event.type === 'change' && event.blockId === this.id && event.name === 'SCOPE') {
+      this.updateShape_(event.newValue);
+      // Ensure 'this' is a valid block and setDisabled is available
+      if (this.setDisabled) {
+        if (event.newValue === 'LOCAL' && !this.getParent()) {
+          this.setDisabled(true);
+        } else {
+          this.setDisabled(false);
+        }
+      }
+    }
+  },
+  updateShape_: function(scope) {
+    if (scope === 'GLOBAL') {
+      this.setPreviousStatement(false, null);
+      this.setNextStatement(false, null);
+    } else { // LOCAL
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+    }
+  }
+};
+
+Blockly.Blocks['array_get'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
+        .appendField('[');
+    this.appendValueInput('INDEX')
+        .setCheck('Number')
+        .setShadowDom(Blockly.utils.xml.textToDom(
+            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
+        ));
+    this.appendDummyInput()
+        .appendField(']');
+    this.setInputsInline(true);
+    this.setOutput(true, null); // 可以返回任何類型的值
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_GET_TOOLTIP);
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['array_set'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
+        .appendField('[');
+    this.appendValueInput('INDEX')
+        .setCheck('Number')
+        .setShadowDom(Blockly.utils.xml.textToDom(
+            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
+        ));
+    this.appendDummyInput()
+        .appendField('] = ');
+    this.appendValueInput('VALUE')
+        .setCheck(null); // 可以接受任何類型的值
+    this.appendDummyInput()
+        .appendField(';');
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_SET_TOOLTIP);
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['array_length'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField('length of Array')
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR');
+    this.setInputsInline(true);
+    this.setOutput(true, 'Number');
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_LENGTH_TOOLTIP);
+    this.setHelpUrl("");
+  }
+};
 
 }(Blockly));

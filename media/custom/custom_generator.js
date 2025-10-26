@@ -643,3 +643,39 @@ Blockly.Arduino.forBlock['variables_declare'] = function(block) {
     return code + '\n'; // Local declarations are returned as statements
   }
 };
+
+Blockly.Arduino.forBlock['array_declare'] = function(block) {
+  var scope = block.getFieldValue('SCOPE');
+  var type = block.getFieldValue('TYPE');
+  var varName = block.getFieldValue('VAR');
+  var size = Blockly.Arduino.valueToCode(block, 'SIZE', Blockly.Arduino.ORDER_ATOMIC) || '1'; // Default size to 1 if not provided
+  var code = type + ' ' + varName + '[' + size + '];';
+
+  if (scope === 'GLOBAL') {
+    Blockly.Arduino.definitions_['array_declare_' + varName] = code + '\n';
+    return ''; // Global declarations are handled by the finish function
+  } else {
+    return code + '\n'; // Local declarations are returned as statements
+  }
+};
+
+Blockly.Arduino.forBlock['array_get'] = function(block) {
+  var varName = block.getFieldValue('VAR');
+  var index = Blockly.Arduino.valueToCode(block, 'INDEX', Blockly.Arduino.ORDER_ATOMIC) || '0';
+  var code = varName + '[' + index + ']';
+  return [code, Blockly.Arduino.ORDER_ATOMIC];
+};
+
+Blockly.Arduino.forBlock['array_set'] = function(block) {
+  var varName = block.getFieldValue('VAR');
+  var index = Blockly.Arduino.valueToCode(block, 'INDEX', Blockly.Arduino.ORDER_ATOMIC) || '0';
+  var value = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '0';
+  var code = varName + '[' + index + '] = ' + value + ';\n';
+  return code;
+};
+
+Blockly.Arduino.forBlock['array_length'] = function(block) {
+  var varName = block.getFieldValue('VAR');
+  var code = 'sizeof(' + varName + ') / sizeof(' + varName + '[0])';
+  return [code, Blockly.Arduino.ORDER_ATOMIC];
+};

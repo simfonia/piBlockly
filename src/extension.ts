@@ -69,10 +69,20 @@ export function activate(context: vscode.ExtensionContext) {
 
     const onDidCloseDocumentSubscription = vscode.workspace.onDidCloseTextDocument(async (document) => {
         const closedUriString = document.uri.toString();
+
+        // Handle temporary file deletion
+        try {
+            const tempFilePath = vscode.Uri.parse(closedUriString).fsPath;
+            if (fs.existsSync(tempFilePath) && tempFilePath.includes('piblockly-')) {
+                fs.unlinkSync(tempFilePath);
+            }
+        } catch (err) {
+            console.error(`Failed to delete temporary file: ${closedUriString}`, err);
+        }
+
         let panelToClose: vscode.WebviewPanel | null = null;
 
         for (const [id, panel] of panels.entries()) {
-            // Check if the closed document is the associated .ino file or the associated .xml file
             if (((panel as any).associatedUriString === closedUriString) || ((panel as any).xmlName === closedUriString)) {
                 panelToClose = panel;
                 break;
@@ -80,63 +90,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (panelToClose) {
-            const panel = panelToClose;
-            const isDirty = (panel as any).isDirty;
-
-            if (isDirty) {
-                const choice = await vscode.window.showWarningMessage(
-                    '您在 piBlockly 中有未儲存的變更。是否要儲存？',
-                    { modal: true },
-                    '儲存', '不儲存', '取消'
-                );
-
-                if (choice === '儲存') {
-                    await new Promise<void>(resolve => {
-                        const sub = panel.webview.onDidReceiveMessage(async (message) => {
-                            if (message.command === 'saveProject') {
-                                const currentXmlName = (panel as any).xmlName;
-                                if (currentXmlName) {
-                                    try {
-                                        fs.writeFileSync(currentXmlName, message.xml);
-                                        vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(currentXmlName)}`);
-                                        panel.webview.postMessage({ command: 'saveComplete' });
-                                        panel.dispose();
-                                    } catch (error: any) {
-                                        vscode.window.showErrorMessage(`儲存專案失敗：${String(error)}`);
-                                    }
-                                } else {
-                                    const options: vscode.SaveDialogOptions = {
-                                        filters: { 'Blockly XML': ['xml'] }
-                                    };
-                                    const fileUriToSave = await vscode.window.showSaveDialog(options);
-                                    if (fileUriToSave) {
-                                        try {
-                                            fs.writeFileSync(fileUriToSave.fsPath, message.xml);
-                                            (panel as any).xmlName = fileUriToSave.fsPath;
-                                            panel.title = `piBlockly: ${path.basename(fileUriToSave.fsPath)}`;
-                                            vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(fileUriToSave.fsPath)}`);
-                                            panel.webview.postMessage({ command: 'saveComplete' });
-                                            panel.dispose();
-                                        } catch (error: any) {
-                                            vscode.window.showErrorMessage(`儲存專案失敗：${String(error)}`);
-                                        }
-                                    }
-                                }
-                                sub.dispose();
-                                resolve();
-                            }
-                        });
-                        panel.webview.postMessage({ command: 'requestSave' });
-                    });
-                } else if (choice === '不儲存') {
-                    panel.dispose();
-                } else { // Cancel or undefined
-                    const doc = await vscode.workspace.openTextDocument(document.uri);
-                    await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.One });
-                }
-            } else {
-                panel.dispose();
+            if ((panelToClose as any).isDisposed) {
+                return;
             }
+            closePanel(panelToClose);
         }
     });
 
@@ -184,7 +141,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
         vscode.ViewColumn.Two,
         {
             enableScripts: true,
-            localResourceRoots: [context.extensionUri],
+            localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
             enableForms: true,
             retainContextWhenHidden: true
         }
@@ -194,19 +151,23 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
     (panel as any).associatedUriString = associatedUriString;
     (panel as any).xmlName = xmlName;
     (panel as any).isDirty = false;
+    (panel as any).isDisposed = false;
     panels.set(panelKey, panel);
     vscode.commands.executeCommand('setContext', 'piblockly.panelOpen', true);
 
     panel.onDidDispose(() => {
+        (panel as any).isDisposed = true;
         const associatedUriString = (panel as any).associatedUriString;
         if (associatedUriString) {
-            try {
-                const tempFilePath = vscode.Uri.parse(associatedUriString).fsPath;
-                if (fs.existsSync(tempFilePath) && tempFilePath.includes('piblockly-')) {
-                    fs.unlinkSync(tempFilePath);
-                }
-            } catch (err) {
-                console.error(`Failed to delete temporary file: ${associatedUriString}`, err);
+            const associatedUri = vscode.Uri.parse(associatedUriString);
+            const editor = vscode.window.visibleTextEditors.find(
+                (editor) => editor.document.uri.toString() === associatedUri.toString()
+            );
+
+            if (editor) {
+                vscode.window.showTextDocument(editor.document, editor.viewColumn).then(() => {
+                    vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+                });
             }
         }
         panels.delete(panelKey);
@@ -314,11 +275,73 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                         }
                     }
                     return;
+                case 'closeEditor':
+                    closePanel(panel);
+                    return;
             }
         },
         undefined,
         context.subscriptions
     );
+}
+
+async function closePanel(panel: vscode.WebviewPanel) {
+    const isDirty = (panel as any).isDirty;
+
+    if (isDirty) {
+        const choice = await vscode.window.showWarningMessage(
+            '您在 piBlockly 中有未儲存的變更。是否要儲存？',
+            { modal: true },
+            '儲存', '不儲存'
+        );
+
+        if (choice === '儲存') {
+            await new Promise<void>(resolve => {
+                const sub = panel.webview.onDidReceiveMessage(async (message) => {
+                    if (message.command === 'saveProject') {
+                        const currentXmlName = (panel as any).xmlName;
+                        if (currentXmlName) {
+                            try {
+                                fs.writeFileSync(currentXmlName, message.xml);
+                                vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(currentXmlName)}`);
+                                panel.webview.postMessage({ command: 'saveComplete' });
+                                panel.dispose();
+                            } catch (error: any) {
+                                vscode.window.showErrorMessage(`儲存專案失敗：${String(error)}`);
+                            }
+                        } else {
+                            const options: vscode.SaveDialogOptions = {
+                                filters: { 'Blockly XML': ['xml'] }
+                            };
+                            const fileUriToSave = await vscode.window.showSaveDialog(options);
+                            if (fileUriToSave) {
+                                try {
+                                    fs.writeFileSync(fileUriToSave.fsPath, message.xml);
+                                    (panel as any).xmlName = fileUriToSave.fsPath;
+                                    panel.title = `piBlockly: ${path.basename(fileUriToSave.fsPath)}`;
+                                    vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(fileUriToSave.fsPath)}`);
+                                    panel.webview.postMessage({ command: 'saveComplete' });
+                                    panel.dispose();
+                                } catch (error: any) {
+                                    vscode.window.showErrorMessage(`儲存專案失敗：${String(error)}`);
+                                }
+                            }
+                        }
+                        sub.dispose();
+                        resolve();
+                    }
+                });
+                panel.webview.postMessage({ command: 'requestSave' });
+            });
+        } else if (choice === '不儲存') {
+            panel.dispose();
+        } else { // Cancel or undefined
+            // Do nothing, the user cancelled the close operation.
+        }
+    } else {
+        (panel as any).isDisposed = true;
+        panel.dispose();
+    }
 }
 
 function getNonce() {
@@ -344,8 +367,12 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
     const arduinoGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'arduino_generator.js')).with({ query: `nonce=${nonce}` });
     const customGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'custom_generator.js')).with({ query: `nonce=${nonce}` });
-    const saveIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'save_24dp_1F1F1F.svg'));
-    const saveAsIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'save_as_24dp_1F1F1F.svg'));
+    const saveIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_24dp_1F1F1F.svg'));
+    const saveAsIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_as_24dp_1F1F1F.svg'));
+    const dangerousIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'dangerous_24dp_1F1F1F.svg'));
+    const saveIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_24dp_FE2F89.svg'));
+    const saveAsIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_as_24dp_FE2F89.svg'));
+    const dangerousIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'dangerous_24dp_FE2F89.svg'));
 
     const toolboxPath = path.join(extensionPath, 'media', 'toolbox.xml');
     const toolboxXml = fs.readFileSync(toolboxPath, 'utf8');
@@ -355,7 +382,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
 <head>
     <meta charset="UTF-8">
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src * data:; script-src 'unsafe-inline' ${webview.cspSource} vscode-webview-resource:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src * data:; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource:;">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>piBlockly 編輯器</title>
@@ -401,6 +428,9 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
             height: 24px;
             margin-right: 10px;
         }
+        #closeButton {
+            margin-left: auto; /* Pushes the button to the right */
+        }
     </style>
     <link href="${styleUri}" rel="stylesheet">
 </head>
@@ -408,24 +438,25 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     <div id="loading-overlay">載入中...</div>
     <div id="inactive-overlay" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); color: white; font-size: 2em; z-index: 1000; text-align: center; padding: 20px;"></div>
     <div id="toolbar">
-        <img id="saveButton" src="${saveIconUri}" alt="儲存積木" title="儲存積木">
-        <img id="saveAsButton" src="${saveAsIconUri}" alt="另存積木" title="另存積木">
+        <img id="saveButton" src="${saveIconUri}" data-src="${saveIconUri}" data-hover-src="${saveIconHoverUri}" alt="儲存積木" title="儲存積木">
+        <img id="saveAsButton" src="${saveAsIconUri}" data-src="${saveAsIconUri}" data-hover-src="${saveAsIconHoverUri}" alt="另存積木" title="另存積木">
+        <img id="closeButton" src="${dangerousIconUri}" data-src="${dangerousIconUri}" data-hover-src="${dangerousIconHoverUri}" alt="關閉" title="關閉">
     </div>
     <div id="blocklyDiv" style="height: calc(100vh - 40px); width: 100vw;"></div>
 
     <script id="toolbox-xml" type="text/xml" style="display: none;">${`<xml>${toolboxXml}</xml>`}</script>
 
-    <script src="${blocklyUri}"></script>
-    <script src="${enUri}"></script>
-    <script src="${customEnUri}"></script>
-    <script src="${customZhHantUri}"></script>
-    <script src="${fieldColourUri}"></script>
-    <script src="${fieldMultilineInputUri}"></script>
-    <script src="${customBlocksUri}"></script>
-    <script src="${arduinoGeneratorUri}"></script>
-    <script src="${customGeneratorUri}"></script>
+    <script nonce="${nonce}" src="${blocklyUri}"></script>
+    <script nonce="${nonce}" src="${enUri}"></script>
+    <script nonce="${nonce}" src="${customEnUri}"></script>
+    <script nonce="${nonce}" src="${customZhHantUri}"></script>
+    <script nonce="${nonce}" src="${fieldColourUri}"></script>
+    <script nonce="${nonce}" src="${fieldMultilineInputUri}"></script>
+    <script nonce="${nonce}" src="${customBlocksUri}"></script>
+    <script nonce="${nonce}" src="${arduinoGeneratorUri}"></script>
+    <script nonce="${nonce}" src="${customGeneratorUri}"></script>
 
-    <script src="${mainUri}"></script>
+    <script nonce="${nonce}" src="${mainUri}"></script>
 </body>
 </html>`;
 }

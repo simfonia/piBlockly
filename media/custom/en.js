@@ -162,6 +162,19 @@ Blockly.Msg["CODING_RAW_WRAPPER_TOOLTIP"] = "Allows wrapping other blocks with c
 Blockly.Msg["CODING_RAW_WRAPPER_TOP"] = "Top Code:";
 Blockly.Msg["CODING_RAW_WRAPPER_BOTTOM"] = "Bottom Code:";
 
+// Text Blocks
+Blockly.Msg["TEXT_HUE"] = "#6a8871";  // for Text
+
+
 
 // Functions Blocks
 Blockly.Msg["PROCEDURES_HUE"] = "#d22f73"; // for Functions
+
+// Array Blocks
+Blockly.Msg.ARRAY_HUE = "#d1972b";  // for Arrays
+Blockly.Msg.ARRAY_DECLARE_TITLE = "Declare Array";
+Blockly.Msg.ARRAY_DECLARE_TOOLTIP = "Declares an array of a specified type and size.";
+Blockly.Msg.ARRAY_GET_TOOLTIP = "Gets an element from an array at a specified index.";
+Blockly.Msg.ARRAY_SET_TOOLTIP = "Sets the value of an element in an array at a specified index.";
+Blockly.Msg.ARRAY_LENGTH_TOOLTIP = "Gets the number of elements in an array.";
+Blockly.Msg.ARRAY_LENGTH_TOOLTIP = "Gets the number of elements in an array.";

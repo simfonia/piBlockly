@@ -260,7 +260,7 @@
         </value>
     </block>
 </category>
-<category name="Text" colour="#A6745C">
+<category name="Text" colour="%{BKY_TEXT_HUE}">
     <block type="text"></block>
     <block type="text_join"></block>
     <block type="text_append">
@@ -270,21 +270,20 @@
     </block>
     <block type="text_length"></block>
 </category>
-<category name="Lists" colour="#745CA6">
-    <block type="lists_create_with"></block>
-    <block type="lists_repeat"></block>
-    <block type="lists_length"></block>
-    <block type="lists_isEmpty"></block>
-    <block type="lists_indexOf"></block>
-    <block type="lists_getIndex"></block>
-    <block type="lists_setIndex"></block>
-</category>
+
 <sep></sep>
 <category name="Variables" colour="#A65C81">
     <button text="%{BKY_NEW_VARIABLE}" callbackKey="CREATE_VARIABLE"></button>
     <block type="variables_declare"></block>
     <block type="variables_get"></block>
     <block type="variables_set"></block>
+</category>
+
+<category name="Array" colour="#d1972b">
+    <block type="array_declare"></block>
+    <block type="array_get"></block>
+    <block type="array_set"></block>
+    <block type="array_length"></block>
 </category>
 
 <category name="Functions" colour="#d22f73">
@@ -294,3 +293,4 @@
         <block type="custom_procedures_callnoreturn_manual"></block>
         <block type="custom_procedures_callreturn_manual"></block>
     </category>
+<sep></sep>
