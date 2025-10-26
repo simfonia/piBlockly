@@ -48,6 +48,10 @@
     ]
   },
   "publisher": "piblockly",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/simfonia/piBlockly.git"
+  },
   "scripts": {
     "compile": "webpack",
     "watch": "webpack --watch",
