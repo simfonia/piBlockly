@@ -382,7 +382,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
 <head>
     <meta charset="UTF-8">
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src * data:; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data: https: vscode-webview-resource:; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource:;">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>piBlockly 編輯器</title>
