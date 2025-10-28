@@ -16,34 +16,37 @@ export function activate(context: vscode.ExtensionContext) {
 
     const startCommand = vscode.commands.registerCommand('piblockly.start', async () => {
 
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('請先開啟一個 Arduino (.ino) 檔案，然後再啟動 piBlockly。');
-            return;
-        }
+        let editor: vscode.TextEditor | undefined;
 
-        const languageId = editor.document.languageId;
-        if (languageId !== 'arduino' && languageId !== 'cpp') {
-            vscode.window.showErrorMessage(`目前的檔案類型是 '${languageId}'，不是 'arduino' 或 'cpp'。請開啟一個 .ino 檔案。`);
-            return;
-        }
-
-        // --- New logic for handling existing code ---
-        const currentContent = editor.document.getText();
-        if (currentContent.trim().length > 0) { // Check if file is not empty
-            const overwriteChoice = await vscode.window.showWarningMessage(
-                '偵測到當前檔案包含程式碼。您希望如何處理？',
-                { modal: true },
-                '覆蓋現有程式碼'
-            );
-
-            if (overwriteChoice !== '覆蓋現有程式碼') {
-                // User chose '取消' or closed the dialog
-                return;
+        // Helper function to find a compatible editor
+        const findArduinoEditor = () => {
+            const activeEditor = vscode.window.activeTextEditor;
+            // Check for 'arduino' (VS Code) or 'cpp' (Arduino IDE 2) or 'ino' (fallback)
+            if (activeEditor && (activeEditor.document.languageId === 'arduino' || activeEditor.document.languageId === 'cpp' || activeEditor.document.languageId === 'ino')) {
+                return activeEditor;
             }
-            // If user chose '覆蓋現有程式碼', continue to the next step
+            // Fallback to visible editors
+            return vscode.window.visibleTextEditors.find(e => e.document.languageId === 'arduino' || e.document.languageId === 'cpp' || e.document.languageId === 'ino');
+        };
+
+        editor = findArduinoEditor();
+
+        // If no editor is found, wait and try again. This helps with timing issues.
+        if (!editor) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            editor = findArduinoEditor();
         }
-        // --- End of new logic ---
+
+        // If still no editor, show error and exit
+        if (!editor) {
+            vscode.window.showErrorMessage('找不到有效的 Arduino (.ino) 編輯器。請確認已開啟一個 .ino 檔案並點擊編輯器視窗使其作用中。');
+            return;
+        }
+
+        // Ensure the found editor is active before proceeding
+        if (vscode.window.activeTextEditor?.document.uri.toString() !== editor.document.uri.toString()) {
+            await vscode.window.showTextDocument(editor.document, editor.viewColumn);
+        }
 
         const choice = await vscode.window.showQuickPick([
             { label: '新增專案', description: '建立一個新專案並儲存 .xml 檔案' },
@@ -96,40 +99,14 @@ export function activate(context: vscode.ExtensionContext) {
         createAndShowPanel(context, panels, ++panelCounter, xmlContent, xmlName);
     });
 
-    const onDidCloseDocumentSubscription = vscode.workspace.onDidCloseTextDocument(async (document) => {
-        const closedUriString = document.uri.toString();
-        let panelToClose: vscode.WebviewPanel | null = null;
 
-        for (const [id, panel] of panels.entries()) {
-            if (((panel as any).associatedUriString === closedUriString) || ((panel as any).xmlName === closedUriString)) {
-                panelToClose = panel;
-                break;
-            }
-        }
 
-        if (panelToClose) {
-            if ((panelToClose as any).isDisposed) {
-                return;
-            }
-            closePanel(panelToClose);
-        }
-    });
 
-    const onDidChangeVisibleEditorsSubscription = vscode.window.onDidChangeVisibleTextEditors(editors => {
-        for (const panel of panels.values()) {
-            const associatedUri = (panel as any).associatedUriString;
-            const isAssociatedEditorVisible = editors.some(editor => editor.document.uri.toString() === associatedUri);
 
-            if (isAssociatedEditorVisible) {
-                panel.webview.postMessage({ command: 'panelActive' });
-            } else {
-                panel.webview.postMessage({ command: 'panelInactive' });
-            }
-        }
-    });
-
-    context.subscriptions.push(startCommand, onDidCloseDocumentSubscription, onDidChangeVisibleEditorsSubscription);
+    context.subscriptions.push(startCommand);
 }
+
+
 
 function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string, vscode.WebviewPanel>, panelId: number, xmlContent: string, xmlName: string | undefined) {
     const editor = vscode.window.activeTextEditor;
@@ -144,12 +121,11 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
     const panel = vscode.window.createWebviewPanel(
         'piblocklyEditor',
         `piBlockly: ${xmlName ? path.basename(xmlName) : path.basename(editor.document.fileName)}`,
-        vscode.ViewColumn.Two,
+        vscode.ViewColumn.One,
         {
             enableScripts: true,
             localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
-            enableForms: true,
-            retainContextWhenHidden: true
+            enableForms: true
         }
     );
 
@@ -158,13 +134,12 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
     (panel as any).xmlName = xmlName;
     (panel as any).isDirty = false;
     (panel as any).isDisposed = false;
-    (panel as any).lastGeneratedCodeHash = ''; // Initialize hash
     panels.set(panelKey, panel);
     vscode.commands.executeCommand('setContext', 'piblockly.panelOpen', true);
 
     panel.onDidDispose(() => {
-        const associatedUriString = (panel as any).associatedUriString;
-
+        (panel as any).isDisposed = true;
+        messageDisposable.dispose(); // Explicitly dispose the message listener
         panels.delete(panelKey);
         if (panels.size === 0) {
             vscode.commands.executeCommand('setContext', 'piblockly.panelOpen', false);
@@ -175,8 +150,9 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
 
     panel.webview.html = getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
 
-    panel.webview.onDidReceiveMessage(
+    const messageDisposable = panel.webview.onDidReceiveMessage(
         async message => {
+            console.log('Extension Host: Received message from webview:', message); // DEBUG LOG
             const currentAssociatedUri = (panel as any).associatedUriString;
             const associatedEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === currentAssociatedUri);
 
@@ -189,29 +165,10 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                         const code = message.code;
                         try {
                             const doc = associatedEditor.document;
-                            const currentContent = doc.getText();
-                            const currentHash = crypto.createHash('sha256').update(currentContent).digest('hex');
-                            const lastGeneratedHash = (panel as any).lastGeneratedCodeHash;
-
-                            if (lastGeneratedHash && currentHash !== lastGeneratedHash) {
-                                const overwriteChoice = await vscode.window.showWarningMessage(
-                                    '偵測到程式碼已被手動修改。繼續生成將會覆蓋您的修改。是否繼續？',
-                                    { modal: true },
-                                    '繼續覆蓋'
-                                );
-                                if (overwriteChoice !== '繼續覆蓋') {
-                                    return; // User cancelled
-                                }
-                            }
-
                             const edit = new vscode.WorkspaceEdit();
                             const fullRange = new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length));
                             edit.replace(doc.uri, fullRange, code);
                             await vscode.workspace.applyEdit(edit);
-
-                            // Update the last generated code hash
-                            (panel as any).lastGeneratedCodeHash = crypto.createHash('sha256').update(code).digest('hex');
-
                         } catch (error) {
                             vscode.window.showErrorMessage(`更新程式碼失敗：${String(error)}`);
                         }
@@ -300,47 +257,27 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
 }
 
 async function closePanel(panel: vscode.WebviewPanel) {
+    console.log('Extension Host: closePanel function called.');
     const isDirty = (panel as any).isDirty;
 
     if (isDirty) {
+        console.log('Extension Host: Panel is dirty. Showing warning message.');
         const choice = await vscode.window.showWarningMessage(
             '您在 piBlockly 中有未儲存的變更。是否要儲存？',
             { modal: true },
             '儲存', '不儲存'
         );
 
+        console.log('Extension Host: User choice for dirty panel:', choice);
+
         if (choice === '儲存') {
+            console.log('Extension Host: User chose SAVE. Requesting save from webview.');
             await new Promise<void>(resolve => {
                 const sub = panel.webview.onDidReceiveMessage(async (message) => {
                     if (message.command === 'saveProject') {
-                        const currentXmlName = (panel as any).xmlName;
-                        if (currentXmlName) {
-                            try {
-                                fs.writeFileSync(currentXmlName, message.xml);
-                                vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(currentXmlName)}`);
-                                panel.webview.postMessage({ command: 'saveComplete' });
-                                panel.dispose();
-                            } catch (error: any) {
-                                vscode.window.showErrorMessage(`儲存專案失敗：${String(error)}`);
-                            }
-                        } else {
-                            const options: vscode.SaveDialogOptions = {
-                                filters: { 'Blockly XML': ['xml'] }
-                            };
-                            const fileUriToSave = await vscode.window.showSaveDialog(options);
-                            if (fileUriToSave) {
-                                try {
-                                    fs.writeFileSync(fileUriToSave.fsPath, message.xml);
-                                    (panel as any).xmlName = fileUriToSave.fsPath;
-                                    panel.title = `piBlockly: ${path.basename(fileUriToSave.fsPath)}`;
-                                    vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(fileUriToSave.fsPath)}`);
-                                    panel.webview.postMessage({ command: 'saveComplete' });
-                                    panel.dispose();
-                                } catch (error: any) {
-                                    vscode.window.showErrorMessage(`儲存專案失敗：${String(error)}`);
-                                }
-                            }
-                        }
+                        console.log('Extension Host: Received saveProject from webview. Proceeding to dispose.');
+                        // Original save logic would go here, but for debugging, we just dispose.
+                        panel.dispose();
                         sub.dispose();
                         resolve();
                     }
@@ -348,11 +285,15 @@ async function closePanel(panel: vscode.WebviewPanel) {
                 panel.webview.postMessage({ command: 'requestSave' });
             });
         } else if (choice === '不儲存') {
+            console.log('Extension Host: User chose DON\'T SAVE. Disposing panel.');
             panel.dispose();
         } else { // Cancel or undefined
+            console.log('Extension Host: User cancelled close operation.');
             // Do nothing, the user cancelled the close operation.
         }
-    } else { // Clean state
+    } else {
+        console.log('Extension Host: Panel is clean. Disposing panel.');
+        (panel as any).isDisposed = true; // This line is redundant if panel.dispose() is called.
         panel.dispose();
     }
 }
@@ -450,16 +391,16 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
 <body>
     <div id="loading-overlay">載入中...</div>
     <div id="inactive-overlay" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); color: white; font-size: 2em; z-index: 1000; text-align: center; padding: 20px;"></div>
-    <div id="toolbar">
-        <img id="saveButton" src="${saveIconUri}" data-src="${saveIconUri}" data-hover-src="${saveIconHoverUri}" alt="儲存積木" title="儲存積木">
-        <img id="saveAsButton" src="${saveAsIconUri}" data-src="${saveAsIconUri}" data-hover-src="${saveAsIconHoverUri}" alt="另存積木" title="另存積木">
-        <img id="closeButton" src="${dangerousIconUri}" data-src="${dangerousIconUri}" data-hover-src="${dangerousIconHoverUri}" alt="關閉" title="關閉">
-    </div>
-    <div id="blocklyDiv" style="height: calc(100vh - 40px); width: 100vw;"></div>
-
-    <script id="toolbox-xml" type="text/xml" style="display: none;">${`<xml>${toolboxXml}</xml>`}</script>
-
-    <script nonce="${nonce}" src="${blocklyUri}"></script>
+            <div id="toolbar">
+                <img id="saveButton" src="${saveIconUri}" data-src="${saveIconUri}" data-hover-src="${saveIconHoverUri}" alt="儲存積木" title="儲存積木">
+                <img id="saveAsButton" src="${saveAsIconUri}" data-src="${saveAsIconUri}" data-hover-src="${saveAsIconHoverUri}" alt="另存積木" title="另存積木">
+                <button id="closeButton" title="關閉" style="background: none; border: none; padding: 0; cursor: pointer; margin-left: auto; z-index: 9999;">
+                    <img src="${dangerousIconUri}" data-src="${dangerousIconUri}" data-hover-src="${dangerousIconHoverUri}" alt="關閉">
+                </button>
+            </div>
+            <div id="blocklyDiv" style="height: calc(100vh - 40px); width: 100vw;"></div>
+        
+            <script id="toolbox-xml" type="text/xml" style="display: none;">${`<xml>${toolboxXml}</xml>`}</script>    <script nonce="${nonce}" src="${blocklyUri}"></script>
     <script nonce="${nonce}" src="${enUri}"></script>
     <script nonce="${nonce}" src="${customEnUri}"></script>
     <script nonce="${nonce}" src="${customZhHantUri}"></script>
