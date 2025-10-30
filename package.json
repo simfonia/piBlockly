@@ -2,7 +2,7 @@
   "name": "piblockly",
   "displayName": "πBlockly",
   "description": "A Arduino IDE 2 extension for Blockly",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "engines": {
     "vscode": "^1.104.0"
   },

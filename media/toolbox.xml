@@ -274,7 +274,8 @@
 <sep></sep>
 <category name="Variables" colour="#A65C81">
     <button text="%{BKY_NEW_VARIABLE}" callbackKey="CREATE_VARIABLE"></button>
-    <block type="variables_declare"></block>
+    <block type="variables_declare_global"></block>
+    <block type="variables_declare_local"></block>
     <block type="variables_get"></block>
     <block type="variables_set"></block>
 </category>

@@ -754,6 +754,8 @@ Blockly.Blocks['coding_raw_definition'] = {
           "text": ""
         }
       ],
+      "previousStatement": true,
+      "nextStatement": true,
       "colour": Blockly.Msg["CODING_HUE"],
       "tooltip": Blockly.Msg["CODING_RAW_DEFINITION_TOOLTIP"],
       "helpUrl": ""
@@ -808,7 +810,7 @@ Blockly.Blocks['initializes_setup'] = {
           "name": "CONTENT"
         }
       ],
-      "nextStatement": null,
+      "nextStatement": true,
       "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
       "tooltip": "%{BKY_INITIALIZES_SETUP_TOOLTIP}",
       "helpUrl": "%{BKY_INITIALIZES_SETUP_HELPURL}"
@@ -827,7 +829,7 @@ Blockly.Blocks['initializes_loop'] = {
           "name": "CONTENT"
         }
       ],
-      "previousStatement": null,
+      "previousStatement": true,
       "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
       "tooltip": "%{BKY_INITIALIZES_LOOP_TOOLTIP}",
       "helpUrl": "%{BKY_INITIALIZES_LOOP_HELPURL}"
@@ -836,19 +838,11 @@ Blockly.Blocks['initializes_loop'] = {
 };
 
 
-Blockly.Blocks['variables_declare'] = {
+Blockly.Blocks['variables_declare_global'] = {
   init: function() {
     this.jsonInit({
-      "message0": "%1 %2 %3 = %4",
+      "message0": "global %1 %2 = %3",
       "args0": [
-        {
-          "type": "field_dropdown",
-          "name": "SCOPE",
-          "options": [
-            ["Global", "GLOBAL"],
-            ["Local", "LOCAL"]
-          ]
-        },
         {
           "type": "field_dropdown",
           "name": "TYPE",
@@ -869,26 +863,46 @@ Blockly.Blocks['variables_declare'] = {
           "name": "VALUE"
         }
       ],
+      "previousStatement": true,
+      "nextStatement": true,
       "colour": "%{BKY_VARIABLES_HUE}",
-      "tooltip": "Declare a variable with a type and scope.",
+      "tooltip": "Declare a global variable.",
       "helpUrl": ""
     });
-    // Set initial shape based on the default value
-    this.updateShape_(this.getFieldValue('SCOPE'));
-  },
-  onchange: function(event) {
-    if (event.type === 'change' && event.blockId === this.id && event.name === 'SCOPE') {
-      this.updateShape_(event.newValue);
-    }
-  },
-  updateShape_: function(scope) {
-    if (scope === 'GLOBAL') {
-      this.setPreviousStatement(false, null);
-      this.setNextStatement(false, null);
-    } else { // LOCAL
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-    }
+  }
+};
+
+Blockly.Blocks['variables_declare_local'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "local %1 %2 = %3",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "TYPE",
+          "options": [
+            ["int", "int"],
+            ["float", "float"],
+            ["String", "String"],
+            ["bool", "bool"]
+          ]
+        },
+        {
+          "type": "field_variable",
+          "name": "VAR",
+          "variable": "%{BKY_VARIABLES_DEFAULT_NAME}"
+        },
+        {
+          "type": "input_value",
+          "name": "VALUE"
+        }
+      ],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "%{BKY_VARIABLES_HUE}",
+      "tooltip": "Declare a local variable.",
+      "helpUrl": ""
+    });
   }
 };
 

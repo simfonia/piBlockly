@@ -530,101 +530,60 @@ Blockly.Arduino.forBlock['coding_raw_input'] = function(block) {
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };
 
-Blockly.Arduino.forBlock['coding_raw_definition'] = function(block) {
-  var code = block.getFieldValue('CODE');
-  Blockly.Arduino.definitions_['raw_definition_' + block.id] = code;
-  return '';
-};
+const DEFINITION_BLOCK_TYPES = ['variables_declare_global', 'coding_raw_definition'];
 
-Blockly.Arduino.forBlock['coding_raw_wrapper'] = function(block) {
-  var codeTop = block.getFieldValue('CODE_TOP');
-  var statementsDo = Blockly.Arduino.statementToCode(block, 'DO');
-  var codeBottom = block.getFieldValue('CODE_BOTTOM');
-  var code = codeTop + '\n' + statementsDo + codeBottom + '\n';
-
-  if (!block.getParent()) {
-    // It's a top-level block, add to definitions
-    Blockly.Arduino.definitions_['raw_wrapper_' + block.id] = code;
-    return ''; // Return nothing for the main loop
-  } else {
-    // It's connected to something, return code normally
-    return code;
+function processDefinitionStack(block) {
+  const prevBlock = block.getPreviousBlock();
+  if (prevBlock && DEFINITION_BLOCK_TYPES.includes(prevBlock.type)) {
+    return '';
   }
-};
 
+  let code = '';
+  let currentBlock = block;
 
-Blockly.Arduino.forBlock['arduino_pin_mode'] = function(block) {
-  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var mode = Blockly.Arduino.valueToCode(block, 'MODE', Blockly.Arduino.ORDER_ATOMIC) || 'OUTPUT';
-  var code = 'pinMode(' + pin + ', ' + mode + ');\n';
-  return code;
-};
+  while (currentBlock && DEFINITION_BLOCK_TYPES.includes(currentBlock.type)) {
+    let blockCode = '';
+    if (currentBlock.type === 'variables_declare_global') {
+        const type = currentBlock.getFieldValue('TYPE');
+        const varId = currentBlock.getFieldValue('VAR');
+        const variable = currentBlock.workspace.getVariableById(varId);
+        const varName = variable ? variable.name : 'UNKNOWN_VAR';
+        const value = Blockly.Arduino.valueToCode(currentBlock, 'VALUE', Blockly.Arduino.ORDER_ATOMIC);
+        const defaultValue = (type === 'String') ? '""' : (type === 'bool') ? 'false' : '0';
+        const finalValue = value || defaultValue;
+        blockCode = type + ' ' + varName + ' = ' + finalValue + ';';
+    } else if (currentBlock.type === 'coding_raw_definition') {
+        blockCode = currentBlock.getFieldValue('CODE');
+    }
+    
+    if (blockCode) {
+        code += blockCode + '\n';
+    }
+    
+    currentBlock = currentBlock.getNextBlock();
+  }
 
-Blockly.Arduino.forBlock['arduino_pin_mode_mode_shadow'] = function(block) {
-  var mode = block.getFieldValue('MODE');
-  return [mode, Blockly.Arduino.ORDER_ATOMIC];
-};
+  if (code.endsWith('\n')) {
+    code = code.slice(0, -1);
+  }
 
-Blockly.Arduino.forBlock['arduino_pin_shadow'] = function(block) {
-  var pin = block.getFieldValue('PIN');
-  return [pin, Blockly.Arduino.ORDER_ATOMIC];
-};
+  if (code) {
+    Blockly.Arduino.definitions_['stack_' + block.id] = code;
+  }
 
+  return '';
+}
 
-Blockly.Arduino.forBlock['arduino_digital_read'] = function(block) {
-  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var code = 'digitalRead(' + pin + ')';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
+Blockly.Arduino.forBlock['coding_raw_definition'] = processDefinitionStack;
+Blockly.Arduino.forBlock['variables_declare_global'] = processDefinitionStack;
 
-Blockly.Arduino.forBlock['arduino_digital_write'] = function(block) {
-  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var value = block.getFieldValue('VALUE');
-  var code = 'digitalWrite(' + pin + ', ' + value + ');\n';
-  return code;
-};
-
-
-Blockly.Arduino.forBlock['arduino_analog_read'] = function(block) {
-  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || 'A0';
-  var code = 'analogRead(' + pin + ')';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
-
-Blockly.Arduino.forBlock['arduino_analog_write'] = function(block) {
-  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || '3';
-  var value = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var code = 'analogWrite(' + pin + ', ' + value + ');\n';
-  return code;
-};
-
-Blockly.Arduino.forBlock['arduino_constrain'] = function(block) {
-  var value = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var low = Blockly.Arduino.valueToCode(block, 'LOW', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var high = Blockly.Arduino.valueToCode(block, 'HIGH', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var code = 'constrain(' + value + ', ' + low + ', ' + high + ')';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
-
-Blockly.Arduino.forBlock['arduino_map'] = function(block) {
-  var value = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var fromLow = Blockly.Arduino.valueToCode(block, 'FROMLOW', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var fromHigh = Blockly.Arduino.valueToCode(block, 'FROMHIGH', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var toLow = Blockly.Arduino.valueToCode(block, 'TOLOW', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var toHigh = Blockly.Arduino.valueToCode(block, 'TOHIGH', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var code = 'map(' + value + ', ' + fromLow + ', ' + fromHigh + ', ' + toLow + ', ' + toHigh + ')';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
-
-Blockly.Arduino.forBlock['variables_declare'] = function(block) {
-  var scope = block.getFieldValue('SCOPE');
+Blockly.Arduino.forBlock['variables_declare_local'] = function(block) {
   var type = block.getFieldValue('TYPE');
   var varId = block.getFieldValue('VAR');
   var variable = block.workspace.getVariableById(varId);
-  var varName = variable.name;
+  var varName = variable ? variable.name : 'UNKNOWN_VAR';
   var value = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC);
 
-  // Determine the default value based on the type
   var defaultValue = '0';
   if (type === 'String') {
     defaultValue = '""';
@@ -633,15 +592,9 @@ Blockly.Arduino.forBlock['variables_declare'] = function(block) {
   }
   
   var finalValue = value || defaultValue;
-
   var code = type + ' ' + varName + ' = ' + finalValue + ';';
 
-  if (scope === 'GLOBAL') {
-    Blockly.Arduino.definitions_['variables_declare_' + varName] = code;
-    return ''; // Global declarations are handled by the finish function
-  } else {
-    return code + '\n'; // Local declarations are returned as statements
-  }
+  return code + '\n'; // Return as a statement.
 };
 
 Blockly.Arduino.forBlock['array_declare'] = function(block) {

@@ -173,6 +173,13 @@ window.addEventListener('message', event => {
     }
 });
 
+// Add a blur event listener to handle mouse-up events outside the webview
+window.addEventListener('blur', () => {
+  if (workspace && workspace.isDragging()) {
+    Blockly.Touch.terminate();
+  }
+});
+
 // --- Orphan Block Handling ---
 function updateOrphanBlocks(event) {
     // If the event is a change to a block's disabled state, ignore it to prevent infinite loops.
@@ -201,7 +208,8 @@ function updateOrphanBlocks(event) {
         'custom_procedures_defreturn',
         'custom_procedures_defnoreturn',
         'coding_raw_definition', // This is for global raw code, so it can be a root.
-        'array_declare' // Allow global array declarations as root blocks.
+        'array_declare', // Allow global array declarations as root blocks.
+        'variables_declare_global' // Allow global variable declarations as root blocks.
     ];
 
     const topBlocks = workspace.getTopBlocks(true);
@@ -214,10 +222,6 @@ function updateOrphanBlocks(event) {
             if (topBlock.type === 'array_declare' && topBlock.getFieldValue('SCOPE') === 'LOCAL') {
                 isAllowedRoot = false;
             } else {
-                isAllowedRoot = true;
-            }
-        } else if (topBlock.type === 'variables_declare') {
-            if (topBlock.getFieldValue('SCOPE') === 'GLOBAL') {
                 isAllowedRoot = true;
             }
         }
