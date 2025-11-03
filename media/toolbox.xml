@@ -106,22 +106,6 @@
     <block type="picar_checkColor"></block>
     <block type="picar_checkGray"></block>
     <block type="picar_inPosition"></block>
-    <!-- <block type="picar_set_left_hand_angle">
-        <value name="ANGLE">
-            <shadow type="math_number">
-                <field name="NUM">180</field>
-            </shadow>
-        </value>
-    </block>
-    <block type="picar_set_right_hand_angle">
-        <value name="ANGLE">
-            <shadow type="math_number">
-                <field name="NUM">0</field>
-            </shadow>
-        </value>
-    </block>
-    <block type="picar_closeHands"></block>
-    <block type="picar_openHands"></block> -->
     <block type="picar_set_hand_range">
         <value name="RANGE">
             <shadow type="math_number">
@@ -143,13 +127,34 @@
     </block>
     <block type="picar_set_led_color"></block>
     <block type="picar_flashingLight"></block>
-    <block type="picar_easterEgg">
+    <block type="picar_set_tempo">
+        <value name="BPM">
+            <shadow type="math_number">
+                <field name="NUM">120</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="picar_play_note">
+        <value name="PIN">
+            <shadow type="math_number">
+                <field name="NUM">22</field>
+            </shadow>
+        </value>
+        <value name="FREQUENCY">
+            <shadow type="picar_note_to_frequency">
+                <field name="NOTE_NAME">C</field>
+                <field name="OCTAVE">4</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="picar_note_to_frequency"></block>
+    <!-- <block type="picar_easterEgg">
         <value name="TEMPO">
             <shadow type="math_number">
                 <field name="NUM">1000</field>
             </shadow>
         </value>
-    </block>
+    </block> -->
     <block type="picar_tone">
         <value name="PIN">
             <shadow type="math_number">
@@ -217,9 +222,7 @@
     <block type="math_single"></block>
     <block type="arduino_constrain">
         <value name="VALUE">
-            <shadow type="math_number">
-                <field name="NUM"></field>
-            </shadow>
+            <shadow type="variables_get"></shadow>
         </value>
         <value name="LOW">
             <shadow type="math_number">
@@ -234,9 +237,7 @@
     </block>
     <block type="arduino_map">
         <value name="VALUE">
-            <shadow type="math_number">
-                <field name="NUM"></field>
-            </shadow>
+            <shadow type="variables_get"></shadow>
         </value>
         <value name="FROMLOW">
             <shadow type="math_number">
@@ -256,6 +257,29 @@
         <value name="TOHIGH">
             <shadow type="math_number">
                 <field name="NUM">255</field>
+            </shadow>
+        </value>
+    </block>
+    <block type="math_random_seed">
+        <value name="SEED">
+            <shadow type="arduino_analog_read">
+                <value name="PIN">
+                    <shadow type="arduino_pin_shadow">
+                        <field name="PIN">A0</field>
+                    </shadow>
+                </value>
+            </shadow>
+        </value>
+    </block>
+    <block type="math_random_int">
+        <value name="MIN">
+            <shadow type="math_number">
+                <field name="NUM">0</field>
+            </shadow>
+        </value>
+        <value name="MAX">
+            <shadow type="math_number">
+                <field name="NUM">100</field>
             </shadow>
         </value>
     </block>

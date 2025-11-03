@@ -1,133 +1,134 @@
-
-
 // Generator Functions for custom blocks
 
-// Initializes Blocks
-Blockly.Arduino.forBlock['initializes_setup'] = function(block) {
-  var statements_content = Blockly.Arduino.statementToCode(block, 'CONTENT');
-  // The setup code is added to a global object for later assembly.
-  Blockly.Arduino.setups_['user_code'] = statements_content;
+const ensurePiCarMotorDependencies = () => {
+  Blockly.Arduino.macros_['define_picar_motor_pins'] = 
+    '// Motor Pins\n' +
+    '#define pinM1A 8\n' +
+    '#define pinM1B 9\n' +
+    '#define pinM2A 10\n' +
+    '#define pinM2B 11\n';
+  Blockly.Arduino.setups_['setup_motors'] = 'pinMode(pinM1A, OUTPUT);\n  pinMode(pinM1B, OUTPUT);\n  pinMode(pinM2A, OUTPUT);\n  pinMode(pinM2B, OUTPUT);\n';
+};
+
+const ensurePiCarUltrasonicDependencies = () => {
+  Blockly.Arduino.macros_['define_picar_ultrasonic_pins'] = 
+    '#define pinTrig 28\n' +
+    '#define pinEcho 7\n';
+  Blockly.Arduino.setups_['setup_ultrasonic'] = 'pinMode(pinTrig, OUTPUT);\n  pinMode(pinEcho, INPUT);\n';
+};
+
+const ensurePiCarIRDependencies = () => {
+  Blockly.Arduino.macros_['define_picar_ir_pins'] = 
+    '#define pinIR_D 26\n' +
+    '#define pinIR_A 27\n';
+  Blockly.Arduino.setups_['setup_ir'] = 'pinMode(pinIR_D, INPUT);\n  pinMode(pinIR_A, INPUT);\n';
+};
+
+const ensurePiCarLEDDependencies = () => {
+  Blockly.Arduino.includes_['define_neopixel_header'] = '#include <Adafruit_NeoPixel.h>\n';
+  Blockly.Arduino.macros_['define_picar_led_pins'] = '#define pinRGB 18\n';
+  Blockly.Arduino.definitions_['define_picar_led_object'] = 'Adafruit_NeoPixel strip(2, pinRGB, NEO_GRB + NEO_KHZ800);\n';
+  Blockly.Arduino.setups_['setup_rgb_led'] = 'strip.begin();\n  strip.setBrightness(10);\n';
+};
+
+const ensurePiCarBuzzerDependencies = () => {
+  Blockly.Arduino.macros_['define_picar_buzzer_pins'] = '#define pinBuzzer 22\n';
+  Blockly.Arduino.setups_['setup_buzzer'] = 'pinMode(pinBuzzer, OUTPUT);\n';
+};
+
+const ensurePiCarButtonDependencies = () => {
+  Blockly.Arduino.macros_['define_picar_button_pins'] = '#define pinBtnStart 20\n';
+  Blockly.Arduino.setups_['setup_button'] = 'pinMode(pinBtnStart, INPUT_PULLUP);\n';
+};
+
+const ensurePiCarServoDependencies = () => {
+  Blockly.Arduino.includes_['define_servo_header'] = '#include <Servo.h>\n';
+  Blockly.Arduino.macros_['define_picar_servo_pins'] = 
+    '#define pinServoL 12\n' +
+    '#define pinServoR 13\n';
+  Blockly.Arduino.definitions_['define_picar_servo_objects'] = 
+    'Servo handL;\n' +
+    'Servo handR;\n';
+  Blockly.Arduino.global_vars_['define_picar_servo_globals'] = 
+    'int g_hand_range = 170;\n' +
+    'int g_s_angle_L = 180;\n' +
+    'int g_s_angle_R = 0;\n';
+  Blockly.Arduino.setups_['setup_servos'] = 'handL.attach(pinServoL, 460, 2400);\n  handR.attach(pinServoR, 460, 2400);\n';
+};
+
+const ensureMusicDependencies = () => {
+  Blockly.Arduino.definitions_['define_g_tempo_bpm'] = 'int g_tempo_bpm = 120; // Default tempo in BPM';
+  Blockly.Arduino.definitions_['define_g_quarter_note_ms'] = 'int g_quarter_note_ms = 500; // Default quarter note duration in ms (120 BPM)';
+  Blockly.Arduino.definitions_['define_playNote'] =
+    'void playNote(int pin, int frequency, int duration_ms, int pause_ms) {\n' +
+    '  if (frequency == 0) { // Rest\n' +
+    '    noTone(pin);\n' +
+    '    delay(duration_ms);\n' +
+    '  } else {\n' +
+    '    tone(pin, frequency, duration_ms);\n' +
+    '    delay(pause_ms); // Pause after playing the note\n' +
+    '  }\n' +
+    '  noTone(pin); // Ensure tone stops\n' +
+    '}\n';
+};
+
+
+// =============================================================================
+// BLOCK GENERATORS
+// =============================================================================
+
+// picar
+// 初始化 - This block provides the basic hardware definitions and setup sequence.
+Blockly.Arduino.forBlock['picar_init'] = function(block) {
+  // Ensure all hardware modules are defined
+  ensurePiCarMotorDependencies();
+  ensurePiCarServoDependencies();
+  ensurePiCarUltrasonicDependencies();
+  ensurePiCarIRDependencies();
+  ensurePiCarLEDDependencies();
+  ensurePiCarBuzzerDependencies();
+  ensurePiCarButtonDependencies();
+
+  // Define the boot sequence function
+  Blockly.Arduino.definitions_['define_inPosition'] =
+    'void inPosition(){  // Servo motor initial positioning\n' + 
+    '  handL.write(180);\n' + 
+    '  handR.write(0);\n' + 
+    '  delay(1000);\n' + 
+    '}\n';
+
+  // Add the boot sequence to the setup
+  Blockly.Arduino.setups_['setup_serial'] = 'Serial.begin(9600);\n'; // Also ensure serial is ready
+  Blockly.Arduino.setups_['setup_flow_inposition'] = 'inPosition(); // Servo homing\n';
+  Blockly.Arduino.setups_['setup_flow_beep'] = 'tone(pinBuzzer, 440, 200); // Ready beep\n';
+  Blockly.Arduino.setups_['setup_flow_wait_button'] = 'while (digitalRead(pinBtnStart)) { /* wait for button press */ }\n  delay(500);\n';
+
+  return '// PiCar Initialized and ready.\n';
+};
+
+// 手臂開合角度最大範圍
+Blockly.Arduino.forBlock['picar_set_hand_range'] = function(block) {
+  var range = Blockly.Arduino.valueToCode(block, 'RANGE', Blockly.Arduino.ORDER_ATOMIC) || '170';
+  // This overwrites the default global definition from picar_init
+  Blockly.Arduino.definitions_['define_picar_servo_globals'] = 
+    'int g_hand_range = ' + range + ';\n' +
+    'int g_s_angle_L = 180;\n' +
+    'int g_s_angle_R = 0;\n';
   return '';
 };
 
-Blockly.Arduino.forBlock['initializes_loop'] = function(block) {
-  var statements_content = Blockly.Arduino.statementToCode(block, 'CONTENT');
-  // The loop code is returned directly to be placed inside the loop() function.
-  return statements_content;
-};
-
-Blockly.Arduino.forBlock['custom_procedures_defnoreturn'] = function(block) {
-  // Function name
-  var funcName = block.getFieldValue('NAME');
-  var branch = Blockly.Arduino.statementToCode(block, 'STACK');
-  // Construct parameter list
-  var args = [];
-  for (var i = 0; i < block.arguments_.length; i++) {
-    args[i] = block.argTypes_[i] + ' ' + block.arguments_[i];
-  }
-  var argsStr = args.join(', ');
-  var code = 'void ' + funcName + '(' + argsStr + ') {\n' + branch + '}\n';
-  Blockly.Arduino.definitions_['func_' + funcName] = code;
-  return null;
-};
-
-Blockly.Arduino.forBlock['custom_procedures_defreturn'] = function(block) {
-  // Function name
-  var funcName = block.getFieldValue('NAME');
-  // Return type
-  var returnType = block.getFieldValue('TYPE');
-  var branch = Blockly.Arduino.statementToCode(block, 'STACK');
-  // Construct parameter list
-  var args = [];
-  for (var i = 0; i < block.arguments_.length; i++) {
-    args[i] = block.argTypes_[i] + ' ' + block.arguments_[i];
-  }
-  var argsStr = args.join(', ');
-  // The 'return' is now handled by a separate block inside the 'STACK'.
-  var code = returnType + ' ' + funcName + '(' + argsStr + ') {\n' + branch + '}\n';
-  Blockly.Arduino.definitions_['func_' + funcName] = code;
-  return null;
-};
-
-Blockly.Arduino.forBlock['custom_procedures_return'] = function(block) {
-  var value_return = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '';
-  return '  return ' + value_return + ';\n';
-};
-
-
-Blockly.Arduino.forBlock['custom_procedures_callnoreturn_manual'] = function(block) {
-  var funcName = block.getFieldValue('NAME');
-  var args = [];
-  for (var i = 0; i < block.arguments_.length; i++) {
-    args[i] = Blockly.Arduino.valueToCode(block, 'ARG' + i, Blockly.Arduino.ORDER_NONE) || 'null';
-  }
-  var argsStr = args.join(', ');
-  var code = funcName + '(' + argsStr + ');\n';
-  return code;
-};
-
-
-Blockly.Arduino.forBlock['custom_procedures_callreturn_manual'] = function(block) {
-  var funcName = block.getFieldValue('NAME');
-  var args = [];
-  for (var i = 0; i < block.arguments_.length; i++) {
-    args[i] = Blockly.Arduino.valueToCode(block, 'ARG' + i, Blockly.Arduino.ORDER_NONE) || 'null';
-  }
-  var argsStr = args.join(', ');
-  var code = funcName + '(' + argsStr + ')';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
-
-
-
-// --- Content from BlocklyDuino_simfonia/javascript.js ---
-
-// Defines the code generated by the block.
-
-// 初始化
-Blockly.Arduino.forBlock['picar_init'] = function(block) {
-  // Global definitions
-  // 前置處理
-  Blockly.Arduino.definitions_['define_preprocess'] = 
-    '#include <Servo.h>  // for servo\n' + 
-    '#include <Adafruit_NeoPixel.h>  // for RGB LED, install Adafruit NeoPixel lib first\n';
-  
-  // 全域變數
-  Blockly.Arduino.definitions_['define_g_hand_range'] = 'int g_hand_range = 170;  // 手臂開合角度最大範圍，最大180。'; // Default value
-  Blockly.Arduino.definitions_['define_g_s_angle_L'] = 'int g_s_angle_L = 180;  // 左手目前角度，最大180。'; // Initial value
-  Blockly.Arduino.definitions_['define_g_s_angle_R'] = 'int g_s_angle_R = 0;  // 右手目前角度，最大180。'; // Initial value
-
-
-  // 腳位定義
-  Blockly.Arduino.definitions_['define_picar_pins'] =
-    'const int pinM1A = 8;  // left motor A pin\n' + 
-    'const int pinM1B = 9;  // left motor B pin\n' + 
-    'const int pinM2A = 10;  // right motor A pin\n' + 
-    'const int pinM2B = 11;  // right motor B pin\n\n' + 
-    'const int pinServoL = 12;  // left servo pin\n' + 
-    'const int pinServoR = 13;  // right servo pin\n' + 
-    'Servo handL;  // left servo\n' + 
-    'Servo handR;  // right servo\n\n' + 
-    'const int pinBtnStart = 20;  // start button pin\n' + 
-    'const int pinBuzzer = 22;  // piezo buzzer pin\n' + 
-    'const int pinIR_D = 26;  // IR digital\n' + 
-    'const int pinIR_A = 27;  // IR analog\n' + 
-    'const int pinTrig = 28;  // ultrasonic Trig\n' + 
-    'const int pinEcho = 7;  // ultrasonic Echo\n\n' + 
-    'const int pinRGB = 18;  // RGB LED pin\n\n' + 
-    '// 創建 NeoPixel 燈條物件 strip \n' + 
-    '// 設定(個數,腳位,RGB傳送順序+通訊速率)\n' + 
-    '// WS2812B燈條的顏色傳送順序是 GRB, 工作頻率是 800 KHz\n' + 
-    'Adafruit_NeoPixel strip(2, pinRGB, NEO_GRB + NEO_KHZ800);\n\n';
-
-  // 函數定義
-  // 重置
+// 重置
+Blockly.Arduino.forBlock['picar_resetPiCar'] = function(block) {
   Blockly.Arduino.definitions_['define_resetPiCar'] =
-    'void resetPiCar() {  // restart PiCar\n' + 
+    'void resetPiCar() {\n' + 
     '  watchdog_reboot(0, 0, 0);\n' + 
     '}\n';
+  return 'resetPiCar();\n';
+};
 
-  // 左右直流馬達動力
+// 左右直流馬達動力
+Blockly.Arduino.forBlock['picar_drive'] = function(block) {
+  ensurePiCarMotorDependencies();
   Blockly.Arduino.definitions_['define_drive'] =
     'void drive(int powerL, int powerR) {  // left and right motor control\n' + 
     '  // powerL: Left motor direction and power.\n' + 
@@ -149,9 +150,14 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
     '    analogWrite(pinM2B, -powerR);\n' + 
     '  }\n' + 
     '}\n';
+  var value_power_l = Blockly.Arduino.valueToCode(block, 'POWER_L', Blockly.Arduino.ORDER_ATOMIC) || '0';
+  var value_power_r = Blockly.Arduino.valueToCode(block, 'POWER_R', Blockly.Arduino.ORDER_ATOMIC) || '0';
+  return 'drive(' + value_power_l + ', ' + value_power_r + ');\n';
+};
 
-
-  // 滑行
+// 停車
+Blockly.Arduino.forBlock['picar_stop'] = function(block) {
+  ensurePiCarMotorDependencies();
   Blockly.Arduino.definitions_['define_coast'] =
     'void coast() {  // stop the car and coast\n' + 
     '  analogWrite(pinM1A, 255);\n' + 
@@ -160,9 +166,6 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
     '  analogWrite(pinM2B, 255);\n' + 
     '  delay(1000);\n' + 
     '}\n';
-
-
-  // 剎車
   Blockly.Arduino.definitions_['define_brake'] =
     'void brake() {  // stop the car and brake\n' + 
     '  analogWrite(pinM1A, 0);\n' + 
@@ -171,8 +174,19 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
     '  analogWrite(pinM2B, 0);\n' + 
     '  delay(500);\n' + 
     '}\n';
+  var dropdown_mode = block.getFieldValue('MODE');
+  var code = '';
+  if (dropdown_mode === 'COAST') {
+    code = 'coast();\n';
+  } else if (dropdown_mode === 'BRAKE') {
+    code = 'brake();\n';
+  }
+  return code;
+};
 
-  // 超音波測距
+// 超音波測距
+Blockly.Arduino.forBlock['picar_checkDistance'] = function(block) {
+  ensurePiCarUltrasonicDependencies();
   Blockly.Arduino.definitions_['define_checkDistance'] =
     'float checkDistance() {  // detection distance\n' + 
     '  // Use ultrasonic to detect the distance of obstacles in centimeters.\n' + 
@@ -189,8 +203,12 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
     '  delay(20);  // Pause to prevent frequent reading\n' + 
     '  return distance;\n' + 
     '}\n';
+  return ['checkDistance()', Blockly.Arduino.ORDER_ATOMIC];
+};
 
-  // 紅外線反射(數位)
+// 紅外線反射(數位)
+Blockly.Arduino.forBlock['picar_checkColor'] = function(block) {
+  ensurePiCarIRDependencies();
   Blockly.Arduino.definitions_['define_checkColor'] =
     'int checkColor() {  // detection black and white\n' + 
     '  // Use digital signals from infrared reflective sensor to detect black and white.\n' + 
@@ -199,8 +217,12 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
     '  delay(1);  // Pause to prevent noise caused by frequent reads.\n' + 
     '  return !IR_D;  // Invert, 0:black  1:white\n' + 
     '}\n';
+  return ['checkColor()', Blockly.Arduino.ORDER_ATOMIC];
+};
 
-  // 紅外線反射(類比)
+// 紅外線反射(類比)
+Blockly.Arduino.forBlock['picar_checkGray'] = function(block) {
+  ensurePiCarIRDependencies();
   Blockly.Arduino.definitions_['define_checkGray'] =
     'int checkGray() {  // detection grayscale\n' + 
     '  // Use analog signals from infrared reflective sensor to detect grayscale.\n' + 
@@ -209,62 +231,32 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
     '  delay(1);  // Pause to prevent noise caused by frequent reads.\n' + 
     '  return (1023 - IR_A);  // Invert, 0:black  1023:white \n' + 
     '}\n';
+  return ['checkGray()', Blockly.Arduino.ORDER_ATOMIC];
+};
 
+// 手臂初始位置
+Blockly.Arduino.forBlock['picar_inPosition'] = function(block) {
+  // The function is defined in picar_init, this block just calls it.
+  return 'inPosition();\n';
+};
 
-  // 手臂初始位置
-  Blockly.Arduino.definitions_['define_inPosition'] =
-    'void inPosition(){  // Servo motor initial positioning\n' + 
-    '  handL.write(180);\n' + 
-    '  handR.write(0);\n' + 
-    '  delay(1000);\n' + 
-    '}\n';
-
-
-  // 手臂合起
-  Blockly.Arduino.definitions_['define_closeHands'] =
-    'void closeHands(){\n' + 
-    '  for (int i = 0; i <= g_hand_range; i++){\n' + 
-    '    handL.write(180-i);\n' + 
-    '    handR.write(i);\n' + 
-    '    delay(7);\n' + 
-    '  }\n' + 
-    '}\n';
-
-
-    // 手臂張開
-    Blockly.Arduino.definitions_['define_openHands'] = 
-      'void openHands(){\n' + 
-      '  for (int i = 0; i <= g_hand_range; i++){\n' + 
-      '    handL.write(i+180-g_hand_range);\n' + 
-      '    handR.write(g_hand_range-i);\n' + 
-      '    delay(7);\n' + 
-      '  }\n' + 
-      '}\n';
-  
-    // 設定左手角度
-    Blockly.Arduino.definitions_['define_setLeftHandAngle'] = 
-      'void setLeftHandAngle(int angle){\n' + 
-      '  angle = constrain(angle, 0, 180);\n' + 
-      '  handL.write(angle);\n' + 
-      '}\n';
-  
-    // 設定右手角度
-    Blockly.Arduino.definitions_['define_setRightHandAngle'] = 
-      'void setRightHandAngle(int angle){\n' + 
-      '  angle = constrain(angle, 0, 180);\n' + 
-      '  handR.write(angle);\n' + 
-      '}\n';
-
-      
+// 萬用手臂控制
+Blockly.Arduino.forBlock['picar_move_hands'] = function(block) {
+  ensurePiCarServoDependencies();
   Blockly.Arduino.definitions_['define_moveHandsStateful'] =
     'void moveHandsStateful(int hand_selector, int percent, int speed) {\n' + 
     '  /* hand_selector: 0=LEFT, 1=RIGHT, 2=BOTH */\n\n' + 
     '  percent = constrain(percent, 0, 100);\n' + 
-    '  speed = constrain(speed, 1, 10);\n\n' + 
     '  float percentage = percent / 100.0;\n' + 
     '  int target_L = 180 - (percentage * g_hand_range);\n' + 
     '  int target_R = percentage * g_hand_range;\n\n' + 
-    '  long step_delay_us = map(speed, 1, 10, 20000, 1000);\n\n' + 
+    '  long step_delay_us;\n' + 
+    '  if (speed == 11) {\n' + 
+    '    step_delay_us = 1; // Full speed\n' + 
+    '  } else {\n' + 
+    '    speed = constrain(speed, 1, 10);\n' + 
+    '    step_delay_us = map(speed, 1, 10, 20000, 100);\n' + 
+    '  }\n\n' + 
     '  bool move_L = (hand_selector == 0 || hand_selector == 2);\n' + 
     '  bool move_R = (hand_selector == 1 || hand_selector == 2);\n\n' + 
     '  while (true) {\n' + 
@@ -290,162 +282,6 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
     '  }\n' + 
     '  delay(500);\n' + 
     '}\n'; // Global angles for the stateful move block
-
-
-  // 燈光閃爍
-  Blockly.Arduino.definitions_['define_flashingLight'] =
-    'void flashingLight(){\n' + 
-    '  strip.setPixelColor(0, strip.Color(255, 0, 0));\n' + 
-    '  strip.setPixelColor(1, strip.Color(0, 0, 255));\n' + 
-    '  strip.show();\n' + 
-    '  delay(500);\n' + 
-    '  strip.setPixelColor(0, strip.Color(0, 0, 0));\n' + 
-    '  strip.setPixelColor(1, strip.Color(0, 0, 0));\n' + 
-    '  strip.show();\n' + 
-    '  delay(500);\n' + 
-    '}\n';
-
-  // 命運主題
-  Blockly.Arduino.definitions_['define_easterEgg'] =
-    'void easterEgg(int tempo){\n' + 
-    '  // https://zh.wikipedia.org/zh-tw/%E9%9F%B3%E9%AB%98\n' + 
-    '  // notes in the melody:\n' + 
-    '  int melody[] = {\n' + 
-    '    0, 392, 392, 392, 311\n' + 
-    '  };\n\n' + 
-    '  // note durations: 4 = quarter note, 8 = eighth note, etc.:\n' + 
-    '  int noteDurations[] = {\n' + 
-    '    8, 12, 12, 12, 2\n' + 
-    '  };\n\n' + 
-    '  // iterate over the notes of the melody:\n' + 
-    '  for (int i = 0; i < sizeof(melody)/sizeof(int); i++) {\n' + 
-    '    // to calculate the note duration, take one second divided by the note type.\n' + 
-    '    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.\n' + 
-    '    int noteDuration = tempo / noteDurations[i];\n' + 
-    '    tone(pinBuzzer, melody[i], noteDuration);\n\n' + 
-    '    // to distinguish the notes, set a minimum time between them.\n' + 
-    '    // the note\'s duration + 30% seems to work well:\n' + 
-    '    int pauseBetweenNotes = noteDuration * 1.30;\n' + 
-    '    delay(pauseBetweenNotes);\n\n' + 
-    '    // stop the tone playing:\n' + 
-    '    noTone(pinBuzzer);\n' + 
-    '  }  //end for\n' + 
-    '}\n';
-
-
-  // Setup code to be added to the Arduino setup() function
-  Blockly.Arduino.setups_['setup_serial'] = 'Serial.begin(9600);\n\n';
-
-  Blockly.Arduino.setups_['setup_button'] = 'pinMode(pinBtnStart, INPUT_PULLUP);  // enable pull-up resistor';
-  Blockly.Arduino.setups_['setup_buzzer'] = 'pinMode(pinBuzzer, OUTPUT);\n';
-
-  Blockly.Arduino.setups_['setup_ultrasonic'] = 'pinMode(pinTrig, OUTPUT);  // Ultrasonic HC-SR04P Trig\n  pinMode(pinEcho, INPUT);  // Ultrasonic HC-SR04P Echo\n';
-
-  Blockly.Arduino.setups_['setup_ir'] = 'pinMode(pinIR_D, INPUT);  //IR digital\n  pinMode(pinIR_A, INPUT);  //IR analog\n';
-
-  Blockly.Arduino.setups_['setup_motors'] = 'pinMode(pinM1A, OUTPUT);  //Motor left A\n  pinMode(pinM1B, OUTPUT);  //Motor left B\n  pinMode(pinM2A, OUTPUT);  //Motor right A\n  pinMode(pinM2B, OUTPUT);  //Motor right B\n';
-  Blockly.Arduino.setups_['setup_servos'] = 'handL.attach(pinServoL, 460, 2400);  // Servo left， 最小與最大PWM寬度(µs)，對應 0° 到 180°，每批貨都有些微出入\n  handR.attach(pinServoR, 460, 2400);  // Servo right\n  inPosition();  // initial positioning\n';
-
-  Blockly.Arduino.setups_['setup_rgb_led'] = 'strip.begin();  // initialize RGB LED\n  strip.setBrightness(10);  // set brightness, 0~255';
-
-  Blockly.Arduino.setups_['setup_easter_egg'] = '//easterEgg(1000);  // watch out!\n';
-  Blockly.Arduino.setups_['setup_beep'] = 'tone(pinBuzzer, 440, 200);  // watch out!\n';
-  Blockly.Arduino.setups_['setup_wait_button'] = 'while (digitalRead(pinBtnStart)) {  // Wait for button event\n    // I haven\'t pressed the start button yet, just idling here waiting.\n  }\n  delay(500);\n\n  //Your code starts here...';
-
-  return ''; // This block doesnot generate code directly in the loop
-};
-
-
-// 手臂開合角度最大範圍
-Blockly.Arduino.forBlock['picar_set_hand_range'] = function(block) {
-  var range = Blockly.Arduino.valueToCode(block, 'RANGE', Blockly.Arduino.ORDER_ATOMIC) || '170';
-  Blockly.Arduino.definitions_['define_g_hand_range'] = 'int g_hand_range = ' + range + ';';
-  return '';
-};
-
-
-// 重置
-Blockly.Arduino.forBlock['picar_resetPiCar'] = function(block) {
-  return 'resetPiCar();\n';
-};
-
-
-
-// 左右直流馬達動力
-Blockly.Arduino.forBlock['picar_drive'] = function(block) {
-  // Get the input values
-  var value_power_l = Blockly.Arduino.valueToCode(block, 'POWER_L', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  var value_power_r = Blockly.Arduino.valueToCode(block, 'POWER_R', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  
-  // Generate the function call
-  var code = 'drive(' + value_power_l + ', ' + value_power_r + ');\n';
-  return code;
-};
-
-// 停車
-Blockly.Arduino.forBlock['picar_stop'] = function(block) {
-  var dropdown_mode = block.getFieldValue('MODE');
-  var code = '';
-  if (dropdown_mode === 'COAST') {
-    code = 'coast();\n';
-  } else if (dropdown_mode === 'BRAKE') {
-    code = 'brake();\n';
-  }
-  return code;
-};
-
-
-// 超音波測距
-Blockly.Arduino.forBlock['picar_checkDistance'] = function(block) {
-  var code = 'checkDistance()';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
-
-
-// 紅外線反射(數位)
-Blockly.Arduino.forBlock['picar_checkColor'] = function(block) {
-  var code = 'checkColor()';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
-
-
-// 紅外線反射(類比)
-Blockly.Arduino.forBlock['picar_checkGray'] = function(block) {
-  var code = 'checkGray()';
-  return [code, Blockly.Arduino.ORDER_ATOMIC];
-};
-
-
-// 手臂初始位置
-Blockly.Arduino.forBlock['picar_inPosition'] = function(block) {
-  return 'inPosition();\n';
-};
-
-// 設定左手角度
-Blockly.Arduino.forBlock['simfonia_set_left_hand_angle'] = function(block) {
-  var angle = Blockly.Arduino.valueToCode(block, 'ANGLE', Blockly.Arduino.ORDER_ATOMIC) || '180';
-  return 'setLeftHandAngle(' + angle + ');\n';
-};
-
-// 設定右手角度
-Blockly.Arduino.forBlock['simfonia_set_right_hand_angle'] = function(block) {
-  var angle = Blockly.Arduino.valueToCode(block, 'ANGLE', Blockly.Arduino.ORDER_ATOMIC) || '0';
-  return 'setRightHandAngle(' + angle + ');\n';
-};
-
-// 手臂合起
-Blockly.Arduino.forBlock['picar_closeHands'] = function(block) {
-  return 'closeHands();\n';
-};
-
-
-// 手臂張開
-Blockly.Arduino.forBlock['picar_openHands'] = function(block) {
-  return 'openHands();\n';
-};
-
-// 萬用手臂控制
-Blockly.Arduino.forBlock['picar_move_hands'] = function(block) {
   var hand = block.getFieldValue('HAND');
   var percent = Blockly.Arduino.valueToCode(block, 'PERCENT', Blockly.Arduino.ORDER_ATOMIC) || '50';
   var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '8';
@@ -459,12 +295,11 @@ Blockly.Arduino.forBlock['picar_move_hands'] = function(block) {
   return code;
 };
 
-
 // 設定RGB燈顏色
 Blockly.Arduino.forBlock['picar_set_led_color'] = function(block) {
+  ensurePiCarLEDDependencies();
   var ledIndex = block.getFieldValue('LED_INDEX');
   var color = block.getFieldValue('COLOR');
-  // Convert hex color to R, G, B
   var r = parseInt(color.substring(1, 3), 16);
   var g = parseInt(color.substring(3, 5), 16);
   var b = parseInt(color.substring(5, 7), 16);
@@ -480,12 +315,84 @@ Blockly.Arduino.forBlock['picar_set_led_color'] = function(block) {
   return code;
 };
 
-
 // 燈光閃爍
 Blockly.Arduino.forBlock['picar_flashingLight'] = function(block) {
+  ensurePiCarLEDDependencies();
+  Blockly.Arduino.definitions_['define_flashingLight'] =
+      'void flashingLight(){\n' + 
+      '  strip.setPixelColor(0, strip.Color(255, 0, 0));\n' + 
+      '  strip.setPixelColor(1, strip.Color(0, 0, 255));\n' + 
+      '  strip.show();\n' +
+      '  delay(500);\n' + 
+      '  strip.setPixelColor(0, strip.Color(0, 0, 0));\n' + 
+      '  strip.setPixelColor(1, strip.Color(0, 0, 0));\n' + 
+      '  strip.show();\n' + 
+      '  delay(500);\n' + 
+      '}\n';
   return 'flashingLight();\n';
 };
 
+Blockly.Arduino.forBlock['picar_set_tempo'] = function(block) {
+  ensurePiCarBuzzerDependencies();
+  ensureMusicDependencies();
+  var bpm = Blockly.Arduino.valueToCode(block, 'BPM', Blockly.Arduino.ORDER_ATOMIC) || '120';
+  var code = '';
+  code += 'g_tempo_bpm = ' + bpm + ';\n';
+  code += 'g_quarter_note_ms = 60000 / g_tempo_bpm; // Calculate quarter note duration in ms\n';
+  return code;
+};
+
+Blockly.Arduino.forBlock['picar_play_note'] = function(block) {
+  ensurePiCarBuzzerDependencies();
+  ensureMusicDependencies();
+  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || 'pinBuzzer';
+  var frequency = Blockly.Arduino.valueToCode(block, 'FREQUENCY', Blockly.Arduino.ORDER_ATOMIC) || '440';
+  var noteValueRatio = parseFloat(block.getFieldValue('NOTE_VALUE'));
+  var isDotted = block.getFieldValue('DOTTED') === 'TRUE';
+  var isTriplet = block.getFieldValue('TRIPLET') === 'TRUE';
+
+  // Calculate base duration in milliseconds based on quarter note duration
+  var duration_ms_code = 'g_quarter_note_ms * ' + noteValueRatio;
+
+  if (isDotted) {
+    duration_ms_code += ' * 1.5';
+  }
+  if (isTriplet) {
+    duration_ms_code += ' * (2.0 / 3.0)'; // Triplet reduces duration to 2/3 of its normal value
+  }
+
+  // Pause between notes (e.g., 1.3 times the note duration)
+  var pause_ms_code = '(' + duration_ms_code + ') * 1.30';
+
+  var code = 'playNote(' + pin + ', ' + frequency + ', (int)(' + duration_ms_code + '), (int)(' + pause_ms_code + '));\n';
+  return code;
+};
+
+Blockly.Arduino.forBlock['picar_note_to_frequency'] = function(block) {
+  var noteName = block.getFieldValue('NOTE_NAME');
+  var octave = parseInt(block.getFieldValue('OCTAVE'), 10);
+
+  var semitonesFromC = 0;
+  switch (noteName) {
+    case 'C': semitonesFromC = 0; break;
+    case 'CS': semitonesFromC = 1; break; // C#
+    case 'D': semitonesFromC = 2; break;
+    case 'DS': semitonesFromC = 3; break; // D#
+    case 'E': semitonesFromC = 4; break;
+    case 'F': semitonesFromC = 5; break;
+    case 'FS': semitonesFromC = 6; break; // F#
+    case 'G': semitonesFromC = 7; break;
+    case 'GS': semitonesFromC = 8; break; // G#
+    case 'A': semitonesFromC = 9; break;
+    case 'AS': semitonesFromC = 10; break; // A#
+    case 'B': semitonesFromC = 11; break;
+  }
+
+  const C0_FREQ = 16.35; // Frequency of C0
+  var frequency = C0_FREQ * Math.pow(2, octave + (semitonesFromC / 12));
+
+  return [frequency.toFixed(2), Blockly.Arduino.ORDER_ATOMIC];
+};
 
 // 播放彩蛋旋律
 Blockly.Arduino.forBlock['picar_easterEgg'] = function(block) {
@@ -493,10 +400,11 @@ Blockly.Arduino.forBlock['picar_easterEgg'] = function(block) {
   return 'easterEgg(' + tempo + ');\n';
 };
 
-
 // 播放音調
 Blockly.Arduino.forBlock['picar_tone'] = function(block) {
-  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || '22';
+  ensurePiCarBuzzerDependencies();
+  ensureMusicDependencies();
+  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || 'pinBuzzer';
   var frequency = Blockly.Arduino.valueToCode(block, 'FREQUENCY', Blockly.Arduino.ORDER_ATOMIC) || '440';
   var duration = Blockly.Arduino.valueToCode(block, 'DURATION', Blockly.Arduino.ORDER_ATOMIC) || '200';
   var code = 'tone(' + pin + ', ' + frequency + ', ' + duration + ');\n';
@@ -505,13 +413,15 @@ Blockly.Arduino.forBlock['picar_tone'] = function(block) {
 
 // 停止音調
 Blockly.Arduino.forBlock['picar_no_tone'] = function(block) {
-  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || '22';
+  ensurePiCarBuzzerDependencies();
+  ensureMusicDependencies();
+  var pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || 'pinBuzzer';
   var code = 'noTone(' + pin + ');\n';
   return code;
 };
 
 
-// 自由寫
+// Coding
 Blockly.Arduino.forBlock['coding_raw_statement'] = function(block) {
   var code = block.getFieldValue('CODE') + '\n';
   if (!block.getParent()) {
@@ -538,7 +448,7 @@ function processDefinitionStack(block) {
     return '';
   }
 
-  let code = '';
+  let codes = [];
   let currentBlock = block;
 
   while (currentBlock && DEFINITION_BLOCK_TYPES.includes(currentBlock.type)) {
@@ -552,23 +462,23 @@ function processDefinitionStack(block) {
         const defaultValue = (type === 'String') ? '""' : (type === 'bool') ? 'false' : '0';
         const finalValue = value || defaultValue;
         blockCode = type + ' ' + varName + ' = ' + finalValue + ';';
+        if (!blockCode.endsWith(';')) {
+            blockCode += ';';
+        }
     } else if (currentBlock.type === 'coding_raw_definition') {
         blockCode = currentBlock.getFieldValue('CODE');
     }
     
     if (blockCode) {
-        code += blockCode + '\n';
+        codes.push(blockCode);
     }
     
     currentBlock = currentBlock.getNextBlock();
   }
 
-  if (code.endsWith('\n')) {
-    code = code.slice(0, -1);
-  }
-
-  if (code) {
-    Blockly.Arduino.definitions_['stack_' + block.id] = code;
+  if (codes.length > 0) {
+    // Place the collected definitions into the global variables bucket.
+    Blockly.Arduino.global_vars_['stack_' + block.id] = codes.join('\n') + '\n';
   }
 
   return '';
@@ -577,6 +487,8 @@ function processDefinitionStack(block) {
 Blockly.Arduino.forBlock['coding_raw_definition'] = processDefinitionStack;
 Blockly.Arduino.forBlock['variables_declare_global'] = processDefinitionStack;
 
+
+// Variables Blocks
 Blockly.Arduino.forBlock['variables_declare_local'] = function(block) {
   var type = block.getFieldValue('TYPE');
   var varId = block.getFieldValue('VAR');
@@ -597,6 +509,8 @@ Blockly.Arduino.forBlock['variables_declare_local'] = function(block) {
   return code + '\n'; // Return as a statement.
 };
 
+
+// Array Blocks
 Blockly.Arduino.forBlock['array_declare'] = function(block) {
   var scope = block.getFieldValue('SCOPE');
   var type = block.getFieldValue('TYPE');
@@ -630,5 +544,75 @@ Blockly.Arduino.forBlock['array_set'] = function(block) {
 Blockly.Arduino.forBlock['array_length'] = function(block) {
   var varName = block.getFieldValue('VAR');
   var code = 'sizeof(' + varName + ') / sizeof(' + varName + '[0])';
+  return [code, Blockly.Arduino.ORDER_ATOMIC];
+};
+
+
+// Function Blocks
+Blockly.Arduino.forBlock['custom_procedures_defnoreturn'] = function(block) {
+  var funcName = block.getFieldValue('NAME');
+  var branch = Blockly.Arduino.statementToCode(block, 'STACK');
+  var args = [];
+  for (var i = 0; i < block.arguments_.length; i++) {
+    args[i] = block.argTypes_[i] + ' ' + block.arguments_[i];
+  }
+  var argsStr = args.join(', ');
+  
+  // Create prototype and definition
+  var prototype = 'void ' + funcName + '(' + argsStr + ');';
+  var definition = 'void ' + funcName + '(' + argsStr + ') {\n' + branch + '}\n';
+  
+  // Place in respective buckets
+  Blockly.Arduino.function_prototypes_['proto_' + funcName] = prototype;
+  Blockly.Arduino.function_definitions_['def_' + funcName] = definition;
+  
+  return null;
+};
+
+Blockly.Arduino.forBlock['custom_procedures_defreturn'] = function(block) {
+  var funcName = block.getFieldValue('NAME');
+  var returnType = block.getFieldValue('TYPE');
+  var branch = Blockly.Arduino.statementToCode(block, 'STACK');
+  var args = [];
+  for (var i = 0; i < block.arguments_.length; i++) {
+    args[i] = block.argTypes_[i] + ' ' + block.arguments_[i];
+  }
+  var argsStr = args.join(', ');
+
+  // Create prototype and definition
+  var prototype = returnType + ' ' + funcName + '(' + argsStr + ');';
+  var definition = returnType + ' ' + funcName + '(' + argsStr + ') {\n' + branch + '}\n';
+
+  // Place in respective buckets
+  Blockly.Arduino.function_prototypes_['proto_' + funcName] = prototype;
+  Blockly.Arduino.function_definitions_['def_' + funcName] = definition;
+
+  return null;
+};
+
+Blockly.Arduino.forBlock['custom_procedures_return'] = function(block) {
+  var value_return = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '';
+  return '  return ' + value_return + ';\n';
+};
+
+Blockly.Arduino.forBlock['custom_procedures_callnoreturn_manual'] = function(block) {
+  var funcName = block.getFieldValue('NAME');
+  var args = [];
+  for (var i = 0; i < block.arguments_.length; i++) {
+    args[i] = Blockly.Arduino.valueToCode(block, 'ARG' + i, Blockly.Arduino.ORDER_NONE) || 'null';
+  }
+  var argsStr = args.join(', ');
+  var code = funcName + '(' + argsStr + ');\n';
+  return code;
+};
+
+Blockly.Arduino.forBlock['custom_procedures_callreturn_manual'] = function(block) {
+  var funcName = block.getFieldValue('NAME');
+  var args = [];
+  for (var i = 0; i < block.arguments_.length; i++) {
+    args[i] = Blockly.Arduino.valueToCode(block, 'ARG' + i, Blockly.Arduino.ORDER_NONE) || 'null';
+  }
+  var argsStr = args.join(', ');
+  var code = funcName + '(' + argsStr + ')';
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };

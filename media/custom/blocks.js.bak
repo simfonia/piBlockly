@@ -1,44 +1,8 @@
-// 積木的外觀
 (function(Blockly) {
+
+// 積木的外觀
+
 // Arduino Blocks
-Blockly.Blocks['initializes_setup'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": "%{BKY_INITIALIZES_SETUP_APPENDTEXT}",
-      "message1": "%1",
-      "args1": [
-        {
-          "type": "input_statement",
-          "name": "CONTENT"
-        }
-      ],
-      "nextStatement": true,
-      "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
-      "tooltip": "%{BKY_INITIALIZES_SETUP_TOOLTIP}",
-      "helpUrl": "%{BKY_INITIALIZES_SETUP_HELPURL}"
-    });
-  }
-};
-
-Blockly.Blocks['initializes_loop'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": "%{BKY_INITIALIZES_LOOP_APPENDTEXT}",
-      "message1": "%1",
-      "args1": [
-        {
-          "type": "input_statement",
-          "name": "CONTENT"
-        }
-      ],
-      "previousStatement": true,
-      "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
-      "tooltip": "%{BKY_INITIALIZES_LOOP_TOOLTIP}",
-      "helpUrl": "%{BKY_INITIALIZES_LOOP_HELPURL}"
-    });
-  }
-};
-
 Blockly.Blocks['arduino_pin_mode'] = {
   init: function() {
     this.appendDummyInput()
@@ -60,18 +24,6 @@ Blockly.Blocks['arduino_pin_mode'] = {
   }
 };
 
-Blockly.Blocks['arduino_pin_shadow'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg.ARDUINO_PIN_LABEL)
-        .appendField(new Blockly.FieldTextInput(""), "PIN");
-    this.setOutput(true, ["Number", "String"]);
-    this.setColour(Blockly.Msg.ARDUINO_CONTROL_HUE);
-    this.setTooltip("");
-    this.setHelpUrl("");
-  }
-};
-
 Blockly.Blocks['arduino_pin_mode_mode_shadow'] = {
   init: function() {
     this.appendDummyInput()
@@ -87,6 +39,19 @@ Blockly.Blocks['arduino_pin_mode_mode_shadow'] = {
     this.setHelpUrl("");
   }
 };
+
+Blockly.Blocks['arduino_pin_shadow'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(Blockly.Msg.ARDUINO_PIN_LABEL)
+        .appendField(new Blockly.FieldTextInput(""), "PIN");
+    this.setOutput(true, ["Number", "String"]);
+    this.setColour(Blockly.Msg.ARDUINO_CONTROL_HUE);
+    this.setTooltip("");
+    this.setHelpUrl("");
+  }
+};
+
 
 Blockly.Blocks['arduino_digital_read'] = {
   init: function() {
@@ -133,6 +98,7 @@ Blockly.Blocks['arduino_digital_write'] = {
   }
 };
 
+
 Blockly.Blocks['arduino_analog_read'] = {
   init: function() {
     this.jsonInit({
@@ -175,6 +141,139 @@ Blockly.Blocks['arduino_analog_write'] = {
       "colour": Blockly.Msg.ARDUINO_ANALOG_IO_HUE,
       "tooltip": Blockly.Msg.ARDUINO_ANALOG_WRITE_TOOLTIP,
       "helpUrl": ""
+    });
+  }
+};
+
+Blockly.Blocks['arduino_constrain'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_ARDUINO_CONSTRAIN_TITLE}",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "VALUE",
+          "check": ["Number", "String"]
+        },
+        {
+          "type": "input_value",
+          "name": "LOW",
+          "check": "Number"
+        },
+        {
+          "type": "input_value",
+          "name": "HIGH",
+          "check": "Number"
+        }
+      ],
+      "inputsInline": true,
+      "output": "Number",
+      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
+      "tooltip": "%{BKY_ARDUINO_CONSTRAIN_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['arduino_map'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_ARDUINO_MAP_TITLE}",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "VALUE",
+          "check": ["Number", "String"]
+        },
+        {
+          "type": "input_value",
+          "name": "FROMLOW",
+          "check": "Number"
+        },
+        {
+          "type": "input_value",
+          "name": "FROMHIGH",
+          "check": "Number"
+        },
+        {
+          "type": "input_value",
+          "name": "TOLOW",
+          "check": "Number"
+        },
+        {
+          "type": "input_value",
+          "name": "TOHIGH",
+          "check": "Number"
+        }
+      ],
+      "inputsInline": true,
+      "output": "Number",
+      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
+      "tooltip": "%{BKY_ARDUINO_MAP_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['math_random_seed'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": Blockly.Msg.ARDUINO_MATH_RANDOM_SEED_TITLE || "randomSeed( %1 );",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "SEED",
+          "check": "Number",
+          "shadow": {
+            "type": "arduino_analog_read",
+            "inputs": {
+                "PIN": {
+                    "shadow": {
+                        "type": "arduino_pin_shadow",
+                        "fields": {
+                            "PIN": "A0"
+                        }
+                    }
+                }
+            }
+          }
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
+      "tooltip": "%{BKY_ARDUINO_MATH_RANDOM_SEED_TOOLTIP}"
+    });
+  }
+};
+
+Blockly.Blocks['math_random_int'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": Blockly.Msg.ARDUINO_MATH_RANDOM_INT_TITLE || "random( %1, %2 )",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "MIN",
+          "check": "Number",
+          "shadow": {
+            "type": "math_number",
+            "fields": { "NUM": 0 }
+          }
+        },
+        {
+          "type": "input_value",
+          "name": "MAX",
+          "check": "Number",
+          "shadow": {
+            "type": "math_number",
+            "fields": { "NUM": 100 }
+          }
+        }
+      ],
+      "inputsInline": true,
+      "output": "Number",
+      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
+      "tooltip": "%{BKY_ARDUINO_MATH_RANDOM_INT_TOOLTIP}"
     });
   }
 };
@@ -331,140 +430,6 @@ Blockly.Blocks['arduino_serial_read'] = {
   }
 };
 
-Blockly.Blocks['arduino_constrain'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": "%{BKY_ARDUINO_CONSTRAIN_TITLE}",
-      "args0": [
-        {
-          "type": "input_value",
-          "name": "VALUE",
-          "check": ["Number", "String"]
-        },
-        {
-          "type": "input_value",
-          "name": "LOW",
-          "check": "Number"
-        },
-        {
-          "type": "input_value",
-          "name": "HIGH",
-          "check": "Number"
-        }
-      ],
-      "inputsInline": true,
-      "output": "Number",
-      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
-      "tooltip": "%{BKY_ARDUINO_CONSTRAIN_TOOLTIP}"
-    });
-  }
-};
-
-Blockly.Blocks['arduino_map'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": "%{BKY_ARDUINO_MAP_TITLE}",
-      "args0": [
-        {
-          "type": "input_value",
-          "name": "VALUE",
-          "check": ["Number", "String"]
-        },
-        {
-          "type": "input_value",
-          "name": "FROMLOW",
-          "check": "Number"
-        },
-        {
-          "type": "input_value",
-          "name": "FROMHIGH",
-          "check": "Number"
-        },
-        {
-          "type": "input_value",
-          "name": "TOLOW",
-          "check": "Number"
-        },
-        {
-          "type": "input_value",
-          "name": "TOHIGH",
-          "check": "Number"
-        }
-      ],
-      "inputsInline": true,
-      "output": "Number",
-      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
-      "tooltip": "%{BKY_ARDUINO_MAP_TOOLTIP}"
-    });
-  }
-};
-
-Blockly.Blocks['math_random_seed'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": Blockly.Msg.ARDUINO_MATH_RANDOM_SEED_TITLE || "randomSeed( %1 );",
-      "args0": [
-        {
-          "type": "input_value",
-          "name": "SEED",
-          "check": "Number",
-          "shadow": {
-            "type": "arduino_analog_read",
-            "inputs": {
-                "PIN": {
-                    "shadow": {
-                        "type": "arduino_pin_shadow",
-                        "fields": {
-                            "PIN": "A0"
-                        }
-                    }
-                }
-            }
-          }
-        }
-      ],
-      "inputsInline": true,
-      "previousStatement": true,
-      "nextStatement": true,
-      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
-      "tooltip": "%{BKY_ARDUINO_MATH_RANDOM_SEED_TOOLTIP}"
-    });
-  }
-};
-
-Blockly.Blocks['math_random_int'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": Blockly.Msg.ARDUINO_MATH_RANDOM_INT_TITLE || "random( %1, %2 )",
-      "args0": [
-        {
-          "type": "input_value",
-          "name": "MIN",
-          "check": "Number",
-          "shadow": {
-            "type": "math_number",
-            "fields": { "NUM": 0 }
-          }
-        },
-        {
-          "type": "input_value",
-          "name": "MAX",
-          "check": "Number",
-          "shadow": {
-            "type": "math_number",
-            "fields": { "NUM": 100 }
-          }
-        }
-      ],
-      "inputsInline": true,
-      "output": "Number",
-      "colour": Blockly.Msg.ARDUINO_MATH_HUE,
-      "tooltip": "%{BKY_ARDUINO_MATH_RANDOM_INT_TOOLTIP}"
-    });
-  }
-};
-
-
 
 // piCar Blocks
 Blockly.Blocks['picar_init'] = {
@@ -479,6 +444,9 @@ Blockly.Blocks['picar_init'] = {
   }
 };
 
+
+
+
 Blockly.Blocks['picar_resetPiCar'] = {
   init: function() {
     this.appendDummyInput()
@@ -490,6 +458,7 @@ Blockly.Blocks['picar_resetPiCar'] = {
     this.setHelpUrl("");
   }
 };
+
 
 Blockly.Blocks['picar_drive'] = {
   init: function() {
@@ -557,6 +526,7 @@ Blockly.Blocks['picar_checkGray'] = {
   }
 };
 
+
 Blockly.Blocks['picar_inPosition'] = {
   init: function() {
     this.appendDummyInput()
@@ -568,6 +538,61 @@ Blockly.Blocks['picar_inPosition'] = {
     this.setHelpUrl("");
   }
 };
+
+
+// Blockly.Blocks['picar_set_left_hand_angle'] = {
+//   init: function() {
+//     this.appendValueInput("ANGLE")
+//         .setCheck("Number")
+//         .appendField(Blockly.Msg["PICAR_SET_LEFT_HAND_ANGLE"]);
+//     this.setInputsInline(true);
+//     this.setPreviousStatement(true, null);
+//     this.setNextStatement(true, null);
+//     this.setColour(Blockly.Msg["PICAR_SERVO_HUE"]);
+//     this.setTooltip(Blockly.Msg["PICAR_SET_LEFT_HAND_ANGLE_TOOLTIP"]);
+//     this.setHelpUrl("");
+//   }
+// };
+
+// Blockly.Blocks['picar_set_right_hand_angle'] = {
+//   init: function() {
+//     this.appendValueInput("ANGLE")
+//         .setCheck("Number")
+//         .appendField(Blockly.Msg["PICAR_SET_RIGHT_HAND_ANGLE"]);
+//     this.setInputsInline(true);
+//     this.setPreviousStatement(true, null);
+//     this.setNextStatement(true, null);
+//     this.setColour(Blockly.Msg["PICAR_SERVO_HUE"]);
+//     this.setTooltip(Blockly.Msg["PICAR_SET_RIGHT_HAND_ANGLE_TOOLTIP"]);
+//     this.setHelpUrl("");
+//   }
+// };
+
+
+// Blockly.Blocks['picar_closeHands'] = {
+//   init: function() {
+//     this.appendDummyInput()
+//         .appendField(Blockly.Msg["PICAR_CLOSE_HANDS"]);
+//     this.setPreviousStatement(true, null);
+//     this.setNextStatement(true, null);
+//     this.setColour(Blockly.Msg["PICAR_SERVO_HUE"]);
+//     this.setTooltip(Blockly.Msg["PICAR_CLOSE_HANDS_TOOLTIP"]);
+//     this.setHelpUrl("");
+//   }
+// };
+
+// Blockly.Blocks['picar_openHands'] = {
+//   init: function() {
+//     this.appendDummyInput()
+//         .appendField(Blockly.Msg["PICAR_OPEN_HANDS"]);
+//     this.setPreviousStatement(true, null);
+//     this.setNextStatement(true, null);
+//     this.setColour(Blockly.Msg["PICAR_SERVO_HUE"]);
+//     this.setTooltip(Blockly.Msg["PICAR_OPEN_HANDS_TOOLTIP"]);
+//     this.setHelpUrl("");
+//   }
+// };
+
 
 Blockly.Blocks['picar_set_hand_range'] = {
   init: function() {
@@ -595,6 +620,7 @@ Blockly.Blocks['picar_set_hand_range'] = {
     }
   }
 };
+
 
 Blockly.Blocks['picar_move_hands'] = {
   init: function() {
@@ -680,137 +706,6 @@ Blockly.Blocks['picar_flashingLight'] = {
   }
 };
 
-Blockly.Blocks['picar_set_tempo'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": Blockly.Msg["PICAR_SET_TEMPO"] + " %1 " + Blockly.Msg["PICAR_BPM"],
-      "args0": [
-        {
-          "type": "input_value",
-          "name": "BPM",
-          "check": "Number",
-          "shadow": {
-            "type": "math_number",
-            "fields": { "NUM": 120 }
-          }
-        }
-      ],
-      "inputsInline": true,
-      "previousStatement": true,
-      "nextStatement": true,
-      "colour": Blockly.Msg["PICAR_MEDIA_HUE"],
-      "tooltip": Blockly.Msg["PICAR_SET_TEMPO_TOOLTIP"],
-      "helpUrl": ""
-    });
-  }
-};
-
-Blockly.Blocks['picar_play_note'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": Blockly.Msg["PICAR_PLAY_NOTE"] + " " + Blockly.Msg["PICAR_PIN"] + " %1 " + Blockly.Msg["PICAR_FREQUENCY"] + " %2",
-      "args0": [
-        {
-          "type": "input_value",
-          "name": "PIN",
-          "check": "Number",
-          "shadow": {
-            "type": "math_number",
-            "fields": { "NUM": 22 } // Default to pinBuzzer
-          }
-        },
-        {
-          "type": "input_value",
-          "name": "FREQUENCY",
-          "check": "Number",
-          "shadow": {
-            "type": "math_number",
-            "fields": { "NUM": 440 } // Default to A4
-          }
-        }
-      ],
-      "message1": Blockly.Msg["PICAR_NOTE_DURATION"] + " %1 " + Blockly.Msg["PICAR_DOTTED"] + " %2 " + Blockly.Msg["PICAR_TRIPLET"] + " %3",
-      "args1": [
-        {
-          "type": "field_dropdown",
-          "name": "NOTE_VALUE",
-          "options": [
-            [Blockly.Msg["PICAR_WHOLE_NOTE"], "1"],
-            [Blockly.Msg["PICAR_HALF_NOTE"], "0.5"],
-            [Blockly.Msg["PICAR_QUARTER_NOTE"], "0.25"],
-            [Blockly.Msg["PICAR_EIGHTH_NOTE"], "0.125"],
-            [Blockly.Msg["PICAR_SIXTEENTH_NOTE"], "0.0625"],
-            [Blockly.Msg["PICAR_THIRTYSECOND_NOTE"], "0.03125"]
-          ]
-        },
-        {
-          "type": "field_checkbox",
-          "name": "DOTTED",
-          "checked": false
-        },
-        {
-          "type": "field_checkbox",
-          "name": "TRIPLET",
-          "checked": false
-        }
-      ],
-      "inputsInline": true,
-      "previousStatement": true,
-      "nextStatement": true,
-      "colour": Blockly.Msg["PICAR_MEDIA_HUE"],
-      "tooltip": Blockly.Msg["PICAR_PLAY_NOTE_TOOLTIP"],
-      "helpUrl": ""
-    });
-  }
-};
-
-Blockly.Blocks['picar_note_to_frequency'] = {
-  init: function() {
-    this.jsonInit({
-      "message0": Blockly.Msg["PICAR_NOTE_TO_FREQUENCY"] + " %1 %2",
-      "args0": [
-        {
-          "type": "field_dropdown",
-          "name": "NOTE_NAME",
-          "options": [
-            ["C", "C"],
-            ["C#", "CS"],
-            ["D", "D"],
-            ["D#", "DS"],
-            ["E", "E"],
-            ["F", "F"],
-            ["F#", "FS"],
-            ["G", "G"],
-            ["G#", "GS"],
-            ["A", "A"],
-            ["A#", "AS"],
-            ["B", "B"]
-          ]
-        },
-        {
-          "type": "field_dropdown",
-          "name": "OCTAVE",
-          "options": [
-            ["0", "0"],
-            ["1", "1"],
-            ["2", "2"],
-            ["3", "3"],
-            ["4", "4"],
-            ["5", "5"],
-            ["6", "6"],
-            ["7", "7"],
-            ["8", "8"]
-          ]
-        }
-      ],
-      "output": "Number",
-      "inputsInline": true,
-      "colour": Blockly.Msg["PICAR_MEDIA_HUE"],
-      "tooltip": Blockly.Msg["PICAR_NOTE_TO_FREQUENCY_TOOLTIP"],
-      "helpUrl": ""
-    });
-  }
-};
 
 Blockly.Blocks['picar_easterEgg'] = {
   init: function() {
@@ -917,6 +812,7 @@ Blockly.Blocks['coding_raw_statement'] = {
   }
 };
 
+
 Blockly.Blocks['coding_raw_input'] = {
   init: function() {
     this.jsonInit({
@@ -991,232 +887,46 @@ Blockly.Blocks['coding_raw_wrapper'] = {
   }
 };
 
-
-// Logic Blocks
-Blockly.Blocks['logic_compare'] = {
+// Add modern definitions for setup and loop blocks
+Blockly.Blocks['initializes_setup'] = {
   init: function() {
-    this.appendValueInput('A')
-        .setCheck(null);
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['==', 'EQ'],
-          ['!=', 'NEQ'],
-          ['<', 'LT'],
-          ['<=', 'LTE'],
-          ['>', 'GT'],
-          ['>=', 'GTE']
-        ]), 'OP');
-    this.appendValueInput('B')
-        .setCheck(null);
-    this.setInputsInline(true);
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_COMPARE_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_COMPARE_HELPURL);
-  }
-};
-
-Blockly.Blocks['logic_operation'] = {
-  init: function() {
-    this.appendValueInput('A')
-        .setCheck('Boolean');
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['&& (and)', 'AND'],
-          ['|| (or)', 'OR']
-        ]), 'OP');
-    this.appendValueInput('B')
-        .setCheck('Boolean');
-    this.setInputsInline(true);
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_OPERATION_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_OPERATION_HELPURL);
-  }
-};
-
-Blockly.Blocks['logic_negate'] = {
-  init: function() {
-    this.appendValueInput('BOOL')
-        .setCheck('Boolean')
-        .appendField('!(not)');
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_NEGATE_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_NEGATE_HELPURL);
-  }
-};
-
-Blockly.Blocks['logic_boolean'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['true', 'TRUE'],
-          ['false', 'FALSE']
-        ]), 'BOOL');
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_BOOLEAN_HELPURL);
-  }
-};
-
-
-// Loops Blocks
-Blockly.Blocks['controls_whileUntil'] = {
-  init: function() {
-    this.appendDummyInput() // For "while ("
-        .appendField('while (');
-    this.appendValueInput('BOOL') // For the actual input slot
-        .setCheck('Boolean');
-    this.appendDummyInput() // For ") {"
-        .appendField(') {');
-    this.appendStatementInput('DO')
-        .appendField('  '); // Indent for code feel
-    this.appendDummyInput()
-        .appendField('}');
-    this.setInputsInline(true); // Crucial: allow inputs to be inline
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setStyle('loop_blocks');
-    this.setTooltip(Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL);
-  }
-};
-
-Blockly.Blocks['controls_for'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField('for (int ')
-        .appendField(new Blockly.FieldVariable('i'), 'VAR')
-        .appendField(' = ');
-    this.appendValueInput('FROM').setCheck('Number');
-    this.appendDummyInput('COMPARE_INPUT')
-        .appendField('; ')
-        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_1')
-        .appendField(' <= ', 'COMPARE_OP');
-    this.appendValueInput('TO').setCheck('Number');
-    this.appendDummyInput('STEP_INPUT')
-        .appendField('; ')
-        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_2')
-        .appendField(' += ', 'STEP_OP');
-    this.appendValueInput('BY').setCheck('Number');
-    this.appendDummyInput().appendField(') {');
-    this.appendStatementInput('DO');
-    this.appendDummyInput().appendField('}');
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setStyle('loop_blocks');
-    const updateLabels = (block) => {
-      const varName = block.getField('VAR').getText();
-      block.setFieldValue(varName, 'VAR_LABEL_1');
-      block.setFieldValue(varName, 'VAR_LABEL_2');
-    };
-    // 變數重新命名時同步更新 Label（不延遲、不落後、不亂碼）
-    this.getField('VAR').setValidator(function(newVarId) {
-      const block = this.getSourceBlock();
-      setTimeout(() => {
-        updateLabels(block);
-        block.render();
-      }, 0);
-      return newVarId; // *必須回傳 ID*
-    });
-    // 初始顯示變數 i
-    setTimeout(() => {
-      updateLabels(this);
-      this.render();
-    }, 0);
-  },
-  // 自動切換 <= / >= 與 += / -=
-  onchange: function(event) {
-    if (!this.workspace || this.workspace.isFlyout || !event.recordUndo) {
-      return;
-    }
-    if (event.type === Blockly.Events.BLOCK_CHANGE &&
-        (event.blockId === this.getInputTargetBlock('FROM')?.id ||
-         event.blockId === this.getInputTargetBlock('TO')?.id)) {
-      const fromBlock = this.getInputTargetBlock('FROM');
-      const toBlock = this.getInputTargetBlock('TO');
-      let fromValue = NaN;
-      let toValue = NaN;
-      if (fromBlock && fromBlock.type === 'math_number') {
-        fromValue = parseFloat(fromBlock.getFieldValue('NUM'));
-      }
-      if (toBlock && toBlock.type === 'math_number') {
-        toValue = parseFloat(toBlock.getFieldValue('NUM'));
-      }
-      if (!isNaN(fromValue) && !isNaN(toValue)) {
-        if (fromValue < toValue) {
-          this.setFieldValue(' <= ', 'COMPARE_OP');
-          this.setFieldValue(' += ', 'STEP_OP');
-        } else if (fromValue > toValue) {
-          this.setFieldValue(' >= ', 'COMPARE_OP');
-          this.setFieldValue(' -= ', 'STEP_OP');
-        } else {
-          this.setFieldValue(' <= ', 'COMPARE_OP');
-          this.setFieldValue(' += ', 'STEP_OP');
+    this.jsonInit({
+      "message0": "%{BKY_INITIALIZES_SETUP_APPENDTEXT}",
+      "message1": "%1",
+      "args1": [
+        {
+          "type": "input_statement",
+          "name": "CONTENT"
         }
-      } else {
-        this.setFieldValue(' <= ', 'COMPARE_OP');
-        this.setFieldValue(' += ', 'STEP_OP');
-      }
-      this.render();
-    }
+      ],
+      "nextStatement": true,
+      "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
+      "tooltip": "%{BKY_INITIALIZES_SETUP_TOOLTIP}",
+      "helpUrl": "%{BKY_INITIALIZES_SETUP_HELPURL}"
+    });
   }
 };
 
-Blockly.Blocks['controls_flow_statements'] = {
+Blockly.Blocks['initializes_loop'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['break;', 'BREAK'],
-          ['continue;', 'CONTINUE']
-        ]), 'FLOW');
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setStyle('loop_blocks');
-    this.setTooltip(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_HELPURL);
+    this.jsonInit({
+      "message0": "%{BKY_INITIALIZES_LOOP_APPENDTEXT}",
+      "message1": "%1",
+      "args1": [
+        {
+          "type": "input_statement",
+          "name": "CONTENT"
+        }
+      ],
+      "previousStatement": true,
+      "colour": "%{BKY_ARDUINO_STRUCTURE_HUE}",
+      "tooltip": "%{BKY_INITIALIZES_LOOP_TOOLTIP}",
+      "helpUrl": "%{BKY_INITIALIZES_LOOP_HELPURL}"
+    });
   }
 };
 
 
-// Text Blocks
-Blockly.Blocks['text_append'] = {
-  init: function() {
-    this.appendValueInput('TEXT')
-        .setCheck(['String', 'Number'])
-        .appendField(new Blockly.FieldVariable('myString'), 'VAR') // Use FieldVariable
-        .appendField(' += ');
-    this.appendDummyInput()
-        .appendField(';');
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg.TEXT_HUE);
-    this.setTooltip(Blockly.Msg.TEXT_APPEND_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.TEXT_APPEND_HELPURL);
-  }
-};
-
-Blockly.Blocks['text_length'] = {
-  init: function() {
-    this.appendValueInput('VALUE')
-        .setCheck(['String', 'Array'])
-        .appendField(''); // Empty field to allow input to be first
-    this.appendDummyInput()
-        .appendField('.length()');
-    this.setInputsInline(true);
-    this.setOutput(true, 'Number');
-    this.setColour(Blockly.Msg.TEXT_HUE);
-    this.setTooltip(Blockly.Msg.TEXT_LENGTH_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.TEXT_LENGTH_HELPURL);
-  }
-};
-
-
-// Variables Blocks
 Blockly.Blocks['variables_declare_global'] = {
   init: function() {
     this.jsonInit({
@@ -1245,7 +955,7 @@ Blockly.Blocks['variables_declare_global'] = {
       "previousStatement": true,
       "nextStatement": true,
       "colour": "%{BKY_VARIABLES_HUE}",
-      "tooltip": "%{BKY_VARIABLES_DECLARE_GLOBAL_TOOLTIP}",
+      "tooltip": "Declare a global variable.",
       "helpUrl": ""
     });
   }
@@ -1279,13 +989,17 @@ Blockly.Blocks['variables_declare_local'] = {
       "previousStatement": true,
       "nextStatement": true,
       "colour": "%{BKY_VARIABLES_HUE}",
-      "tooltip": "%{BKY_VARIABLES_DECLARE_LOCAL_TOOLTIP}",
+      "tooltip": "Declare a local variable.",
       "helpUrl": ""
     });
   }
 };
 
 Blockly.Blocks['variables_get'] = {
+  /**
+   * Block for variable getter.
+   * @this {Blockly.Block}
+   */
   init: function() {
     this.jsonInit({
       "message0": "%1",
@@ -1307,6 +1021,10 @@ Blockly.Blocks['variables_get'] = {
 };
 
 Blockly.Blocks['variables_set'] = {
+  /**
+   * Block for setting the value of a variable.
+   * @this {Blockly.Block}
+   */
   init: function() {
     this.jsonInit({
       "message0": "%{BKY_VARIABLES_SET}",
@@ -1332,123 +1050,6 @@ Blockly.Blocks['variables_set'] = {
   contextMenuType_: 'variables_get'
 };
 
-
-// Array Blocks
-Blockly.Blocks['array_declare'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['Global', 'GLOBAL'],
-          ['Local', 'LOCAL']
-        ]), 'SCOPE')
-        .appendField(Blockly.Msg.ARRAY_DECLARE_TITLE)
-        .appendField(new Blockly.FieldDropdown([
-          ['int', 'int'],
-          ['float', 'float'],
-          ['String', 'String'],
-          ['bool', 'bool']
-        ]), 'TYPE');
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
-        .appendField('[');
-    this.appendValueInput('SIZE')
-        .setCheck('Number')
-        .setShadowDom(Blockly.utils.xml.textToDom(
-            '<shadow type="math_number"><field name="NUM">10</field></shadow>'
-        ));
-    this.appendDummyInput()
-        .appendField('];');
-    this.setInputsInline(true);
-    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
-    this.setTooltip(Blockly.Msg.ARRAY_DECLARE_TOOLTIP);
-    this.setHelpUrl(""); // 幫助連結留空
-    // Set initial shape based on the default value
-    this.updateShape_(this.getFieldValue('SCOPE'));
-  },
-  onchange: function(event) {
-    if (event.type === 'change' && event.blockId === this.id && event.name === 'SCOPE') {
-      this.updateShape_(event.newValue);
-      // Ensure 'this' is a valid block and setDisabled is available
-      if (this.setDisabled) {
-        if (event.newValue === 'LOCAL' && !this.getParent()) {
-          this.setDisabled(true);
-        } else {
-          this.setDisabled(false);
-        }
-      }
-    }
-  },
-  updateShape_: function(scope) {
-    if (scope === 'GLOBAL') {
-      this.setPreviousStatement(false, null);
-      this.setNextStatement(false, null);
-    } else { // LOCAL
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-    }
-  }
-};
-
-Blockly.Blocks['array_get'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
-        .appendField('[');
-    this.appendValueInput('INDEX')
-        .setCheck('Number')
-        .setShadowDom(Blockly.utils.xml.textToDom(
-            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
-        ));
-    this.appendDummyInput()
-        .appendField(']');
-    this.setInputsInline(true);
-    this.setOutput(true, null); // 可以返回任何類型的值
-    this.setColour(Blockly.Msg.ARRAY_HUE);
-    this.setTooltip(Blockly.Msg.ARRAY_GET_TOOLTIP);
-    this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['array_set'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
-        .appendField('[');
-    this.appendValueInput('INDEX')
-        .setCheck('Number')
-        .setShadowDom(Blockly.utils.xml.textToDom(
-            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
-        ));
-    this.appendDummyInput()
-        .appendField('] = ');
-    this.appendValueInput('VALUE')
-        .setCheck(null); // 可以接受任何類型的值
-    this.appendDummyInput()
-        .appendField(';');
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
-    this.setTooltip(Blockly.Msg.ARRAY_SET_TOOLTIP);
-    this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['array_length'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField('length of Array')
-        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR');
-    this.setInputsInline(true);
-    this.setOutput(true, 'Number');
-    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
-    this.setTooltip(Blockly.Msg.ARRAY_LENGTH_TOOLTIP);
-    this.setHelpUrl("");
-  }
-};
-
-
-// Function Blocks
 const CUSTOM_PROCEDURES_CALL_MANUAL_COMMON = {
   /**
    * Create XML to represent the (un)typed arguments.
@@ -1581,7 +1182,7 @@ Blockly.Blocks['custom_procedures_callnoreturn_manual'] = Object.assign({}, CUST
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour('%{BKY_PROCEDURES_HUE}');
-    this.setTooltip(Blockly.Msg['PROCEDURES_CALLNORETURN_TOOLTIP']);
+    this.setTooltip('Calls a procedure with no return value.');
     this.setHelpUrl('');
     this.arguments_ = [];
     this.argTypes_ = [];
@@ -1596,7 +1197,7 @@ Blockly.Blocks['custom_procedures_callreturn_manual'] = Object.assign({}, CUSTOM
         .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
     this.setOutput(true, null);
     this.setColour('%{BKY_PROCEDURES_HUE}');
-    this.setTooltip(Blockly.Msg['PROCEDURES_CALLRETURN_TOOLTIP']);
+    this.setTooltip('Calls a procedure with a return value.');
     this.setHelpUrl('');
     this.arguments_ = [];
     this.argTypes_ = [];
@@ -1613,7 +1214,7 @@ Blockly.Blocks['custom_procedures_mutatorcontainer'] = {
         .appendField('function inputs');
     this.appendStatementInput('STACK');
     this.setColour('%{BKY_PROCEDURES_HUE}');
-    this.setTooltip(Blockly.Msg['PROCEDURES_MUTATORCONTAINER_TOOLTIP']);
+    this.setTooltip('A container for function arguments.');
     this.contextMenu = false;
   },
 };
@@ -1632,7 +1233,7 @@ Blockly.Blocks['custom_procedures_mutatorarg'] = {
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour('%{BKY_PROCEDURES_HUE}');
-    this.setTooltip(Blockly.Msg['PROCEDURES_MUTATORARG_TOOLTIP']);
+    this.setTooltip('A function argument.');
     this.contextMenu = false;
   },
 };
@@ -2158,6 +1759,241 @@ Blockly.Blocks['custom_procedures_callreturn'] =
       defType_: 'procedures_defreturn',
     });
 
+
+
+Blockly.Blocks['logic_compare'] = {
+  init: function() {
+    this.appendValueInput('A')
+        .setCheck(null);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['==', 'EQ'],
+          ['!=', 'NEQ'],
+          ['<', 'LT'],
+          ['<=', 'LTE'],
+          ['>', 'GT'],
+          ['>=', 'GTE']
+        ]), 'OP');
+    this.appendValueInput('B')
+        .setCheck(null);
+    this.setInputsInline(true);
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_COMPARE_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_COMPARE_HELPURL);
+  }
+};
+
+Blockly.Blocks['logic_operation'] = {
+  init: function() {
+    this.appendValueInput('A')
+        .setCheck('Boolean');
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['&& (and)', 'AND'],
+          ['|| (or)', 'OR']
+        ]), 'OP');
+    this.appendValueInput('B')
+        .setCheck('Boolean');
+    this.setInputsInline(true);
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_OPERATION_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_OPERATION_HELPURL);
+  }
+};
+
+Blockly.Blocks['logic_negate'] = {
+  init: function() {
+    this.appendValueInput('BOOL')
+        .setCheck('Boolean')
+        .appendField('!(not)');
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_NEGATE_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_NEGATE_HELPURL);
+  }
+};
+
+Blockly.Blocks['logic_boolean'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['true', 'TRUE'],
+          ['false', 'FALSE']
+        ]), 'BOOL');
+    this.setOutput(true, 'Boolean');
+    this.setStyle('logic_blocks');
+    this.setTooltip(Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.LOGIC_BOOLEAN_HELPURL);
+  }
+};
+
+
+// Loops
+
+Blockly.Blocks['controls_whileUntil'] = {
+  init: function() {
+    this.appendDummyInput() // For "while ("
+        .appendField('while (');
+    this.appendValueInput('BOOL') // For the actual input slot
+        .setCheck('Boolean');
+    this.appendDummyInput() // For ") {"
+        .appendField(') {');
+    this.appendStatementInput('DO')
+        .appendField('  '); // Indent for code feel
+    this.appendDummyInput()
+        .appendField('}');
+    this.setInputsInline(true); // Crucial: allow inputs to be inline
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle('loop_blocks');
+    this.setTooltip(Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL);
+  }
+};
+
+
+Blockly.Blocks['controls_for'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField('for (int ')
+        .appendField(new Blockly.FieldVariable('i'), 'VAR')
+        .appendField(' = ');
+    this.appendValueInput('FROM').setCheck('Number');
+    this.appendDummyInput('COMPARE_INPUT')
+        .appendField('; ')
+        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_1')
+        .appendField(' <= ', 'COMPARE_OP');
+    this.appendValueInput('TO').setCheck('Number');
+    this.appendDummyInput('STEP_INPUT')
+        .appendField('; ')
+        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_2')
+        .appendField(' += ', 'STEP_OP');
+    this.appendValueInput('BY').setCheck('Number');
+    this.appendDummyInput().appendField(') {');
+    this.appendStatementInput('DO');
+    this.appendDummyInput().appendField('}');
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle('loop_blocks');
+    const updateLabels = (block) => {
+      const varName = block.getField('VAR').getText();
+      block.setFieldValue(varName, 'VAR_LABEL_1');
+      block.setFieldValue(varName, 'VAR_LABEL_2');
+    };
+    // ✅ 變數重新命名時同步更新 Label（不延遲、不落後、不亂碼）
+    this.getField('VAR').setValidator(function(newVarId) {
+      const block = this.getSourceBlock();
+      setTimeout(() => {
+        updateLabels(block);
+        block.render();
+      }, 0);
+      return newVarId; // *必須回傳 ID*
+    });
+    // ✅ 初始顯示變數 i（解決你最後遇到的問題）
+    setTimeout(() => {
+      updateLabels(this);
+      this.render();
+    }, 0);
+  },
+  // ✅ 自動切換 <= / >= 與 += / -=
+  onchange: function(event) {
+    if (!this.workspace || this.workspace.isFlyout || !event.recordUndo) {
+      return;
+    }
+    if (event.type === Blockly.Events.BLOCK_CHANGE &&
+        (event.blockId === this.getInputTargetBlock('FROM')?.id ||
+         event.blockId === this.getInputTargetBlock('TO')?.id)) {
+      const fromBlock = this.getInputTargetBlock('FROM');
+      const toBlock = this.getInputTargetBlock('TO');
+      let fromValue = NaN;
+      let toValue = NaN;
+      if (fromBlock && fromBlock.type === 'math_number') {
+        fromValue = parseFloat(fromBlock.getFieldValue('NUM'));
+      }
+      if (toBlock && toBlock.type === 'math_number') {
+        toValue = parseFloat(toBlock.getFieldValue('NUM'));
+      }
+      if (!isNaN(fromValue) && !isNaN(toValue)) {
+        if (fromValue < toValue) {
+          this.setFieldValue(' <= ', 'COMPARE_OP');
+          this.setFieldValue(' += ', 'STEP_OP');
+        } else if (fromValue > toValue) {
+          this.setFieldValue(' >= ', 'COMPARE_OP');
+          this.setFieldValue(' -= ', 'STEP_OP');
+        } else {
+          this.setFieldValue(' <= ', 'COMPARE_OP');
+          this.setFieldValue(' += ', 'STEP_OP');
+        }
+      } else {
+        this.setFieldValue(' <= ', 'COMPARE_OP');
+        this.setFieldValue(' += ', 'STEP_OP');
+      }
+      this.render();
+    }
+  }
+};
+
+
+
+
+Blockly.Blocks['controls_flow_statements'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['break;', 'BREAK'],
+          ['continue;', 'CONTINUE']
+        ]), 'FLOW');
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle('loop_blocks');
+    this.setTooltip(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_HELPURL);
+  }
+};
+
+
+
+// Text
+// text_append
+Blockly.Blocks['text_append'] = {
+  init: function() {
+    this.appendValueInput('TEXT')
+        .setCheck(['String', 'Number'])
+        .appendField(new Blockly.FieldVariable('myString'), 'VAR') // Use FieldVariable
+        .appendField(' += ');
+    this.appendDummyInput()
+        .appendField(';');
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(Blockly.Msg.TEXT_HUE);
+    this.setTooltip(Blockly.Msg.TEXT_APPEND_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.TEXT_APPEND_HELPURL);
+  }
+};
+
+//text_length
+Blockly.Blocks['text_length'] = {
+  init: function() {
+    this.appendValueInput('VALUE')
+        .setCheck(['String', 'Array'])
+        .appendField(''); // Empty field to allow input to be first
+    this.appendDummyInput()
+        .appendField('.length()');
+    this.setInputsInline(true);
+    this.setOutput(true, 'Number');
+    this.setColour(Blockly.Msg.TEXT_HUE);
+    this.setTooltip(Blockly.Msg.TEXT_LENGTH_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.TEXT_LENGTH_HELPURL);
+  }
+};
+
+
+
+// Functions
 Blockly.Blocks['custom_procedures_return'] = {
   init: function() {
     this.appendValueInput('VALUE')
@@ -2168,7 +2004,7 @@ Blockly.Blocks['custom_procedures_return'] = {
     this.setPreviousStatement(true, null);
     // No next statement because return terminates the function.
     this.setColour('%{BKY_PROCEDURES_HUE}');
-    this.setTooltip(Blockly.Msg['PROCEDURES_RETURN_TOOLTIP']);
+    this.setTooltip('Returns a value from a function.');
     this.setHelpUrl('');
     this.setOnChange(function(event) {
       if (!this.workspace || this.isInFlyout) {
@@ -2197,5 +2033,118 @@ Blockly.Blocks['custom_procedures_return'] = {
   FUNCTION_TYPES: ['custom_procedures_defreturn', 'custom_procedures_defnoreturn'],
 };
 
+
+Blockly.Blocks['array_declare'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([
+          ['Global', 'GLOBAL'],
+          ['Local', 'LOCAL']
+        ]), 'SCOPE')
+        .appendField(Blockly.Msg.ARRAY_DECLARE_TITLE)
+        .appendField(new Blockly.FieldDropdown([
+          ['int', 'int'],
+          ['float', 'float'],
+          ['String', 'String'],
+          ['bool', 'bool']
+        ]), 'TYPE');
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
+        .appendField('[');
+    this.appendValueInput('SIZE')
+        .setCheck('Number')
+        .setShadowDom(Blockly.utils.xml.textToDom(
+            '<shadow type="math_number"><field name="NUM">10</field></shadow>'
+        ));
+    this.appendDummyInput()
+        .appendField('];');
+    this.setInputsInline(true);
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_DECLARE_TOOLTIP);
+    this.setHelpUrl(""); // 幫助連結留空
+    // Set initial shape based on the default value
+    this.updateShape_(this.getFieldValue('SCOPE'));
+  },
+  onchange: function(event) {
+    if (event.type === 'change' && event.blockId === this.id && event.name === 'SCOPE') {
+      this.updateShape_(event.newValue);
+      // Ensure 'this' is a valid block and setDisabled is available
+      if (this.setDisabled) {
+        if (event.newValue === 'LOCAL' && !this.getParent()) {
+          this.setDisabled(true);
+        } else {
+          this.setDisabled(false);
+        }
+      }
+    }
+  },
+  updateShape_: function(scope) {
+    if (scope === 'GLOBAL') {
+      this.setPreviousStatement(false, null);
+      this.setNextStatement(false, null);
+    } else { // LOCAL
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+    }
+  }
+};
+
+Blockly.Blocks['array_get'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
+        .appendField('[');
+    this.appendValueInput('INDEX')
+        .setCheck('Number')
+        .setShadowDom(Blockly.utils.xml.textToDom(
+            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
+        ));
+    this.appendDummyInput()
+        .appendField(']');
+    this.setInputsInline(true);
+    this.setOutput(true, null); // 可以返回任何類型的值
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_GET_TOOLTIP);
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['array_set'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
+        .appendField('[');
+    this.appendValueInput('INDEX')
+        .setCheck('Number')
+        .setShadowDom(Blockly.utils.xml.textToDom(
+            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
+        ));
+    this.appendDummyInput()
+        .appendField('] = ');
+    this.appendValueInput('VALUE')
+        .setCheck(null); // 可以接受任何類型的值
+    this.appendDummyInput()
+        .appendField(';');
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_SET_TOOLTIP);
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['array_length'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField('length of Array')
+        .appendField(new Blockly.FieldTextInput('myArray'), 'VAR');
+    this.setInputsInline(true);
+    this.setOutput(true, 'Number');
+    this.setColour(Blockly.Msg.ARRAY_HUE); // 使用陣列的顏色
+    this.setTooltip(Blockly.Msg.ARRAY_LENGTH_TOOLTIP);
+    this.setHelpUrl("");
+  }
+};
 
 }(Blockly));

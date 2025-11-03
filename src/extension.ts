@@ -111,7 +111,7 @@ export function activate(context: vscode.ExtensionContext) {
             if ((panelToClose as any).isDisposed) {
                 return;
             }
-            closePanel(panelToClose);
+            closePanel(panelToClose, false);
         }
     });
 
@@ -191,9 +191,9 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                             const doc = associatedEditor.document;
                             const currentContent = doc.getText();
                             const currentHash = crypto.createHash('sha256').update(currentContent).digest('hex');
-                            const lastGeneratedHash = (panel as any).lastGeneratedCodeHash;
+                            const lastGeneratedCodeHash = (panel as any).lastGeneratedCodeHash;
 
-                            if (lastGeneratedHash && currentHash !== lastGeneratedHash) {
+                            if (lastGeneratedCodeHash && currentHash !== lastGeneratedCodeHash) {
                                 const overwriteChoice = await vscode.window.showWarningMessage(
                                     '偵測到程式碼已被手動修改。繼續生成將會覆蓋您的修改。是否繼續？',
                                     { modal: true },
@@ -290,7 +290,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                     }
                     return;
                 case 'closeEditor':
-                    closePanel(panel);
+                    closePanel(panel, true);
                     return;
             }
         },
@@ -299,15 +299,15 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
     );
 }
 
-async function closePanel(panel: vscode.WebviewPanel) {
+async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
     const isDirty = (panel as any).isDirty;
 
     if (isDirty) {
-        const choice = await vscode.window.showWarningMessage(
-            '您在 piBlockly 中有未儲存的變更。是否要儲存？',
-            { modal: true },
-            '儲存', '不儲存'
-        );
+        const message = '您在 piBlockly 中有未儲存的變更。是否要儲存？';
+        const options: vscode.MessageOptions = { modal: true };
+        const items = canCancel ? ['儲存', '不儲存', '取消'] : ['儲存', '不儲存'];
+
+        const choice = await vscode.window.showWarningMessage(message, options, ...items);
 
         if (choice === '儲存') {
             await new Promise<void>(resolve => {
@@ -349,8 +349,14 @@ async function closePanel(panel: vscode.WebviewPanel) {
             });
         } else if (choice === '不儲存') {
             panel.dispose();
-        } else { // Cancel or undefined
-            // Do nothing, the user cancelled the close operation.
+        } else if (choice === '取消') {
+            // Do nothing, user cancelled. This is only possible if canCancel is true.
+        } else { // undefined (dialog closed)
+            // If cancellation is not an option, we must close. Treat as "Don't Save".
+            if (!canCancel) {
+                panel.dispose();
+            }
+            // Otherwise, do nothing (same as "Cancel").
         }
     } else { // Clean state
         panel.dispose();
