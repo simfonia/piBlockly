@@ -4,12 +4,12 @@
     // Traditional Chinese language file
     // Category Keys
     "ARDUINO_CATEGORY": "Arduino",
-    "ARDUINO_STRUCTURE_CATEGORY": "結構",
-    "ARDUINO_IO_CATEGORY": "輸出/輸入",
-    "ARDUINO_TIME_CATEGORY": "時間",
-    "ARDUINO_SERIAL_CATEGORY": "序列埠",
+    "ARDUINO_STRUCTURE_CATEGORY": "Structure",
+    "ARDUINO_IO_CATEGORY": "I/O",
+    "ARDUINO_TIME_CATEGORY": "Time",
+    "ARDUINO_SERIAL_CATEGORY": "Serial",
     "PICAR_CATEGORY": "πCar",
-    "CODING_CATEGORY": "程式碼",
+    "CODING_CATEGORY": "Coding",
 
     // Arduino Blocks
     "ARDUINO_HUE": "#016c8d", // for Arduino
@@ -22,27 +22,27 @@
     "ARDUINO_MATH_HUE": "#b13333", // for Arduino math blocks (red-ish)
 
     // Arduino Structure
-    "INITIALIZES_SETUP_APPENDTEXT": "設定",
+    "INITIALIZES_SETUP_APPENDTEXT": "setup",
     "INITIALIZES_SETUP_TOOLTIP": "setup() 在程式開始時呼叫。用它來初始化變數、腳位模式、開始使用函式庫等。setup 函式只會在每次 Arduino 板上電或重置後執行一次。",
     "INITIALIZES_SETUP_HELPURL": "",
-    "INITIALIZES_LOOP_APPENDTEXT": "主程式",
+    "INITIALIZES_LOOP_APPENDTEXT": "loop",
     "INITIALIZES_LOOP_TOOLTIP": "loop() 會不斷地重複執行，讓您的程式可以改變和回應。使用它來主動控制 Arduino 板。",
     "INITIALIZES_LOOP_HELPURL": "",
 
     // Arduino I/O
-    "ARDUINO_PIN_LABEL": "腳位:",
-    "ARDUINO_MODE_LABEL": "模式:",
+    "ARDUINO_PIN_LABEL": "pin:",
+    "ARDUINO_MODE_LABEL": "mode:",
     "ARDUINO_PIN_MODE": "pinMode",
     "ARDUINO_PIN_MODE_TOOLTIP": "將指定的腳位設定為輸入或輸出模式。",
-    "ARDUINO_PIN_MODE_INPUT": "INPUT (輸入)",
-    "ARDUINO_PIN_MODE_OUTPUT": "OUTPUT (輸出)",
-    "ARDUINO_PIN_MODE_INPUT_PULLUP": "INPUT_PULLUP (上拉輸入)",
+    "ARDUINO_PIN_MODE_INPUT": "INPUT",
+    "ARDUINO_PIN_MODE_OUTPUT": "OUTPUT",
+    "ARDUINO_PIN_MODE_INPUT_PULLUP": "INPUT_PULLUP",
     "ARDUINO_DIGITAL_READ": "digitalRead",
     "ARDUINO_DIGITAL_READ_TOOLTIP": "讀入指定數位腳位的狀態，HIGH 或 LOW。",
     "ARDUINO_DIGITAL_WRITE": "digitalWrite(%1, %2)",
     "ARDUINO_DIGITAL_WRITE_TOOLTIP": "將 HIGH 或 LOW 值寫出數位腳位。",
-    "ARDUINO_HIGH": "HIGH (高電位)",
-    "ARDUINO_LOW": "LOW (低電位)",
+    "ARDUINO_HIGH": "HIGH",
+    "ARDUINO_LOW": "LOW",
     "ARDUINO_ANALOG_READ": "analogRead(%1)",
     "ARDUINO_ANALOG_READ_TOOLTIP": "讀入指定類比腳位(analog in / ADC)的狀態(0-1023 for 10-bit)。",
     "ARDUINO_ANALOG_WRITE": "analogWrite(%1, %2)",

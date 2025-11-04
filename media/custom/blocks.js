@@ -41,27 +41,39 @@ Blockly.Blocks['initializes_loop'] = {
 
 Blockly.Blocks['arduino_pin_mode'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField("pinMode(");
-    this.appendValueInput("PIN")
-        .setCheck(["Number", "String"]);
-    this.appendDummyInput()
-        .appendField(",");
-    this.appendValueInput("MODE")
-        .setCheck("String");
-    this.appendDummyInput()
-        .appendField(")");
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg.ARDUINO_CONTROL_HUE);
-    this.setTooltip(Blockly.Msg.ARDUINO_PIN_MODE_TOOLTIP);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": "pinMode(%1, %2)",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "PIN",
+          "check": ["Number", "String"],
+          "shadow": {
+            "type": "arduino_pin_shadow"
+          }
+        },
+        {
+          "type": "input_value",
+          "name": "MODE",
+          "check": "String",
+          "shadow": {
+            "type": "arduino_pin_mode_mode_shadow"
+          }
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg.ARDUINO_CONTROL_HUE,
+      "tooltip": Blockly.Msg.ARDUINO_PIN_MODE_TOOLTIP,
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['arduino_pin_shadow'] = {
   init: function() {
+    // Kept in imperative style due to jsonInit issues with FieldTextInput in shadow blocks.
     this.appendDummyInput()
         .appendField(Blockly.Msg.ARDUINO_PIN_LABEL)
         .appendField(new Blockly.FieldTextInput(""), "PIN");
@@ -74,17 +86,25 @@ Blockly.Blocks['arduino_pin_shadow'] = {
 
 Blockly.Blocks['arduino_pin_mode_mode_shadow'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg.ARDUINO_MODE_LABEL)
-        .appendField(new Blockly.FieldDropdown([
-          [Blockly.Msg.ARDUINO_PIN_MODE_OUTPUT, "OUTPUT"],
-          [Blockly.Msg.ARDUINO_PIN_MODE_INPUT, "INPUT"],
-          [Blockly.Msg.ARDUINO_PIN_MODE_INPUT_PULLUP, "INPUT_PULLUP"]
-        ]), "MODE");
-    this.setOutput(true, "String");
-    this.setColour(Blockly.Msg.ARDUINO_CONTROL_HUE);
-    this.setTooltip("");
-    this.setHelpUrl("");
+    // Kept in imperative style due to jsonInit issues with FieldDropdown in shadow blocks.
+    this.jsonInit({
+      "message0": Blockly.Msg.ARDUINO_MODE_LABEL + " %1",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "MODE",
+          "options": [
+            [Blockly.Msg.ARDUINO_PIN_MODE_OUTPUT, "OUTPUT"],
+            [Blockly.Msg.ARDUINO_PIN_MODE_INPUT, "INPUT"],
+            [Blockly.Msg.ARDUINO_PIN_MODE_INPUT_PULLUP, "INPUT_PULLUP"]
+          ]
+        }
+      ],
+      "output": "String",
+      "colour": Blockly.Msg.ARDUINO_CONTROL_HUE,
+      "tooltip": "",
+      "helpUrl": ""
+    });
   }
 };
 
@@ -469,117 +489,146 @@ Blockly.Blocks['math_random_int'] = {
 // piCar Blocks
 Blockly.Blocks['picar_init'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_INIT"]);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_SETUP_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_INIT_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_INIT"],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg["PICAR_SETUP_HUE"],
+      "tooltip": Blockly.Msg["PICAR_INIT_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_resetPiCar'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_RESET"]);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_SETUP_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_RESET_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_RESET"],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg["PICAR_SETUP_HUE"],
+      "tooltip": Blockly.Msg["PICAR_RESET_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_drive'] = {
   init: function() {
-    this.appendValueInput("POWER_L")
-        .setCheck("Number")
-        .appendField(Blockly.Msg["PICAR_DRIVE_LEFT"]);
-    this.appendValueInput("POWER_R")
-        .setCheck("Number")
-        .appendField(Blockly.Msg["PICAR_DRIVE_RIGHT"]);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_DRIVE_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_DRIVE_LEFT"] + " %1 " + Blockly.Msg["PICAR_DRIVE_RIGHT"] + " %2",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "POWER_L",
+          "check": "Number"
+        },
+        {
+          "type": "input_value",
+          "name": "POWER_R",
+          "check": "Number"
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg["PICAR_HUE"],
+      "tooltip": Blockly.Msg["PICAR_DRIVE_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_stop'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_STOP"])
-        .appendField(new Blockly.FieldDropdown([
-          [Blockly.Msg["PICAR_STOP_BRAKE"], "BRAKE"],
-          [Blockly.Msg["PICAR_STOP_COAST"], "COAST"]
-        ]), "MODE");
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_STOP_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_STOP"] + " %1",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "MODE",
+          "options": [
+            [Blockly.Msg["PICAR_STOP_BRAKE"], "BRAKE"],
+            [Blockly.Msg["PICAR_STOP_COAST"], "COAST"]
+          ]
+        }
+      ],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg["PICAR_HUE"],
+      "tooltip": Blockly.Msg["PICAR_STOP_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_checkDistance'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_CHECK_DISTANCE"]);
-    this.setOutput(true, "Number");
-    this.setColour(Blockly.Msg["PICAR_SENSOR_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_CHECK_DISTANCE_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_CHECK_DISTANCE"],
+      "output": "Number",
+      "colour": Blockly.Msg["PICAR_SENSOR_HUE"],
+      "tooltip": Blockly.Msg["PICAR_CHECK_DISTANCE_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_checkColor'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_CHECK_COLOR"]);
-    this.setOutput(true, "Number");
-    this.setColour(Blockly.Msg["PICAR_SENSOR_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_CHECK_COLOR_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_CHECK_COLOR"],
+      "output": "Number",
+      "colour": Blockly.Msg["PICAR_SENSOR_HUE"],
+      "tooltip": Blockly.Msg["PICAR_CHECK_COLOR_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_checkGray'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_CHECK_GRAY"]);
-    this.setOutput(true, "Number");
-    this.setColour(Blockly.Msg["PICAR_SENSOR_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_CHECK_GRAY_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_CHECK_GRAY"],
+      "output": "Number",
+      "colour": Blockly.Msg["PICAR_SENSOR_HUE"],
+      "tooltip": Blockly.Msg["PICAR_CHECK_GRAY_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_inPosition'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_IN_POSITION"]);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_SERVO_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_IN_POSITION_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_IN_POSITION"],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg["PICAR_SERVO_HUE"],
+      "tooltip": Blockly.Msg["PICAR_IN_POSITION_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
 Blockly.Blocks['picar_set_hand_range'] = {
   init: function() {
-    this.appendValueInput("RANGE")
-        .setCheck("Number")
-        .appendField(Blockly.Msg["PICAR_SET_HAND_RANGE"]);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_SERVO_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_SET_HAND_RANGE_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_SET_HAND_RANGE"] + " %1",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "RANGE",
+          "check": "Number"
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg["PICAR_SERVO_HUE"],
+      "tooltip": Blockly.Msg["PICAR_SET_HAND_RANGE_TOOLTIP"],
+      "helpUrl": ""
+    });
   },
   onchange: function(event) {
     var rangeBlock = this.getInputTargetBlock('RANGE');
@@ -670,13 +719,14 @@ Blockly.Blocks['picar_set_led_color'] = {
 
 Blockly.Blocks['picar_flashingLight'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(Blockly.Msg["PICAR_FLASHING_LIGHT"]);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_MEDIA_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_FLASHING_LIGHT_TOOLTIP"]);
-    this.setHelpUrl("");
+    this.jsonInit({
+      "message0": Blockly.Msg["PICAR_FLASHING_LIGHT"],
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg["PICAR_MEDIA_HUE"],
+      "tooltip": Blockly.Msg["PICAR_FLASHING_LIGHT_TOOLTIP"],
+      "helpUrl": ""
+    });
   }
 };
 
@@ -809,20 +859,6 @@ Blockly.Blocks['picar_note_to_frequency'] = {
       "tooltip": Blockly.Msg["PICAR_NOTE_TO_FREQUENCY_TOOLTIP"],
       "helpUrl": ""
     });
-  }
-};
-
-Blockly.Blocks['picar_easterEgg'] = {
-  init: function() {
-    this.appendValueInput("TEMPO")
-        .setCheck("Number")
-        .appendField(Blockly.Msg["PICAR_EASTER_EGG"]);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg["PICAR_MEDIA_HUE"]);
-    this.setTooltip(Blockly.Msg["PICAR_EASTER_EGG_TOOLTIP"]);
-    this.setHelpUrl("");
   }
 };
 
@@ -995,69 +1031,112 @@ Blockly.Blocks['coding_raw_wrapper'] = {
 // Logic Blocks
 Blockly.Blocks['logic_compare'] = {
   init: function() {
-    this.appendValueInput('A')
-        .setCheck(null);
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['==', 'EQ'],
-          ['!=', 'NEQ'],
-          ['<', 'LT'],
-          ['<=', 'LTE'],
-          ['>', 'GT'],
-          ['>=', 'GTE']
-        ]), 'OP');
-    this.appendValueInput('B')
-        .setCheck(null);
-    this.setInputsInline(true);
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_COMPARE_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_COMPARE_HELPURL);
+    this.jsonInit({
+      "message0": "%1 %2 %3",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "A",
+          "check": null
+        },
+        {
+          "type": "field_dropdown",
+          "name": "OP",
+          "options": [
+            ["==", "EQ"],
+            ["!=", "NEQ"],
+            ["<", "LT"],
+            ["<=", "LTE"],
+            [">", "GT"],
+            [">=", "GTE"]
+          ]
+        },
+        {
+          "type": "input_value",
+          "name": "B",
+          "check": null
+        }
+      ],
+      "inputsInline": true,
+      "output": "Boolean",
+      "style": "logic_blocks",
+      "tooltip": Blockly.Msg.LOGIC_COMPARE_TOOLTIP,
+      "helpUrl": Blockly.Msg.LOGIC_COMPARE_HELPURL
+    });
   }
 };
 
 Blockly.Blocks['logic_operation'] = {
   init: function() {
-    this.appendValueInput('A')
-        .setCheck('Boolean');
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['&& (and)', 'AND'],
-          ['|| (or)', 'OR']
-        ]), 'OP');
-    this.appendValueInput('B')
-        .setCheck('Boolean');
-    this.setInputsInline(true);
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_OPERATION_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_OPERATION_HELPURL);
+    this.jsonInit({
+      "message0": "%1 %2 %3",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "A",
+          "check": "Boolean"
+        },
+        {
+          "type": "field_dropdown",
+          "name": "OP",
+          "options": [
+            ["&& (and)", "AND"],
+            ["|| (or)", "OR"]
+          ]
+        },
+        {
+          "type": "input_value",
+          "name": "B",
+          "check": "Boolean"
+        }
+      ],
+      "inputsInline": true,
+      "output": "Boolean",
+      "style": "logic_blocks",
+      "tooltip": Blockly.Msg.LOGIC_OPERATION_TOOLTIP,
+      "helpUrl": Blockly.Msg.LOGIC_OPERATION_HELPURL
+    });
   }
 };
 
 Blockly.Blocks['logic_negate'] = {
   init: function() {
-    this.appendValueInput('BOOL')
-        .setCheck('Boolean')
-        .appendField('!(not)');
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_NEGATE_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_NEGATE_HELPURL);
+    this.jsonInit({
+      "message0": "!(not) %1",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "BOOL",
+          "check": "Boolean"
+        }
+      ],
+      "output": "Boolean",
+      "style": "logic_blocks",
+      "tooltip": Blockly.Msg.LOGIC_NEGATE_TOOLTIP,
+      "helpUrl": Blockly.Msg.LOGIC_NEGATE_HELPURL
+    });
   }
 };
 
 Blockly.Blocks['logic_boolean'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['true', 'TRUE'],
-          ['false', 'FALSE']
-        ]), 'BOOL');
-    this.setOutput(true, 'Boolean');
-    this.setStyle('logic_blocks');
-    this.setTooltip(Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.LOGIC_BOOLEAN_HELPURL);
+    this.jsonInit({
+      "message0": "%1",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "BOOL",
+          "options": [
+            ["true", "TRUE"],
+            ["false", "FALSE"]
+          ]
+        }
+      ],
+      "output": "Boolean",
+      "style": "logic_blocks",
+      "tooltip": Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP,
+      "helpUrl": Blockly.Msg.LOGIC_BOOLEAN_HELPURL
+    });
   }
 };
 
@@ -1065,49 +1144,94 @@ Blockly.Blocks['logic_boolean'] = {
 // Loops Blocks
 Blockly.Blocks['controls_whileUntil'] = {
   init: function() {
-    this.appendDummyInput() // For "while ("
-        .appendField('while (');
-    this.appendValueInput('BOOL') // For the actual input slot
-        .setCheck('Boolean');
-    this.appendDummyInput() // For ") {"
-        .appendField(') {');
-    this.appendStatementInput('DO')
-        .appendField('  '); // Indent for code feel
-    this.appendDummyInput()
-        .appendField('}');
-    this.setInputsInline(true); // Crucial: allow inputs to be inline
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setStyle('loop_blocks');
-    this.setTooltip(Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL);
+    this.jsonInit({
+      "message0": "while (%1) {",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "BOOL",
+          "check": "Boolean"
+        }
+      ],
+      "message1": "  %1",
+      "args1": [
+        {
+          "type": "input_statement",
+          "name": "DO"
+        }
+      ],
+      "message2": "}",
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "style": "loop_blocks",
+      "tooltip": Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP,
+      "helpUrl": Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL
+    });
   }
 };
 
 Blockly.Blocks['controls_for'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField('for (int ')
-        .appendField(new Blockly.FieldVariable('i'), 'VAR')
-        .appendField(' = ');
-    this.appendValueInput('FROM').setCheck('Number');
-    this.appendDummyInput('COMPARE_INPUT')
-        .appendField('; ')
-        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_1')
-        .appendField(' <= ', 'COMPARE_OP');
-    this.appendValueInput('TO').setCheck('Number');
-    this.appendDummyInput('STEP_INPUT')
-        .appendField('; ')
-        .appendField(new Blockly.FieldLabel('i'), 'VAR_LABEL_2')
-        .appendField(' += ', 'STEP_OP');
-    this.appendValueInput('BY').setCheck('Number');
-    this.appendDummyInput().appendField(') {');
-    this.appendStatementInput('DO');
-    this.appendDummyInput().appendField('}');
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setStyle('loop_blocks');
+    this.jsonInit({
+      "message0": "for (int %1 = %2; %3 %4 %5; %6 %7 %8) {",
+      "args0": [
+        {
+          "type": "field_variable",
+          "name": "VAR",
+          "variable": "i"
+        },
+        {
+          "type": "input_value",
+          "name": "FROM",
+          "check": "Number"
+        },
+        {
+          "type": "field_label",
+          "name": "VAR_LABEL_1",
+          "text": "i"
+        },
+        {
+          "type": "field_label",
+          "name": "COMPARE_OP",
+          "text": " <= "
+        },
+        {
+          "type": "input_value",
+          "name": "TO",
+          "check": "Number"
+        },
+        {
+          "type": "field_label",
+          "name": "VAR_LABEL_2",
+          "text": "i"
+        },
+        {
+          "type": "field_label",
+          "name": "STEP_OP",
+          "text": " += "
+        },
+        {
+          "type": "input_value",
+          "name": "BY",
+          "check": "Number"
+        }
+      ],
+      "message1": "%1",
+      "args1": [
+        {
+          "type": "input_statement",
+          "name": "DO"
+        }
+      ],
+      "message2": "}",
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "style": "loop_blocks",
+      "tooltip": Blockly.Msg.CONTROLS_FOR_TOOLTIP,
+      "helpUrl": Blockly.Msg.CONTROLS_FOR_HELPURL
+    });
     const updateLabels = (block) => {
       const varName = block.getField('VAR').getText();
       block.setFieldValue(varName, 'VAR_LABEL_1');
@@ -1157,9 +1281,6 @@ Blockly.Blocks['controls_for'] = {
           this.setFieldValue(' <= ', 'COMPARE_OP');
           this.setFieldValue(' += ', 'STEP_OP');
         }
-      } else {
-        this.setFieldValue(' <= ', 'COMPARE_OP');
-        this.setFieldValue(' += ', 'STEP_OP');
       }
       this.render();
     }
@@ -1168,16 +1289,24 @@ Blockly.Blocks['controls_for'] = {
 
 Blockly.Blocks['controls_flow_statements'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([
-          ['break;', 'BREAK'],
-          ['continue;', 'CONTINUE']
-        ]), 'FLOW');
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setStyle('loop_blocks');
-    this.setTooltip(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.CONTROLS_FLOW_STATEMENTS_HELPURL);
+    this.jsonInit({
+      "message0": "%1",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "FLOW",
+          "options": [
+            ["break;", "BREAK"],
+            ["continue;", "CONTINUE"]
+          ]
+        }
+      ],
+      "previousStatement": true,
+      "nextStatement": true,
+      "style": "loop_blocks",
+      "tooltip": Blockly.Msg.CONTROLS_FLOW_STATEMENTS_TOOLTIP,
+      "helpUrl": Blockly.Msg.CONTROLS_FLOW_STATEMENTS_HELPURL
+    });
   }
 };
 
@@ -1185,33 +1314,47 @@ Blockly.Blocks['controls_flow_statements'] = {
 // Text Blocks
 Blockly.Blocks['text_append'] = {
   init: function() {
-    this.appendValueInput('TEXT')
-        .setCheck(['String', 'Number'])
-        .appendField(new Blockly.FieldVariable('myString'), 'VAR') // Use FieldVariable
-        .appendField(' += ');
-    this.appendDummyInput()
-        .appendField(';');
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(Blockly.Msg.TEXT_HUE);
-    this.setTooltip(Blockly.Msg.TEXT_APPEND_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.TEXT_APPEND_HELPURL);
+    this.jsonInit({
+      "message0": "%1 += %2;",
+      "args0": [
+        {
+          "type": "field_variable",
+          "name": "VAR",
+          "variable": "myString"
+        },
+        {
+          "type": "input_value",
+          "name": "TEXT",
+          "check": ["String", "Number"]
+        }
+      ],
+      "inputsInline": true,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": Blockly.Msg.TEXT_HUE,
+      "tooltip": Blockly.Msg.TEXT_APPEND_TOOLTIP,
+      "helpUrl": Blockly.Msg.TEXT_APPEND_HELPURL
+    });
   }
 };
 
 Blockly.Blocks['text_length'] = {
   init: function() {
-    this.appendValueInput('VALUE')
-        .setCheck(['String', 'Array'])
-        .appendField(''); // Empty field to allow input to be first
-    this.appendDummyInput()
-        .appendField('.length()');
-    this.setInputsInline(true);
-    this.setOutput(true, 'Number');
-    this.setColour(Blockly.Msg.TEXT_HUE);
-    this.setTooltip(Blockly.Msg.TEXT_LENGTH_TOOLTIP);
-    this.setHelpUrl(Blockly.Msg.TEXT_LENGTH_HELPURL);
+    this.jsonInit({
+      "message0": "%1.length()",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "VALUE",
+          "check": ["String", "Array"]
+        }
+      ],
+      "inputsInline": true,
+      "output": "Number",
+      "colour": Blockly.Msg.TEXT_HUE,
+      "tooltip": Blockly.Msg.TEXT_LENGTH_TOOLTIP,
+      "helpUrl": Blockly.Msg.TEXT_LENGTH_HELPURL
+    });
   }
 };
 
@@ -1336,6 +1479,7 @@ Blockly.Blocks['variables_set'] = {
 // Array Blocks
 Blockly.Blocks['array_declare'] = {
   init: function() {
+    // Kept in imperative style due to jsonInit issues with FieldTextInput/FieldDropdown and complex updateShape_ logic.
     this.appendDummyInput()
         .appendField(new Blockly.FieldDropdown([
           ['Global', 'GLOBAL'],
@@ -1391,6 +1535,7 @@ Blockly.Blocks['array_declare'] = {
 
 Blockly.Blocks['array_get'] = {
   init: function() {
+    // Kept in imperative style due to jsonInit issues with FieldTextInput and shadow DOM for index.
     this.appendDummyInput()
         .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
         .appendField('[');
@@ -1411,6 +1556,7 @@ Blockly.Blocks['array_get'] = {
 
 Blockly.Blocks['array_set'] = {
   init: function() {
+    // Kept in imperative style due to jsonInit issues with FieldTextInput and shadow DOM for index.
     this.appendDummyInput()
         .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
         .appendField('[');
@@ -1436,6 +1582,7 @@ Blockly.Blocks['array_set'] = {
 
 Blockly.Blocks['array_length'] = {
   init: function() {
+    // Kept in imperative style due to jsonInit issues with FieldTextInput.
     this.appendDummyInput()
         .appendField('length of Array')
         .appendField(new Blockly.FieldTextInput('myArray'), 'VAR');
@@ -1678,11 +1825,6 @@ const CUSTOM_PROCEDURES_DEF_COMMON = {
   validateName_: function(name) {
     // Temporary fix: Disable rename to avoid gesture conflicts.
     name = name.replace(/[^\w\s]/g, '').replace(/\s/g, ' ');
-    // if (this.workspace && !this.workspace.isFlyout) {
-    //   if (name !== this.getFieldValue('NAME')) {
-    //       Blockly.Procedures.rename(this.getFieldValue('NAME'), name, this.workspace);
-    //   }
-    // }
     return name;
   },
   mutationToDom: function() {

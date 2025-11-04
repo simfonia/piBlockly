@@ -39,7 +39,6 @@ Blockly.Arduino.ORDER_ASSIGNMENT = 16;
 Blockly.Arduino.ORDER_YIELD = 17;
 Blockly.Arduino.ORDER_COMMA = 18;
 Blockly.Arduino.ORDER_NONE = 99;
-Blockly.Arduino.ORDER_NONE = 99;
 
 Blockly.Arduino.init = function(workspace) {
   // Create new buckets for ordered code generation

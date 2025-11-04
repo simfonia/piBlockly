@@ -49,8 +49,8 @@ const ensurePiCarServoDependencies = () => {
   Blockly.Arduino.definitions_['define_picar_servo_objects'] = 
     'Servo handL;\n' +
     'Servo handR;\n';
-  Blockly.Arduino.global_vars_['define_picar_servo_globals'] = 
-    'int g_hand_range = 170;\n' +
+  Blockly.Arduino.definitions_['define_picar_servo_globals'] = 
+    'int g_hand_range = 180;\n' +
     'int g_s_angle_L = 180;\n' +
     'int g_s_angle_R = 0;\n';
   Blockly.Arduino.setups_['setup_servos'] = 'handL.attach(pinServoL, 460, 2400);\n  handR.attach(pinServoR, 460, 2400);\n';
@@ -109,12 +109,8 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
 // 手臂開合角度最大範圍
 Blockly.Arduino.forBlock['picar_set_hand_range'] = function(block) {
   var range = Blockly.Arduino.valueToCode(block, 'RANGE', Blockly.Arduino.ORDER_ATOMIC) || '170';
-  // This overwrites the default global definition from picar_init
-  Blockly.Arduino.definitions_['define_picar_servo_globals'] = 
-    'int g_hand_range = ' + range + ';\n' +
-    'int g_s_angle_L = 180;\n' +
-    'int g_s_angle_R = 0;\n';
-  return '';
+  // Assign the value to the globally declared g_hand_range
+  return 'g_hand_range = ' + range + ';\n';
 };
 
 // 重置
@@ -394,12 +390,6 @@ Blockly.Arduino.forBlock['picar_note_to_frequency'] = function(block) {
   return [frequency.toFixed(2), Blockly.Arduino.ORDER_ATOMIC];
 };
 
-// 播放彩蛋旋律
-Blockly.Arduino.forBlock['picar_easterEgg'] = function(block) {
-  var tempo = Blockly.Arduino.valueToCode(block, 'TEMPO', Blockly.Arduino.ORDER_ATOMIC) || '1000';
-  return 'easterEgg(' + tempo + ');\n';
-};
-
 // 播放音調
 Blockly.Arduino.forBlock['picar_tone'] = function(block) {
   ensurePiCarBuzzerDependencies();
@@ -424,14 +414,7 @@ Blockly.Arduino.forBlock['picar_no_tone'] = function(block) {
 // Coding
 Blockly.Arduino.forBlock['coding_raw_statement'] = function(block) {
   var code = block.getFieldValue('CODE') + '\n';
-  if (!block.getParent()) {
-    // It's a top-level block, add to definitions
-    Blockly.Arduino.definitions_['raw_statement_' + block.id] = code;
-    return ''; // Return nothing for the main loop
-  } else {
-    // It's connected to something, return code normally
-    return code;
-  }
+  return code;
 };
 
 

@@ -1,18 +1,24 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import * as crypto from 'crypto';
 
-let panelCounter = 0;
+// Interface to hold the state of our webview panel
+interface PiBlocklyPanel {
+    panel: vscode.WebviewPanel;
+    associatedUriString: string;
+    xmlName: string;
+    isDirty: boolean;
+    lastGeneratedCodeHash: string;
+}
+
+// A single panel instance, as we only allow one at a time.
+let currentPanel: PiBlocklyPanel | undefined;
+
 
 export function activate(context: vscode.ExtensionContext) {
 
     vscode.commands.executeCommand('setContext', 'piblockly.panelOpen', false);
-
-    console.log('恭喜，您的擴充功能 "piblockly" 現已啟用！');
-
-    const panels = new Map<string, vscode.WebviewPanel>();
 
     const startCommand = vscode.commands.registerCommand('piblockly.start', async () => {
 
@@ -93,57 +99,56 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
 
-        createAndShowPanel(context, panels, ++panelCounter, xmlContent, xmlName);
+        createAndShowPanel(context, xmlContent, xmlName);
     });
 
     const onDidCloseDocumentSubscription = vscode.workspace.onDidCloseTextDocument(async (document) => {
-        const closedUriString = document.uri.toString();
-        let panelToClose: vscode.WebviewPanel | null = null;
-
-        for (const [id, panel] of panels.entries()) {
-            if (((panel as any).associatedUriString === closedUriString) || ((panel as any).xmlName === closedUriString)) {
-                panelToClose = panel;
-                break;
-            }
+        if (!currentPanel) {
+            return;
         }
+        const closedUriString = document.uri.toString();
+        // Also check against the XML file's URI
+        const panelXmlUriString = vscode.Uri.file(currentPanel.xmlName).toString();
 
-        if (panelToClose) {
-            if ((panelToClose as any).isDisposed) {
-                return;
-            }
-            closePanel(panelToClose, false);
+        if (currentPanel.associatedUriString === closedUriString || panelXmlUriString === closedUriString) {
+            // The associated .ino or .xml file was closed.
+            // We pass `false` for canCancel because the document is already gone, the user can't cancel closing it.
+            closePanel(currentPanel.panel, false);
         }
     });
 
     const onDidChangeVisibleEditorsSubscription = vscode.window.onDidChangeVisibleTextEditors(editors => {
-        for (const panel of panels.values()) {
-            const associatedUri = (panel as any).associatedUriString;
-            const isAssociatedEditorVisible = editors.some(editor => editor.document.uri.toString() === associatedUri);
+        if (!currentPanel) {
+            return;
+        }
+        const isAssociatedEditorVisible = editors.some(editor => editor.document.uri.toString() === currentPanel!.associatedUriString);
 
-            if (isAssociatedEditorVisible) {
-                panel.webview.postMessage({ command: 'panelActive' });
-            } else {
-                panel.webview.postMessage({ command: 'panelInactive' });
-            }
+        if (isAssociatedEditorVisible) {
+            currentPanel.panel.webview.postMessage({ command: 'panelActive' });
+        } else {
+            currentPanel.panel.webview.postMessage({ command: 'panelInactive' });
         }
     });
 
     context.subscriptions.push(startCommand, onDidCloseDocumentSubscription, onDidChangeVisibleEditorsSubscription);
 }
 
-function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string, vscode.WebviewPanel>, panelId: number, xmlContent: string, xmlName: string | undefined) {
+function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string, xmlName: string | undefined) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage('沒有作用中的文字編輯器，無法建立 piBlockly 面板。');
         return;
     }
+    if (!xmlName) {
+        vscode.window.showErrorMessage('沒有提供 XML 檔案路徑，無法建立 piBlockly 面板。');
+        return;
+    }
 
-    const panelKey = panelId.toString();
     const associatedUriString = editor.document.uri.toString();
 
     const panel = vscode.window.createWebviewPanel(
         'piblocklyEditor',
-        `piBlockly: ${xmlName ? path.basename(xmlName) : path.basename(editor.document.fileName)}`,
+        `piBlockly: ${path.basename(xmlName)}`,
         vscode.ViewColumn.Two,
         {
             enableScripts: true,
@@ -153,22 +158,19 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
         }
     );
 
-    (panel as any).panelId = panelKey;
-    (panel as any).associatedUriString = associatedUriString;
-    (panel as any).xmlName = xmlName;
-    (panel as any).isDirty = false;
-    (panel as any).isDisposed = false;
-    (panel as any).lastGeneratedCodeHash = ''; // Initialize hash
-    panels.set(panelKey, panel);
+    currentPanel = {
+        panel: panel,
+        associatedUriString: associatedUriString,
+        xmlName: xmlName,
+        isDirty: false,
+        lastGeneratedCodeHash: crypto.createHash('sha256').update(editor.document.getText()).digest('hex')
+    };
+
     vscode.commands.executeCommand('setContext', 'piblockly.panelOpen', true);
 
     panel.onDidDispose(() => {
-        const associatedUriString = (panel as any).associatedUriString;
-
-        panels.delete(panelKey);
-        if (panels.size === 0) {
-            vscode.commands.executeCommand('setContext', 'piblockly.panelOpen', false);
-        }
+        currentPanel = undefined;
+        vscode.commands.executeCommand('setContext', 'piblockly.panelOpen', false);
     }, null, context.subscriptions);
 
 
@@ -177,12 +179,13 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
 
     panel.webview.onDidReceiveMessage(
         async message => {
-            const currentAssociatedUri = (panel as any).associatedUriString;
-            const associatedEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === currentAssociatedUri);
+            if (!currentPanel) { return; } // Should not happen if panel is visible
+
+            const associatedEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === currentPanel!.associatedUriString);
 
             switch (message.command) {
                 case 'webviewReady':
-                    panel.webview.postMessage({ command: 'initializeWorkspace', xml: xmlContent, inoUri: currentAssociatedUri, xmlName: (panel as any).xmlName });
+                    panel.webview.postMessage({ command: 'initializeWorkspace', xml: xmlContent, inoUri: currentPanel.associatedUriString, xmlName: currentPanel.xmlName });
                     return;
                 case 'updateCode':
                     if (associatedEditor) {
@@ -191,9 +194,8 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                             const doc = associatedEditor.document;
                             const currentContent = doc.getText();
                             const currentHash = crypto.createHash('sha256').update(currentContent).digest('hex');
-                            const lastGeneratedCodeHash = (panel as any).lastGeneratedCodeHash;
 
-                            if (lastGeneratedCodeHash && currentHash !== lastGeneratedCodeHash) {
+                            if (currentPanel.lastGeneratedCodeHash && currentHash !== currentPanel.lastGeneratedCodeHash) {
                                 const overwriteChoice = await vscode.window.showWarningMessage(
                                     '偵測到程式碼已被手動修改。繼續生成將會覆蓋您的修改。是否繼續？',
                                     { modal: true },
@@ -209,8 +211,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                             edit.replace(doc.uri, fullRange, code);
                             await vscode.workspace.applyEdit(edit);
 
-                            // Update the last generated code hash
-                            (panel as any).lastGeneratedCodeHash = crypto.createHash('sha256').update(code).digest('hex');
+                            currentPanel.lastGeneratedCodeHash = crypto.createHash('sha256').update(code).digest('hex');
 
                         } catch (error) {
                             vscode.window.showErrorMessage(`更新程式碼失敗：${String(error)}`);
@@ -226,11 +227,11 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                     panel.webview.postMessage({ command: 'confirmResponse', value: choice === '是' });
                     return;
                 case 'dirtyStateChanged':
-                    (panel as any).isDirty = message.isDirty;
+                    currentPanel.isDirty = message.isDirty;
                     return;
                 case 'saveProject':
                     {
-                        const currentXmlName = (panel as any).xmlName;
+                        const currentXmlName = currentPanel.xmlName;
                         if (currentXmlName) {
                             try {
                                 fs.writeFileSync(currentXmlName, message.xml);
@@ -252,7 +253,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                             if (fileUriToSave) {
                                 try {
                                     fs.writeFileSync(fileUriToSave.fsPath, message.xml);
-                                    (panel as any).xmlName = fileUriToSave.fsPath;
+                                    currentPanel.xmlName = fileUriToSave.fsPath;
                                     panel.title = `piBlockly: ${path.basename(fileUriToSave.fsPath)}`;
                                     vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(fileUriToSave.fsPath)}`);
                                     panel.webview.postMessage({ command: 'saveComplete' });
@@ -268,7 +269,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                         const options: vscode.SaveDialogOptions = {
                             filters: { 'Blockly XML': ['xml'] }
                         };
-                        const currentXmlName = (panel as any).xmlName;
+                        const currentXmlName = currentPanel.xmlName;
                         if (currentXmlName) {
                             options.defaultUri = vscode.Uri.file(currentXmlName);
                         } else if (associatedEditor) {
@@ -279,7 +280,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
                         if (fileUriToSave) {
                             try {
                                 fs.writeFileSync(fileUriToSave.fsPath, message.xml);
-                                (panel as any).xmlName = fileUriToSave.fsPath;
+                                currentPanel.xmlName = fileUriToSave.fsPath;
                                 panel.title = `piBlockly: ${path.basename(fileUriToSave.fsPath)}`;
                                 vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(fileUriToSave.fsPath)}`);
                                 panel.webview.postMessage({ command: 'saveComplete' });
@@ -300,7 +301,8 @@ function createAndShowPanel(context: vscode.ExtensionContext, panels: Map<string
 }
 
 async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
-    const isDirty = (panel as any).isDirty;
+    if (!currentPanel) { return; }
+    const isDirty = currentPanel.isDirty;
 
     if (isDirty) {
         const message = '您在 piBlockly 中有未儲存的變更。是否要儲存？';
@@ -313,7 +315,9 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
             await new Promise<void>(resolve => {
                 const sub = panel.webview.onDidReceiveMessage(async (message) => {
                     if (message.command === 'saveProject') {
-                        const currentXmlName = (panel as any).xmlName;
+                        sub.dispose(); // Dispose the listener immediately
+
+                        const currentXmlName = currentPanel!.xmlName;
                         if (currentXmlName) {
                             try {
                                 fs.writeFileSync(currentXmlName, message.xml);
@@ -331,7 +335,7 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
                             if (fileUriToSave) {
                                 try {
                                     fs.writeFileSync(fileUriToSave.fsPath, message.xml);
-                                    (panel as any).xmlName = fileUriToSave.fsPath;
+                                    currentPanel!.xmlName = fileUriToSave.fsPath;
                                     panel.title = `piBlockly: ${path.basename(fileUriToSave.fsPath)}`;
                                     vscode.window.showInformationMessage(`專案已儲存至 ${path.basename(fileUriToSave.fsPath)}`);
                                     panel.webview.postMessage({ command: 'saveComplete' });
@@ -341,7 +345,6 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
                                 }
                             }
                         }
-                        sub.dispose();
                         resolve();
                     }
                 });

@@ -102,28 +102,9 @@ window.addEventListener('message', event => {
             }
             break;
         }
-        case 'loadWorkspace':
-            Blockly.Events.disable();
-            try {
-                workspace.clear();
-                const xml = Blockly.utils.xml.textToDom(message.xml);
-                Blockly.Xml.domToWorkspace(xml, workspace);
-                isDirty = false; // Loaded state is clean
-                vscode.postMessage({ command: 'dirtyStateChanged', isDirty: false });
-            } finally {
-                Blockly.Events.enable();
-            }
-            updateCode(undefined, true);
-            break;
         case 'saveComplete':
             isDirty = false;
             vscode.postMessage({ command: 'dirtyStateChanged', isDirty: false });
-            break;
-        case 'requestDirtyState':
-            vscode.postMessage({
-                command: 'dirtyStateResponse',
-                isDirty: isDirty
-            });
             break;
         case 'requestSave': {
             const xml = Blockly.Xml.workspaceToDom(workspace);
@@ -135,20 +116,6 @@ window.addEventListener('message', event => {
             });
             break;
         }
-        case 'requestUpdate':
-            updateCode();
-            break;
-        case 'updateInoUri':
-            window.currentInoUri = message.inoUri;
-            break;
-        case 'undo':
-            Blockly.Events.disable();
-            try {
-                workspace.undo(false);
-            } finally {
-                Blockly.Events.enable();
-            }
-            break;
         case 'confirmResponse':
             if (window.confirmCallback) {
                 window.confirmCallback(message.value);
@@ -245,12 +212,10 @@ vscode.postMessage({ command: 'webviewReady' });
 document.getElementById('saveButton').addEventListener('click', () => {
     const xml = Blockly.Xml.workspaceToDom(workspace);
     const xmlText = Blockly.Xml.domToText(xml);
-    const code = Blockly.Arduino.workspaceToCode(workspace);
     vscode.postMessage({
         command: 'saveProject',
         xml: xmlText,
-        code: code,
-        inoUri: window.currentInoUri // Add this line
+        inoUri: window.currentInoUri
     });
 });
 
