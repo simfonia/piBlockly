@@ -152,7 +152,10 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
         vscode.ViewColumn.Two,
         {
             enableScripts: true,
-            localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
+            localResourceRoots: [
+                vscode.Uri.joinPath(context.extensionUri, 'media'),
+                vscode.Uri.joinPath(context.extensionUri, 'node_modules')
+            ],
             enableForms: true,
             retainContextWhenHidden: true
         }
@@ -307,7 +310,7 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
     if (isDirty) {
         const message = '您在 piBlockly 中有未儲存的變更。是否要儲存？';
         const options: vscode.MessageOptions = { modal: true };
-        const items = canCancel ? ['儲存', '不儲存', '取消'] : ['儲存', '不儲存'];
+        const items = ['儲存', '不儲存'];
 
         const choice = await vscode.window.showWarningMessage(message, options, ...items);
 
@@ -378,17 +381,51 @@ function getNonce() {
 function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, extensionPath: string) {
     const mediaPath = vscode.Uri.joinPath(extensionUri, 'media');
     const nonce = getNonce();
+
+    // Determine which language files to load based on VS Code's locale
+    const locale = vscode.env.language;
+    let blocklyLangFilePath; // Path for core blockly language file relative to extension root
+    let customLangFilePath;  // Path for custom language file relative to media folder
+
+    if (locale.startsWith('zh')) { // Covers 'zh-tw', 'zh-cn', etc.
+        blocklyLangFilePath = 'node_modules/blockly/msg/zh-hant.js';
+        customLangFilePath = 'custom/zh-hant.js';
+    } else {
+        blocklyLangFilePath = 'node_modules/blockly/msg/en.js';
+        customLangFilePath = 'custom/en.js';
+    }
+
     const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'style.css')).with({ query: `nonce=${nonce}` });
     const blocklyUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly.js')).with({ query: `nonce=${nonce}` });
-    const enUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'msg', 'en.js')).with({ query: `nonce=${nonce}` });
-    const customBlocksUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'blocks.js')).with({ query: `nonce=${nonce}` });
-    const customEnUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'en.js')).with({ query: `nonce=${nonce}` });
-    const customZhHantUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'zh-hant.js')).with({ query: `nonce=${nonce}` });
+    const langUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, blocklyLangFilePath)).with({ query: `nonce=${nonce}` });
+    const customLangUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, customLangFilePath)).with({ query: `nonce=${nonce}` });
+    const customBlocksDir = vscode.Uri.joinPath(mediaPath, 'custom', 'blocks');
+    const customBlockFiles = fs.readdirSync(path.join(extensionPath, 'media', 'custom', 'blocks'));
+    const customBlockScriptUris = customBlockFiles
+        .filter(file => file.endsWith('.js'))
+        .map(file => webview.asWebviewUri(vscode.Uri.joinPath(customBlocksDir, file)).with({ query: `nonce=${nonce}` }));
     const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js')).with({ query: `nonce=${nonce}` });
     const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
     const arduinoGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'arduino_generator.js')).with({ query: `nonce=${nonce}` });
     const customGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'custom', 'custom_generator.js')).with({ query: `nonce=${nonce}` });
+
+    // Read the content of the custom language file to get toolbar translations
+    const customLangPath = path.join(extensionPath, 'media', customLangFilePath);
+    const customLangContent = fs.readFileSync(customLangPath, 'utf8');
+
+    const messages: { [key: string]: string } = {};
+    const regex = /"([^"]+)":\s*"([^"]*)"/g;
+    let match;
+    while ((match = regex.exec(customLangContent)) !== null) {
+        messages[match[1]] = match[2];
+    }
+
+    const saveTooltip = messages['BKY_TOOLBAR_SAVE_TOOLTIP'] || '';
+    const saveAsTooltip = messages['BKY_TOOLBAR_SAVE_AS_TOOLTIP'] || '';
+    const closeTooltip = messages['BKY_TOOLBAR_CLOSE_TOOLTIP'] || '';
+    const engineerLabel = messages['BKY_TOOLBAR_ENGINEER_LABEL'] || '';
+    const angelLabel = messages['BKY_TOOLBAR_ANGEL_LABEL'] || '';
     const saveIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_24dp_1F1F1F.svg'));
     const saveAsIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_as_24dp_1F1F1F.svg'));
     const dangerousIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'dangerous_24dp_1F1F1F.svg'));
@@ -453,6 +490,56 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
         #closeButton {
             margin-left: auto; /* Pushes the button to the right */
         }
+        /* Theme Switch Styles */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            margin-left: 20px; /* Adjust as needed */
+            font-size: 0.9em;
+            color: #555;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 48px;
+            margin: 0 10px;
+        }
+        .theme-switch input {
+            display: none;
+        }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+        }
+        .slider:before {
+            background-color: #fff;
+            bottom: 4px;
+            content: "";
+            height: 16px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 16px;
+        }
+        input:checked + .slider {
+            background-color: #2196F3; /* A neutral blue for the "on" state */
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .slider.round {
+            border-radius: 24px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
     </style>
     <link href="${styleUri}" rel="stylesheet">
 </head>
@@ -460,21 +547,28 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     <div id="loading-overlay">載入中...</div>
     <div id="inactive-overlay" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); color: white; font-size: 2em; z-index: 1000; text-align: center; padding: 20px;"></div>
     <div id="toolbar">
-        <img id="saveButton" src="${saveIconUri}" data-src="${saveIconUri}" data-hover-src="${saveIconHoverUri}" alt="儲存積木" title="儲存積木">
-        <img id="saveAsButton" src="${saveAsIconUri}" data-src="${saveAsIconUri}" data-hover-src="${saveAsIconHoverUri}" alt="另存積木" title="另存積木">
-        <img id="closeButton" src="${dangerousIconUri}" data-src="${dangerousIconUri}" data-hover-src="${dangerousIconHoverUri}" alt="關閉" title="關閉">
+        <img id="saveButton" src="${saveIconUri}" data-src="${saveIconUri}" data-hover-src="${saveIconHoverUri}" alt="${saveTooltip}" title="${saveTooltip}">
+        <img id="saveAsButton" src="${saveAsIconUri}" data-src="${saveAsIconUri}" data-hover-src="${saveAsIconHoverUri}" alt="${saveAsTooltip}" title="${saveAsTooltip}">
+        <div class="theme-switch-wrapper">
+            <label>${engineerLabel}</label>
+            <label class="theme-switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider round"></span>
+            </label>
+            <label>${angelLabel}</label>
+        </div>
+        <img id="closeButton" src="${dangerousIconUri}" data-src="${dangerousIconUri}" data-hover-src="${dangerousIconHoverUri}" alt="${closeTooltip}" title="${closeTooltip}">
     </div>
     <div id="blocklyDiv" style="height: calc(100vh - 40px); width: 100vw;"></div>
 
     <script id="toolbox-xml" type="text/xml" style="display: none;">${`<xml>${toolboxXml}</xml>`}</script>
 
     <script nonce="${nonce}" src="${blocklyUri}"></script>
-    <script nonce="${nonce}" src="${enUri}"></script>
-    <script nonce="${nonce}" src="${customEnUri}"></script>
-    <script nonce="${nonce}" src="${customZhHantUri}"></script>
+    <script nonce="${nonce}" src="${langUri}"></script>
+    <script nonce="${nonce}" src="${customLangUri}"></script>
     <script nonce="${nonce}" src="${fieldColourUri}"></script>
     <script nonce="${nonce}" src="${fieldMultilineInputUri}"></script>
-    <script nonce="${nonce}" src="${customBlocksUri}"></script>
+    ${customBlockScriptUris.map(uri => `<script nonce="${nonce}" src="${uri}"></script>`).join('\n    ')}
     <script nonce="${nonce}" src="${arduinoGeneratorUri}"></script>
     <script nonce="${nonce}" src="${customGeneratorUri}"></script>
 

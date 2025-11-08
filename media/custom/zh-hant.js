@@ -11,25 +11,184 @@
     "PICAR_CATEGORY": "πCar",
     "CODING_CATEGORY": "Coding",
 
-    // Arduino Blocks
-    "ARDUINO_HUE": "#016c8d", // for Arduino
-    "ARDUINO_CONTROL_HUE": "#016c8d", // for Arduino I/O
-    "ARDUINO_STRUCTURE_HUE": "#585858", // for Arduino Structure
-    "ARDUINO_DIGITAL_IO_HUE": "#0f960a", // for Arduino Digital I/O
-    "ARDUINO_ANALOG_IO_HUE": "#FF9800", // for Arduino Analog I/O
-    "ARDUINO_TIME_HUE": "#1f039b", // for Arduino time
-    "ARDUINO_SERIAL_HUE": "#359AFF", // for Arduino Serial
-    "ARDUINO_MATH_HUE": "#b13333", // for Arduino math blocks (red-ish)
+    // Engineer Theme Hues (Original)
+    "ARDUINO_HUE": "#016c8d",
+    "ARDUINO_STRUCTURE_HUE": "#585858",
+    "ARDUINO_CONTROL_HUE": "#016c8d",
+    "ARDUINO_DIGITAL_IO_HUE": "#0f960a",
+    "ARDUINO_ANALOG_IO_HUE": "#FF9800",
+    "ARDUINO_TIME_HUE": "#1f039b",
+    "ARDUINO_SERIAL_HUE": "#359AFF",
+    "ARDUINO_MATH_HUE": "#b13333",
+    "LOGIC_HUE": "#5C81A6",
+    "LOOPS_HUE": "#5CA65C",
+    "MATH_HUE": "#5C68A6",
+    "TEXT_HUE": "#6a8871",
+    "VARIABLES_HUE": "#A65C81",
+    "FUNCTIONS_HUE": "#d22f73",
 
-    // Arduino Structure
-    "INITIALIZES_SETUP_APPENDTEXT": "setup",
+    // Angel Theme Hues
+    "ANGEL_ARDUINO_HUE": 175,
+    "ANGEL_LOGIC_HUE": 290,
+    "ANGEL_LOOPS_HUE": 205,
+    "ANGEL_MATH_HUE": 60,
+    "ANGEL_TEXT_HUE": "#6a8871", // Set to match TEXT_HUE
+    "ANGEL_VARIABLES_HUE": 185,
+    "ANGEL_FUNCTIONS_HUE": 330,
+    "ANGEL_CODING_HUE": 140,
+
+    // --- Dual-Style Messages ---
+    // Structure
+    "BKY_INITIALIZES_SETUP_MSG_ENGINEER": "void setup()",
+    "BKY_INITIALIZES_SETUP_MSG_ANGEL": "當程式啟動時",
+    "BKY_INITIALIZES_LOOP_MSG_ENGINEER": "void loop()",
+    "BKY_INITIALIZES_LOOP_MSG_ANGEL": "無限重複",
+
+    // Logic
+    "BKY_LOGIC_COMPARE_MSG_ENGINEER": "%1 %2 %3",
+    "BKY_LOGIC_COMPARE_MSG_ANGEL": "%1 %2 %3",
+    "BKY_LOGIC_OPERATION_MSG_ENGINEER": "%1 %2 %3",
+    "BKY_LOGIC_OPERATION_MSG_ANGEL": "%1 %2 %3",
+    "BKY_LOGIC_NEGATE_MSG_ENGINEER": "! %1",
+    "BKY_LOGIC_NEGATE_MSG_ANGEL": "非 %1",
+
+    // Logic Operation Operators
+    "BKY_LOGIC_OPERATION_AND_ENGINEER": "&&",
+    "BKY_LOGIC_OPERATION_AND_ANGEL": "且",
+    "BKY_LOGIC_OPERATION_OR_ENGINEER": "||",
+    "BKY_LOGIC_OPERATION_OR_ANGEL": "或",
+
+    // Logic Boolean
+    "BKY_LOGIC_BOOLEAN_TRUE_ENGINEER": "true",
+    "BKY_LOGIC_BOOLEAN_TRUE_ANGEL": "真",
+    "BKY_LOGIC_BOOLEAN_FALSE_ENGINEER": "false",
+    "BKY_LOGIC_BOOLEAN_FALSE_ANGEL": "假",
+
+    // Toolbar Tooltips
+    "BKY_TOOLBAR_SAVE_TOOLTIP": "儲存積木",
+    "BKY_TOOLBAR_SAVE_AS_TOOLTIP": "另存積木",
+    "BKY_TOOLBAR_CLOSE_TOOLTIP": "關閉",
+    // Toolbar Theme Labels
+    "BKY_TOOLBAR_ENGINEER_LABEL": "Engineer",
+    "BKY_TOOLBAR_ANGEL_LABEL": "Angel",
+
+    // Loops
+    "BKY_CONTROLS_FOR_MSG_ENGINEER": "for (int %1 = %2; %3 %4 %5; %6 %7 %8) {",
+    "BKY_CONTROLS_FOR_MSG_ANGEL": "計數，變數 %1 從 %2 到 %5，間隔 %8 (%3%4%6%7)",
+    "BKY_CONTROLS_WHILEUNTIL_MSG_ENGINEER": "while (%1) {",
+    "BKY_CONTROLS_WHILEUNTIL_MSG_ANGEL": "當 %1",
+    "BKY_CONTROLS_FLOW_STATEMENTS_MSG_ENGINEER": "%1",
+    "BKY_CONTROLS_FLOW_STATEMENTS_MSG_ANGEL": "%1 迴圈",
+
+    // Variables
+    "BKY_VARIABLES_DECLARE_GLOBAL_MSG_ENGINEER": "Global %1 %2 = %3",
+    "BKY_VARIABLES_DECLARE_GLOBAL_MSG_ANGEL": "建立全域變數 %2 型別為 %1 初始值為 %3",
+    "BKY_VARIABLES_DECLARE_LOCAL_MSG_ENGINEER": "Local %1 %2 = %3",
+    "BKY_VARIABLES_DECLARE_LOCAL_MSG_ANGEL": "建立區域變數 %2 型別為 %1 初始值為 %3",
+    "BKY_VARIABLES_SET_MSG_ENGINEER": "%1 = %2",
+    "BKY_VARIABLES_SET_MSG_ANGEL": "設定 %1 為 %2",
+
+    // Functions
+    "BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ENGINEER": "void %1 (%2) {",
+    "BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ANGEL": "建立函式 %1 (%2)",
+    "BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ENGINEER": "%1 %2 (%3) {",
+    "BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ANGEL": "建立函式 %2 (%3) 並傳回 %1",
+    "BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ENGINEER": "%1()",
+    "BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ANGEL": "執行函式 %1 (%2)",
+    "BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ENGINEER": "%1()",
+    "BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ANGEL": "從函式 %1 (%2)取得結果 ",
+    "BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER": "函式輸入",
+    "BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ANGEL": "函式輸入",
+    "BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ENGINEER": "參數",
+    "BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ANGEL": "參數",
+    "BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER": "return %1",
+    "BKY_CUSTOM_PROCEDURES_RETURN_MSG_ANGEL": "傳回 %1",
+
+    // Text
+    "BKY_TEXT_APPEND_MSG_ENGINEER": "%1 += %2",
+    "BKY_TEXT_APPEND_MSG_ANGEL": "將文字 %2 加到 %1 後面",
+
+    // Text Join
+    "BKY_TEXT_JOIN_MSG_ENGINEER": "join",
+    "BKY_TEXT_JOIN_MSG_ANGEL": "組合文字",
+
+    // Text Length
+    "BKY_TEXT_LENGTH_MESSAGE_ENGINEER": "%1.length()",
+    "BKY_TEXT_LENGTH_MESSAGE_ANGEL": "文字 %1 的長度",
+
+    // Arduino IO
+    "BKY_ARDUINO_PIN_MODE_MSG_ENGINEER": "pinMode(%1, %2)",
+    "BKY_ARDUINO_PIN_MODE_MSG_ANGEL": "設定腳位 %1 為 %2 模式",
+    "BKY_ARDUINO_DIGITAL_READ_MSG_ENGINEER": "digitalRead(%1)",
+    "BKY_ARDUINO_DIGITAL_READ_MSG_ANGEL": "讀入數位腳位 %1",
+    "BKY_ARDUINO_DIGITAL_WRITE_MSG_ENGINEER": "digitalWrite(%1, %2)",
+    "BKY_ARDUINO_DIGITAL_WRITE_MSG_ANGEL": "寫出數位腳位 %1 為 %2",
+    "BKY_ARDUINO_ANALOG_READ_MSG_ENGINEER": "analogRead(%1)",
+    "BKY_ARDUINO_ANALOG_READ_MSG_ANGEL": "讀入類比腳位 %1",
+    "BKY_ARDUINO_ANALOG_WRITE_MSG_ENGINEER": "analogWrite(%1, %2)",
+    "BKY_ARDUINO_ANALOG_WRITE_MSG_ANGEL": "寫出類比腳位 %1 為 %2",
+
+    // Arduino Time
+    "BKY_ARDUINO_DELAY_MSG_ENGINEER": "delay(%1)",
+    "BKY_ARDUINO_DELAY_MSG_ANGEL": "等待 %1 毫秒",
+    "BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ENGINEER": "delayMicroseconds(%1)",
+    "BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ANGEL": "等待 %1 微秒",
+    "BKY_ARDUINO_MILLIS_MSG_ENGINEER": "millis()",
+    "BKY_ARDUINO_MILLIS_MSG_ANGEL": "運行時間 (毫秒)",
+    "BKY_ARDUINO_MICROS_MSG_ENGINEER": "micros()",
+    "BKY_ARDUINO_MICROS_MSG_ANGEL": "運行時間 (微秒)",
+
+    // Arduino Serial
+    "BKY_ARDUINO_SERIAL_BEGIN_MSG_ENGINEER": "Serial.begin(speed: %1)",
+    "BKY_ARDUINO_SERIAL_BEGIN_MSG_ANGEL": "開啟序列埠，速度 %1",
+    "BKY_ARDUINO_SERIAL_PRINT_MSG_ENGINEER": "Serial.print(%1)",
+    "BKY_ARDUINO_SERIAL_PRINT_MSG_ANGEL": "序列埠印出 %1",
+    "BKY_ARDUINO_SERIAL_PRINTLN_MSG_ENGINEER": "Serial.println(%1)",
+    "BKY_ARDUINO_SERIAL_PRINTLN_MSG_ANGEL": "序列埠印出 %1 並換行",
+    "BKY_ARDUINO_SERIAL_AVAILABLE_MSG_ENGINEER": "Serial.available()",
+    "BKY_ARDUINO_SERIAL_AVAILABLE_MSG_ANGEL": "序列埠可讀取位元組",
+    "BKY_ARDUINO_SERIAL_READ_MSG_ENGINEER": "Serial.read()",
+    "BKY_ARDUINO_SERIAL_READ_MSG_ANGEL": "從序列埠讀取",
+
+    // Coding
+    "BKY_CODING_RAW_STATEMENT_ENGINEER": "code: %1",
+    "BKY_CODING_RAW_STATEMENT_ANGEL": "執行程式碼 %1",
+    "BKY_CODING_RAW_INPUT_ENGINEER": "expression: %1",
+    "BKY_CODING_RAW_INPUT_ANGEL": "取得數值 %1",
+    "BKY_CODING_RAW_DEFINITION_ENGINEER": "global code %1",
+    "BKY_CODING_RAW_DEFINITION_ANGEL": "在全域區定義 %1",
+    "BKY_CODING_RAW_WRAPPER_ENGINEER": "block %1",
+    "BKY_CODING_RAW_WRAPPER_ANGEL": "程式碼區塊 %1",
+    "BKY_CODING_RAW_WRAPPER_TOP_ENGINEER": "begin: %1",
+    "BKY_CODING_RAW_WRAPPER_TOP_ANGEL": "開始: %1",
+    "BKY_CODING_RAW_WRAPPER_BOTTOM_ENGINEER": "end: %1",
+    "BKY_CODING_RAW_WRAPPER_BOTTOM_ANGEL": "結束: %1",
+
+    // Arduino Math
+    "BKY_ARDUINO_CONSTRAIN_MSG_ENGINEER": "constrain( %1, %2, %3 )",
+    "BKY_ARDUINO_CONSTRAIN_MSG_ANGEL": "限制 %1 在 %2 和 %3 之間",
+    "BKY_ARDUINO_MAP_MSG_ENGINEER": "map( %1, %2, %3, %4, %5 )",
+    "BKY_ARDUINO_MAP_MSG_ANGEL": "將 %1 從 %2 - %3 範圍重新對應到 %4 - %5",
+    "BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ENGINEER": "randomSeed( %1 )",
+    "BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ANGEL": "設定隨機種子為 %1",
+    "BKY_ARDUINO_MATH_RANDOM_INT_MSG_ENGINEER": "random( %1, %2 )",
+    "BKY_ARDUINO_MATH_RANDOM_INT_MSG_ANGEL": "隨機數，介於 %1 和 %2 之間",
+
+    // Controls If
+    "BKY_CONTROLS_IF_MSG_IF_ENGINEER": "if",
+    "BKY_CONTROLS_IF_MSG_IF_ANGEL": "假如",
+    "BKY_CONTROLS_IF_MSG_THEN_ENGINEER": "",
+    "BKY_CONTROLS_IF_MSG_THEN_ANGEL": "",
+    "BKY_CONTROLS_IF_MSG_ELSEIF_ENGINEER": "else if",
+    "BKY_CONTROLS_IF_MSG_ELSEIF_ANGEL": "否則假如",
+    "BKY_CONTROLS_IF_MSG_ELSE_ENGINEER": "else",
+    "BKY_CONTROLS_IF_MSG_ELSE_ANGEL": "其他情況",
+
+    // Arduino Blocks
     "INITIALIZES_SETUP_TOOLTIP": "setup() 在程式開始時呼叫。用它來初始化變數、腳位模式、開始使用函式庫等。setup 函式只會在每次 Arduino 板上電或重置後執行一次。",
     "INITIALIZES_SETUP_HELPURL": "",
-    "INITIALIZES_LOOP_APPENDTEXT": "loop",
     "INITIALIZES_LOOP_TOOLTIP": "loop() 會不斷地重複執行，讓您的程式可以改變和回應。使用它來主動控制 Arduino 板。",
     "INITIALIZES_LOOP_HELPURL": "",
-
-    // Arduino I/O
     "ARDUINO_PIN_LABEL": "pin:",
     "ARDUINO_MODE_LABEL": "mode:",
     "ARDUINO_PIN_MODE": "pinMode",
@@ -47,14 +206,10 @@
     "ARDUINO_ANALOG_READ_TOOLTIP": "讀入指定類比腳位(analog in / ADC)的狀態(0-1023 for 10-bit)。",
     "ARDUINO_ANALOG_WRITE": "analogWrite(%1, %2)",
     "ARDUINO_ANALOG_WRITE_TOOLTIP": "將類比值 (PWM, 0-255 for 8-bit) 寫出~腳位。",
-
-    // Arduino Time
     "ARDUINO_DELAY_TOOLTIP": "暫停指定的毫秒數。",
     "ARDUINO_DELAY_MICROSECONDS_TOOLTIP": "暫停指定的微秒數。",
     "ARDUINO_MILLIS_TOOLTIP": "回傳從 Arduino 開機到現在的毫秒數。",
     "ARDUINO_MICROS_TOOLTIP": "回傳從 Arduino 開機到現在的微秒數。",
-
-    // Arduino Serial
     "ARDUINO_SERIAL_BEGIN": "Serial.begin(speed: %1)",
     "ARDUINO_SERIAL_BEGIN_TOOLTIP": "設定序列埠通訊的傳輸速率（鮑率）。",
     "ARDUINO_SERIAL_PRINT": "Serial.print(%1)",
@@ -65,8 +220,6 @@
     "ARDUINO_SERIAL_AVAILABLE_TOOLTIP": "獲取序列埠緩衝區中可讀取的位元組數，傳回整數。",
     "ARDUINO_SERIAL_READ": "Serial.read()",
     "ARDUINO_SERIAL_READ_TOOLTIP": "讀取一個位元組的序列埠資料, 傳回整數。",
-
-    // Arduino Math
     "ARDUINO_CONSTRAIN_TITLE": "constrain( %1, %2, %3 )",
     "ARDUINO_CONSTRAIN_TOOLTIP": "將一個數字限制在一個範圍內。參數：(要限制的值, 範圍下限, 範圍上限)。",
     "ARDUINO_MAP_TITLE": "map( %1, %2, %3, %4, %5 )",
@@ -77,12 +230,11 @@
     "ARDUINO_MATH_RANDOM_INT_TOOLTIP": "產生一個介於 min (包含) 和 max (不包含) 之間的偽亂數。",
 
     // piCar Blocks
-    "PICAR_HUE": "#ee5b56", // for piCar movement
-    "PICAR_SETUP_HUE": "#016c8d", // for initialization
-    "PICAR_SENSOR_HUE": "#b1b100", // for sensor
-    "PICAR_SERVO_HUE": "#07a91d", // for servo
-    "PICAR_MEDIA_HUE": "#de57ad", // for multimedia
-
+    "PICAR_HUE": "#ee5b56",
+    "PICAR_SETUP_HUE": "#016c8d",
+    "PICAR_SENSOR_HUE": "#b1b100",
+    "PICAR_SERVO_HUE": "#07a91d",
+    "PICAR_MEDIA_HUE": "#de57ad",
     "PICAR_INIT": "初始化 piCar",
     "PICAR_INIT_TOOLTIP": "初始化 piCar 並進入待機狀態",
     "PICAR_SET_HAND_RANGE": "設定手臂開合範圍(0~180)",
@@ -143,15 +295,13 @@
     "PICAR_TRIPLET": "三連音",
     "PICAR_NOTE_TO_FREQUENCY": "音符轉頻率",
     "PICAR_NOTE_TO_FREQUENCY_TOOLTIP": "將音符 (例如 C4, A#5) 轉換為對應的頻率 (Hz)。",
-    "PICAR_EASTER_EGG": "播放彩蛋旋律 全音符的時間 (ms)",
-    "PICAR_EASTER_EGG_TOOLTIP": "播放一段旋律，數值愈大愈慢",
     "PICAR_TONE": "在腳位 %1 上播放音調，頻率 %2，持續時間 (ms) %3 (不等待播完)",
     "PICAR_TONE_TOOLTIP": "在指定腳位上產生音調。預設蜂鳴器位於腳位 22。",
     "PICAR_NO_TONE": "停止在腳位 %1 上的音調",
     "PICAR_NO_TONE_TOOLTIP": "停止在指定腳位上播放的音調。預設蜂鳴器位於腳位 22。",
 
     // Coding Blocks
-    "CODING_HUE": "#585858", // for coding
+    "CODING_HUE": "#585858",
     "CODING_RAW_STATEMENT": "Coding ",
     "CODING_RAW_STATEMENT_TOOLTIP": "可填入任意程式碼作為一個指令",
     "CODING_RAW_INPUT": "Coding ",
@@ -164,25 +314,93 @@
     "CODING_RAW_WRAPPER_BOTTOM": "Coding ",
 
     // Text Blocks
-    "TEXT_HUE": "#6a8871",  // for Text
+    "TEXT_HUE": "#6a8871",
 
     // Array Blocks
-    "ARRAY_HUE": "#d1972b",  // for Arrays
+    "ARRAY_HUE": "#d1972b",
     "ARRAY_DECLARE_TITLE": "宣告陣列",
     "ARRAY_DECLARE_TOOLTIP": "宣告一個指定類型和大小的陣列。",
     "ARRAY_GET_TOOLTIP": "從陣列中獲取指定索引的元素。",
     "ARRAY_SET_TOOLTIP": "設定陣列中指定索引的元素值。",
     "ARRAY_LENGTH_TOOLTIP": "獲取陣列的元素數量。",
+    "BKY_ARRAY_DECLARE_GLOBAL_TITLE": "Global Array",
+    "BKY_ARRAY_DECLARE_GLOBAL_TOOLTIP": "宣告一個指定類型和大小的全域陣列。",
+    "BKY_ARRAY_DECLARE_LOCAL_TITLE": "Local Array",
+    "BKY_ARRAY_DECLARE_LOCAL_TOOLTIP": "宣告一個指定類型和大小的區域陣列。",
+
+    // --- Array Dual-Style Messages (Generic Keys) ---
+    // Titles/Labels
+    "ARRAY_DECLARE_GLOBAL_TITLE_GENERIC": "全域陣列",
+    "ARRAY_DECLARE_LOCAL_TITLE_GENERIC": "區域陣列",
+    "ARRAY_LENGTH_TITLE_GENERIC": "陣列長度",
+
+    // Tooltips
+    "ARRAY_DECLARE_GLOBAL_TOOLTIP_GENERIC": "宣告一個指定類型和大小的全域陣列。",
+    "ARRAY_DECLARE_LOCAL_TOOLTIP_GENERIC": "宣告一個指定類型和大小的區域陣列。",
+    "ARRAY_GET_TOOLTIP_GENERIC": "從陣列中獲取指定索引的元素。",
+    "ARRAY_SET_TOOLTIP_GENERIC": "設定陣列中指定索引的元素值。",
+    "ARRAY_LENGTH_TOOLTIP_GENERIC": "獲取陣列的元素數量。",
+
+    // Other text elements
+    "ARRAY_GET_BRACKET_OPEN_GENERIC": "[",
+    "ARRAY_GET_BRACKET_CLOSE_GENERIC": "]",
+    "ARRAY_SET_BRACKET_OPEN_GENERIC": "[",
+    "ARRAY_SET_BRACKET_CLOSE_EQUALS_GENERIC": "] = ",
+
+    // --- Array Dual-Style Messages (Engineer Versions) ---
+    // Titles/Labels
+    "BKY_ARRAY_DECLARE_GLOBAL_TITLE_ENGINEER": "Global Array",
+    "BKY_ARRAY_DECLARE_LOCAL_TITLE_ENGINEER": "Local Array",
+    "BKY_ARRAY_LENGTH_TITLE_ENGINEER": "length of Array",
+
+    // Tooltips
+    "BKY_ARRAY_DECLARE_GLOBAL_TOOLTIP_ENGINEER": "宣告一個指定類型和大小的全域陣列。",
+    "BKY_ARRAY_DECLARE_LOCAL_TOOLTIP_ENGINEER": "宣告一個指定類型和大小的區域陣列。",
+    "BKY_ARRAY_GET_TOOLTIP_ENGINEER": "從陣列中獲取指定索引的元素。",
+    "BKY_ARRAY_SET_TOOLTIP_ENGINEER": "設定陣列中指定索引的元素值。",
+    "BKY_ARRAY_LENGTH_TOOLTIP_ENGINEER": "獲取陣列的元素數量。",
+
+    // Other text elements
+    "BKY_ARRAY_GET_BRACKET_OPEN_ENGINEER": "[",
+    "BKY_ARRAY_GET_BRACKET_CLOSE_ENGINEER": "]",
+    "BKY_ARRAY_SET_BRACKET_OPEN_ENGINEER": "[",
+    "BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ENGINEER": "] = ",
+
+    // --- Array Dual-Style Messages (Angel Versions) ---
+    // Titles/Labels
+    "BKY_ARRAY_DECLARE_GLOBAL_TITLE_ANGEL": "建立全域陣列",
+    "BKY_ARRAY_DECLARE_LOCAL_TITLE_ANGEL": "建立區域陣列",
+    "BKY_ARRAY_LENGTH_TITLE_ANGEL": "陣列長度",
+
+    // Tooltips
+    "BKY_ARRAY_DECLARE_GLOBAL_TOOLTIP_ANGEL": "建立一個指定類型和大小的全域陣列。",
+    "BKY_ARRAY_DECLARE_LOCAL_TOOLTIP_ANGEL": "建立一個指定類型和大小的區域陣列。",
+    "BKY_ARRAY_GET_TOOLTIP_ANGEL": "從陣列中獲取指定索引的項目。",
+    "BKY_ARRAY_SET_TOOLTIP_ANGEL": "設定陣列中指定索引的項目值。",
+    "BKY_ARRAY_LENGTH_TOOLTIP_ANGEL": "獲取陣列的項目數量。",
+
+    // Other text elements
+    "BKY_ARRAY_GET_BRACKET_OPEN_ANGEL": "項目 #",
+    "BKY_ARRAY_GET_BRACKET_CLOSE_ANGEL": "",
+    "BKY_ARRAY_SET_BRACKET_OPEN_ANGEL": "項目 #",
+    "BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ANGEL": " 設為 ",
+
 
     // Custom Variables
     "VARIABLES_DECLARE_GLOBAL_TOOLTIP": "宣告一個全域變數。",
     "VARIABLES_DECLARE_LOCAL_TOOLTIP": "宣告一個區域變數。",
 
+    // Override default variable name
+    "VARIABLES_DEFAULT_NAME": "var",
+
+    // Override math function display names
+    "MATH_SINGLE_OP_ABSOLUTE": "abs",
+    "MATH_SINGLE_OP_ROOT": "sqrt",
+
     // Functions Blocks
-    "PROCEDURES_HUE": "#d22f73", // for Functions
+    "PROCEDURES_HUE": "#d22f73",
 
     // --- Blockly Built-in Tooltip Overrides ---
-    // Logic
     "CONTROLS_IF_TOOLTIP_1": "如果一個值為真，則執行一些語句。",
     "CONTROLS_IF_TOOLTIP_2": "如果一個值為真，則執行第一塊語句。否則，執行第二塊語句。",
     "CONTROLS_IF_TOOLTIP_3": "如果第一個值為真，則執行第一塊語句。否則，如果第二個值為真，則執行第二塊語句。",
@@ -192,12 +410,10 @@
     "CONTROLS_IF_IF_TOOLTIP": "添加、移除或重新排序區塊來重設此「如果」積木。",
     "LOGIC_NEGATE_TOOLTIP": "如果輸入為假，則傳回真。如果輸入為真，則傳回假。",
     "LOGIC_BOOLEAN_TOOLTIP": "傳回「真」或「假」。",
-    // Loops
     "CONTROLS_WHILEUNTIL_TOOLTIP_WHILE": "當一個值為真時，重複執行一些語句。",
     "CONTROLS_FOR_TOOLTIP": "讓變數 '%1' 從開始數到結束數，按照指定的間隔計數，並執行指定的積木。",
     "CONTROLS_FLOW_STATEMENTS_TOOLTIP_BREAK": "跳出包含的迴圈。",
     "CONTROLS_FLOW_STATEMENTS_TOOLTIP_CONTINUE": "跳過此迴圈的其餘部分，並繼續下一次迭代。",
-    // Math
     "MATH_NUMBER_TOOLTIP": "一個數字。",
     "MATH_ARITHMETIC_TOOLTIP_ADD": "傳回兩個數字的總和。",
     "MATH_ARITHMETIC_TOOLTIP_MINUS": "傳回兩個數字的差。",
@@ -211,16 +427,13 @@
     "MATH_SINGLE_TOOLTIP_LOG10": "傳回一個數字的以 10 為底的對數。",
     "MATH_SINGLE_TOOLTIP_EXP": "傳回 e 的指定數次方。",
     "MATH_SINGLE_TOOLTIP_POW10": "傳回 10 的指定數次方。",
-    // Text
     "TEXT_TEXT_TOOLTIP": "一個字母、單字或一行文字。",
     "TEXT_JOIN_TOOLTIP": "透過連接任意數量的項目來建立一段文字。",
     "TEXT_APPEND_TOOLTIP": "將一些文字附加到變數 '%1'。",
     "TEXT_LENGTH_TOOLTIP": "傳回所提供文字中的字元數（包含空格）。",
     "LISTS_CREATE_WITH_ITEM_TOOLTIP": "添加一個項目到列表或文字中。",
-    // Variables
     "VARIABLES_GET_TOOLTIP": "傳回此變數的值。",
     "VARIABLES_SET_TOOLTIP": "將此變數設定為等於輸入值。",
-    // Functions
     "PROCEDURES_DEFNORETURN_TOOLTIP": "建立一個沒有輸出的函式。",
     "PROCEDURES_DEFRETURN_TOOLTIP": "建立一個有輸出的函式。",
     "PROCEDURES_CALLNORETURN_TOOLTIP": "執行使用者定義的函式 '%1'。",

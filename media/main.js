@@ -11,6 +11,274 @@ if (FieldMultilineInput) {
     Blockly.registry.register('field', 'field_multilineinput', FieldMultilineInput);
 }
 
+// --- Theme Definitions ---
+const engineerTheme = Blockly.Theme.defineTheme('engineer', {
+  'base': Blockly.Themes.Classic,
+  'categoryStyles': {
+    'arduino_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
+    'arduino_structure_category': { 'colour': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
+    'arduino_io_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
+    'arduino_time_category': { 'colour': Blockly.Msg.ARDUINO_TIME_HUE },
+    'arduino_serial_category': { 'colour': Blockly.Msg.ARDUINO_SERIAL_HUE },
+    'logic_category': { 'colour': Blockly.Msg.LOGIC_HUE },
+    'loop_category': { 'colour': Blockly.Msg.LOOPS_HUE },
+    'math_category': { 'colour': Blockly.Msg.MATH_HUE },
+    'text_category': { 'colour': Blockly.Msg.TEXT_HUE },
+    'variable_category': { 'colour': Blockly.Msg.VARIABLES_HUE },
+    'procedure_category': { 'colour': Blockly.Msg.FUNCTIONS_HUE },
+    'picar_category': { 'colour': Blockly.Msg.PICAR_HUE },
+    'coding_category': { 'colour': Blockly.Msg.CODING_HUE },
+    'array_category': { 'colour': Blockly.Msg.ARRAY_HUE },
+  },
+  'blockStyles': {
+    'initializes_block': { 'colourPrimary': Blockly.Msg.ARDUINO_STRUCTURE_HUE }, // Placeholder for actual block, will be removed if not directly used
+    'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE },
+    'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE },
+    'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },
+    'arduino_time_block': { 'colourPrimary': Blockly.Msg.ARDUINO_TIME_HUE },
+    'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ARDUINO_SERIAL_HUE },
+    'arduino_math_block': { 'colourPrimary': Blockly.Msg.ARDUINO_MATH_HUE },
+    'logic_blocks': { 'colourPrimary': Blockly.Msg.LOGIC_HUE },
+    'loop_blocks': { 'colourPrimary': Blockly.Msg.LOOPS_HUE },
+    'math_blocks': { 'colourPrimary': Blockly.Msg.MATH_HUE },
+    'text_blocks': { 'colourPrimary': Blockly.Msg.TEXT_HUE },
+    'variable_blocks': { 'colourPrimary': Blockly.Msg.VARIABLES_HUE },
+    'procedure_blocks': { 'colourPrimary': Blockly.Msg.FUNCTIONS_HUE },
+
+    'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE },
+    'coding_block': { 'colourPrimary': Blockly.Msg.CODING_HUE },
+    'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE },
+  },
+});
+
+const angelTheme = Blockly.Theme.defineTheme('angel', {
+  'base': Blockly.Themes.Classic,
+  'categoryStyles': {
+    'arduino_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
+    'arduino_structure_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
+    'arduino_io_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
+    'arduino_time_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
+    'arduino_serial_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
+    'logic_category': { 'colour': Blockly.Msg.LOGIC_HUE },
+    'loop_category': { 'colour': Blockly.Msg.LOOPS_HUE },
+    'math_category': { 'colour': Blockly.Msg.MATH_HUE },
+    // ...
+    'math_blocks': { 'colourPrimary': Blockly.Msg.MATH_HUE },
+    'text_category': { 'colour': Blockly.Msg.TEXT_HUE },
+    // ...
+    'text_blocks': { 'colourPrimary': Blockly.Msg.TEXT_HUE },
+    'variable_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_VARIABLES_HUE },
+    'procedure_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
+    'coding_blocks': { 'colourPrimary': 140 },
+    
+    'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE },
+    'coding_block': { 'colourPrimary': Blockly.Msg.CODING_HUE },
+    'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE },
+  },
+});
+
+// A map to store the different message style prefixes (for switching block text)
+const blockMessageStylesMap = {
+    'engineer': {
+        'INITIALIZES_SETUP_APPENDTEXT': 'BKY_INITIALIZES_SETUP_MSG_ENGINEER', // This is the Msg key that changes
+        'INITIALIZES_LOOP_APPENDTEXT': 'BKY_INITIALIZES_LOOP_MSG_ENGINEER',
+        // Logic
+        'LOGIC_COMPARE_MESSAGE': 'BKY_LOGIC_COMPARE_MSG_ENGINEER',
+        'LOGIC_OPERATION_MESSAGE': 'BKY_LOGIC_OPERATION_MSG_ENGINEER',
+        'LOGIC_NEGATE_MESSAGE': 'BKY_LOGIC_NEGATE_MSG_ENGINEER',
+        // Logic Operation Operators
+        'LOGIC_OPERATION_AND': 'BKY_LOGIC_OPERATION_AND_ENGINEER',
+        'LOGIC_OPERATION_OR': 'BKY_LOGIC_OPERATION_OR_ENGINEER',
+        // Logic Boolean
+        'LOGIC_BOOLEAN_TRUE': 'BKY_LOGIC_BOOLEAN_TRUE_ENGINEER',
+        'LOGIC_BOOLEAN_FALSE': 'BKY_LOGIC_BOOLEAN_FALSE_ENGINEER',
+        // Loops
+        'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ENGINEER',
+        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ENGINEER',
+        'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ENGINEER',
+        // Variables
+        'VARIABLES_DECLARE_GLOBAL_MESSAGE': 'BKY_VARIABLES_DECLARE_GLOBAL_MSG_ENGINEER',
+        'VARIABLES_DECLARE_LOCAL_MESSAGE': 'BKY_VARIABLES_DECLARE_LOCAL_MSG_ENGINEER',
+        'VARIABLES_SET_MESSAGE': 'BKY_VARIABLES_SET_MSG_ENGINEER',
+        // Text
+        'TEXT_APPEND_MESSAGE': 'BKY_TEXT_APPEND_MSG_ENGINEER',
+        'TEXT_LENGTH_MESSAGE': 'BKY_TEXT_LENGTH_MESSAGE_ENGINEER',
+        // Functions (these are complex, but we need generic keys for them)
+        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER',
+        // Arduino IO
+        'ARDUINO_PIN_MODE_MSG': 'BKY_ARDUINO_PIN_MODE_MSG_ENGINEER',
+        'ARDUINO_DIGITAL_READ_MSG': 'BKY_ARDUINO_DIGITAL_READ_MSG_ENGINEER',
+        'ARDUINO_DIGITAL_WRITE_MSG': 'BKY_ARDUINO_DIGITAL_WRITE_MSG_ENGINEER',
+        'ARDUINO_ANALOG_READ_MSG': 'BKY_ARDUINO_ANALOG_READ_MSG_ENGINEER',
+        'ARDUINO_ANALOG_WRITE_MSG': 'BKY_ARDUINO_ANALOG_WRITE_MSG_ENGINEER',
+        // Arduino Time
+        'ARDUINO_DELAY_MSG': 'BKY_ARDUINO_DELAY_MSG_ENGINEER',
+        'ARDUINO_DELAY_MICROSECONDS_MSG': 'BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ENGINEER',
+        'ARDUINO_MILLIS_MSG': 'BKY_ARDUINO_MILLIS_MSG_ENGINEER',
+        'ARDUINO_MICROS_MSG': 'BKY_ARDUINO_MICROS_MSG_ENGINEER',
+        // Arduino Serial
+        'ARDUINO_SERIAL_BEGIN_MSG': 'BKY_ARDUINO_SERIAL_BEGIN_MSG_ENGINEER',
+        'ARDUINO_SERIAL_PRINT_MSG': 'BKY_ARDUINO_SERIAL_PRINT_MSG_ENGINEER',
+        'ARDUINO_SERIAL_PRINTLN_MSG': 'BKY_ARDUINO_SERIAL_PRINTLN_MSG_ENGINEER',
+        'ARDUINO_SERIAL_AVAILABLE_MSG': 'BKY_ARDUINO_SERIAL_AVAILABLE_MSG_ENGINEER',
+        'ARDUINO_SERIAL_READ_MSG': 'BKY_ARDUINO_SERIAL_READ_MSG_ENGINEER',
+        // Coding
+        'CODING_RAW_STATEMENT_MESSAGE': 'BKY_CODING_RAW_STATEMENT_ENGINEER',
+        'CODING_RAW_INPUT_MESSAGE': 'BKY_CODING_RAW_INPUT_ENGINEER',
+        'CODING_RAW_DEFINITION_MESSAGE': 'BKY_CODING_RAW_DEFINITION_ENGINEER',
+        'CODING_RAW_WRAPPER_TOP_MESSAGE': 'BKY_CODING_RAW_WRAPPER_TOP_ENGINEER',
+        'CODING_RAW_WRAPPER_BOTTOM_MESSAGE': 'BKY_CODING_RAW_WRAPPER_BOTTOM_ENGINEER',
+        // Arduino Math
+        'ARDUINO_CONSTRAIN_MSG': 'BKY_ARDUINO_CONSTRAIN_MSG_ENGINEER',
+        'ARDUINO_MAP_MSG': 'BKY_ARDUINO_MAP_MSG_ENGINEER',
+        'ARDUINO_MATH_RANDOM_SEED_MSG': 'BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ENGINEER',
+        'ARDUINO_MATH_RANDOM_INT_MSG': 'BKY_ARDUINO_MATH_RANDOM_INT_MSG_ENGINEER',
+        // Controls If
+        'CONTROLS_IF_MSG_IF': 'BKY_CONTROLS_IF_MSG_IF_ENGINEER',
+        'CONTROLS_IF_MSG_THEN': 'BKY_CONTROLS_IF_MSG_THEN_ENGINEER',
+        'CONTROLS_IF_MSG_ELSEIF': 'BKY_CONTROLS_IF_MSG_ELSEIF_ENGINEER',
+        'CONTROLS_IF_MSG_ELSE': 'BKY_CONTROLS_IF_MSG_ELSE_ENGINEER',
+        // Array Blocks
+        'ARRAY_DECLARE_GLOBAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TITLE_ENGINEER',
+        'ARRAY_DECLARE_GLOBAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TOOLTIP_ENGINEER',
+        'ARRAY_DECLARE_LOCAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TITLE_ENGINEER',
+        'ARRAY_DECLARE_LOCAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TOOLTIP_ENGINEER',
+        'ARRAY_GET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_GET_BRACKET_OPEN_ENGINEER',
+        'ARRAY_GET_BRACKET_CLOSE_GENERIC': 'BKY_ARRAY_GET_BRACKET_CLOSE_ENGINEER',
+        'ARRAY_GET_TOOLTIP_GENERIC': 'BKY_ARRAY_GET_TOOLTIP_ENGINEER',
+        'ARRAY_SET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_SET_BRACKET_OPEN_ENGINEER',
+        'ARRAY_SET_BRACKET_CLOSE_EQUALS_GENERIC': 'BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ENGINEER',
+        'ARRAY_SET_TOOLTIP_GENERIC': 'BKY_ARRAY_SET_TOOLTIP_ENGINEER',
+        'ARRAY_LENGTH_TITLE_GENERIC': 'BKY_ARRAY_LENGTH_TITLE_ENGINEER',
+        'ARRAY_LENGTH_TOOLTIP_GENERIC': 'BKY_ARRAY_LENGTH_TOOLTIP_ENGINEER',
+    },
+    'angel': {
+        'ARRAY_DECLARE_GLOBAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TITLE_ANGEL',
+        'ARRAY_DECLARE_GLOBAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TOOLTIP_ANGEL',
+        'ARRAY_DECLARE_LOCAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TITLE_ANGEL',
+        'ARRAY_DECLARE_LOCAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TOOLTIP_ANGEL',
+        'ARRAY_GET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_GET_BRACKET_OPEN_ANGEL',
+        'ARRAY_GET_BRACKET_CLOSE_GENERIC': 'BKY_ARRAY_GET_BRACKET_CLOSE_ANGEL',
+        'ARRAY_GET_TOOLTIP_GENERIC': 'BKY_ARRAY_GET_TOOLTIP_ANGEL',
+        'ARRAY_SET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_SET_BRACKET_OPEN_ANGEL',
+        'ARRAY_SET_BRACKET_CLOSE_EQUALS_GENERIC': 'BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ANGEL',
+        'ARRAY_SET_TOOLTIP_GENERIC': 'BKY_ARRAY_SET_TOOLTIP_ANGEL',
+        'ARRAY_LENGTH_TITLE_GENERIC': 'BKY_ARRAY_LENGTH_TITLE_ANGEL',
+        'ARRAY_LENGTH_TOOLTIP_GENERIC': 'BKY_ARRAY_LENGTH_TOOLTIP_ANGEL',
+
+        'INITIALIZES_SETUP_APPENDTEXT': 'BKY_INITIALIZES_SETUP_MSG_ANGEL',
+        'INITIALIZES_LOOP_APPENDTEXT': 'BKY_INITIALIZES_LOOP_MSG_ANGEL',
+        // Logic
+        'LOGIC_COMPARE_MESSAGE': 'BKY_LOGIC_COMPARE_MSG_ANGEL',
+        'LOGIC_OPERATION_MESSAGE': 'BKY_LOGIC_OPERATION_MSG_ANGEL',
+        'LOGIC_NEGATE_MESSAGE': 'BKY_LOGIC_NEGATE_MSG_ANGEL',
+        // Logic Operation Operators
+        'LOGIC_OPERATION_AND': 'BKY_LOGIC_OPERATION_AND_ANGEL',
+        'LOGIC_OPERATION_OR': 'BKY_LOGIC_OPERATION_OR_ANGEL',
+        // Logic Boolean
+        'LOGIC_BOOLEAN_TRUE': 'BKY_LOGIC_BOOLEAN_TRUE_ANGEL',
+        'LOGIC_BOOLEAN_FALSE': 'BKY_LOGIC_BOOLEAN_FALSE_ANGEL',
+        // Loops
+        'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ANGEL',
+        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ANGEL',
+        'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ANGEL',
+        // Variables
+        'VARIABLES_DECLARE_GLOBAL_MESSAGE': 'BKY_VARIABLES_DECLARE_GLOBAL_MSG_ANGEL',
+        'VARIABLES_DECLARE_LOCAL_MESSAGE': 'BKY_VARIABLES_DECLARE_LOCAL_MSG_ANGEL',
+        'VARIABLES_SET_MESSAGE': 'BKY_VARIABLES_SET_MSG_ANGEL',
+        // Text
+        'TEXT_APPEND_MESSAGE': 'BKY_TEXT_APPEND_MSG_ANGEL',
+        'TEXT_LENGTH_MESSAGE': 'BKY_TEXT_LENGTH_MESSAGE_ANGEL',
+        // Functions
+        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ANGEL',
+        // Arduino IO
+        'ARDUINO_PIN_MODE_MSG': 'BKY_ARDUINO_PIN_MODE_MSG_ANGEL',
+        'ARDUINO_DIGITAL_READ_MSG': 'BKY_ARDUINO_DIGITAL_READ_MSG_ANGEL',
+        'ARDUINO_DIGITAL_WRITE_MSG': 'BKY_ARDUINO_DIGITAL_WRITE_MSG_ANGEL',
+        'ARDUINO_ANALOG_READ_MSG': 'BKY_ARDUINO_ANALOG_READ_MSG_ANGEL',
+        'ARDUINO_ANALOG_WRITE_MSG': 'BKY_ARDUINO_ANALOG_WRITE_MSG_ANGEL',
+        // Arduino Time
+        'ARDUINO_DELAY_MSG': 'BKY_ARDUINO_DELAY_MSG_ANGEL',
+        'ARDUINO_DELAY_MICROSECONDS_MSG': 'BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ANGEL',
+        'ARDUINO_MILLIS_MSG': 'BKY_ARDUINO_MILLIS_MSG_ANGEL',
+        'ARDUINO_MICROS_MSG': 'BKY_ARDUINO_MICROS_MSG_ANGEL',
+        // Arduino Serial
+        'ARDUINO_SERIAL_BEGIN_MSG': 'BKY_ARDUINO_SERIAL_BEGIN_MSG_ANGEL',
+        'ARDUINO_SERIAL_PRINT_MSG': 'BKY_ARDUINO_SERIAL_PRINT_MSG_ANGEL',
+        'ARDUINO_SERIAL_PRINTLN_MSG': 'BKY_ARDUINO_SERIAL_PRINTLN_MSG_ANGEL',
+        'ARDUINO_SERIAL_AVAILABLE_MSG': 'BKY_ARDUINO_SERIAL_AVAILABLE_MSG_ANGEL',
+        'ARDUINO_SERIAL_READ_MSG': 'BKY_ARDUINO_SERIAL_READ_MSG_ANGEL',
+        // Coding
+        'CODING_RAW_STATEMENT_MESSAGE': 'BKY_CODING_RAW_STATEMENT_ANGEL',
+        'CODING_RAW_INPUT_MESSAGE': 'BKY_CODING_RAW_INPUT_ANGEL',
+        'CODING_RAW_DEFINITION_MESSAGE': 'BKY_CODING_RAW_DEFINITION_ANGEL',
+        'CODING_RAW_WRAPPER_TOP_MESSAGE': 'BKY_CODING_RAW_WRAPPER_TOP_ANGEL',
+        'CODING_RAW_WRAPPER_BOTTOM_MESSAGE': 'BKY_CODING_RAW_WRAPPER_BOTTOM_ANGEL',
+        // Arduino Math
+        'ARDUINO_CONSTRAIN_MSG': 'BKY_ARDUINO_CONSTRAIN_MSG_ANGEL',
+        'ARDUINO_MAP_MSG': 'BKY_ARDUINO_MAP_MSG_ANGEL',
+        'ARDUINO_MATH_RANDOM_SEED_MSG': 'BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ANGEL',
+        'ARDUINO_MATH_RANDOM_INT_MSG': 'BKY_ARDUINO_MATH_RANDOM_INT_MSG_ANGEL',
+        // Controls If
+        'CONTROLS_IF_MSG_IF': 'BKY_CONTROLS_IF_MSG_IF_ANGEL',
+        'CONTROLS_IF_MSG_THEN': 'BKY_CONTROLS_IF_MSG_THEN_ANGEL',
+        'CONTROLS_IF_MSG_ELSEIF': 'BKY_CONTROLS_IF_MSG_ELSEIF_ANGEL',
+        'CONTROLS_IF_MSG_ELSE': 'BKY_CONTROLS_IF_MSG_ELSE_ANGEL',
+    }
+};
+
+// Function to apply the chosen style
+function applyStyle(themeName, isInitialLoad = false) {
+    Blockly.Msg.STYLE_MODE = themeName; // Set global style mode
+    let currentXml;
+    if (!isInitialLoad) {
+        currentXml = Blockly.Xml.workspaceToDom(workspace);
+    }
+
+    // Apply color theme
+    const themeToApply = themeName === 'angel' ? angelTheme : engineerTheme;
+    workspace.setTheme(themeToApply);
+
+    // Apply text messages
+    const currentMessageMap = blockMessageStylesMap[themeName];
+    if (currentMessageMap) {
+        for (const genericBlocklyMsgKey in currentMessageMap) {
+            if (Object.prototype.hasOwnProperty.call(currentMessageMap, genericBlocklyMsgKey)) {
+                Blockly.Msg[genericBlocklyMsgKey] = Blockly.Msg[currentMessageMap[genericBlocklyMsgKey]];
+            }
+        }
+    }
+
+    // Dynamically set the message for the built-in text_join block
+    if (themeName === 'angel') {
+        Blockly.Msg.TEXT_JOIN_TITLE_CREATEWITH = Blockly.Msg.BKY_TEXT_JOIN_MSG_ANGEL;
+    } else { // engineer
+        Blockly.Msg.TEXT_JOIN_TITLE_CREATEWITH = Blockly.Msg.BKY_TEXT_JOIN_MSG_ENGINEER;
+    }
+
+    // Reload workspace to apply changes, but only if it's not the initial load
+    if (!isInitialLoad) {
+        workspace.clear();
+        Blockly.Xml.domToWorkspace(currentXml, workspace);
+    }
+
+    // Save preference
+    localStorage.setItem('blocklyTheme', themeName);
+}
+
+
 // Initializing a basic Blockly workspace
 const toolboxXml = document.getElementById('toolbox-xml').textContent;
 const workspace = Blockly.inject('blocklyDiv', {
@@ -39,6 +307,9 @@ const workspace = Blockly.inject('blocklyDiv', {
 workspace.registerButtonCallback('CREATE_VARIABLE', function(button) {
     Blockly.Variables.createVariableButtonHandler(workspace);
 });
+
+// ... rest of main.js content
+
 
 // --- State and Communication ---
 const vscode = acquireVsCodeApi();
@@ -85,6 +356,10 @@ window.addEventListener('message', event => {
         case 'initializeWorkspace': {
             Blockly.Events.disable();
             try {
+                // Apply theme before loading XML
+                const savedTheme = localStorage.getItem('blocklyTheme') || 'engineer';
+                applyStyle(savedTheme, true); // Apply style without reloading workspace
+
                 workspace.clear();
                 const xml = Blockly.utils.xml.textToDom(message.xml);
                 Blockly.Xml.domToWorkspace(xml, workspace);
@@ -175,7 +450,7 @@ function updateOrphanBlocks(event) {
         'custom_procedures_defreturn',
         'custom_procedures_defnoreturn',
         'coding_raw_definition', // This is for global raw code, so it can be a root.
-        'array_declare', // Allow global array declarations as root blocks.
+        'array_declare_global', // Allow global array declarations as root blocks.
         'variables_declare_global' // Allow global variable declarations as root blocks.
     ];
 
@@ -185,12 +460,7 @@ function updateOrphanBlocks(event) {
         let isAllowedRoot = false;
 
         if (allowedRootBlocks.includes(topBlock.type)) {
-            // For array_declare, only allow as root if scope is GLOBAL
-            if (topBlock.type === 'array_declare' && topBlock.getFieldValue('SCOPE') === 'LOCAL') {
-                isAllowedRoot = false;
-            } else {
-                isAllowedRoot = true;
-            }
+            isAllowedRoot = true;
         }
 
         if (!isAllowedRoot) {
@@ -208,6 +478,20 @@ workspace.addChangeListener(updateOrphanBlocks);
 // --- Initial Load ---
 // Signal to the extension that the webview is ready to be initialized.
 vscode.postMessage({ command: 'webviewReady' });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        // Set initial state of toggle based on saved theme
+        const savedTheme = localStorage.getItem('blocklyTheme') || 'engineer';
+        themeToggle.checked = (savedTheme === 'angel');
+
+        themeToggle.addEventListener('change', (event) => {
+            const newTheme = event.target.checked ? 'angel' : 'engineer';
+            applyStyle(newTheme);
+        });
+    }
+});
 
 document.getElementById('saveButton').addEventListener('click', () => {
     const xml = Blockly.Xml.workspaceToDom(workspace);
