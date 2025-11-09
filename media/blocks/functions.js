@@ -150,7 +150,7 @@ Blockly.Blocks['custom_procedures_callnoreturn_manual'] = Object.assign({}, CUST
     } else { // Engineer
         this.appendDummyInput('TOPROW')
             .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
-        this.setColour('%{BKY_PROCEDURES_HUE}');
+        this.setColour('%{BKY_FUNCTIONS_HUE}');
     }
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
@@ -178,7 +178,7 @@ Blockly.Blocks['custom_procedures_callreturn_manual'] = Object.assign({}, CUSTOM
     } else { // Engineer
         this.appendDummyInput('TOPROW')
             .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
-        this.setColour('%{BKY_PROCEDURES_HUE}');
+        this.setColour('%{BKY_FUNCTIONS_HUE}');
     }
     this.setOutput(true, null);
     this.setTooltip(Blockly.Msg['PROCEDURES_CALLRETURN_TOOLTIP']);
@@ -202,7 +202,7 @@ Blockly.Blocks['custom_procedures_mutatorcontainer'] = {
           .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER);
     }
     this.appendStatementInput('STACK');
-    this.setColour('%{BKY_PROCEDURES_HUE}');
+    this.setColour('%{BKY_FUNCTIONS_HUE}');
     this.setTooltip(Blockly.Msg['PROCEDURES_MUTATORCONTAINER_TOOLTIP']);
     this.contextMenu = false;
   },
@@ -233,7 +233,7 @@ Blockly.Blocks['custom_procedures_mutatorarg'] = {
     }
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setColour('%{BKY_PROCEDURES_HUE}');
+    this.setColour('%{BKY_FUNCTIONS_HUE}');
     this.setTooltip(Blockly.Msg['PROCEDURES_MUTATORARG_TOOLTIP']);
     this.contextMenu = false;
   },
@@ -253,7 +253,7 @@ const CUSTOM_PROCEDURES_DEF_COMMON = {
         Blockly.Msg['PROCEDURES_DEFNORETURN_COMMENT']) {
       this.setCommentText(Blockly.Msg['PROCEDURES_DEFNORETURN_COMMENT']);
     }
-    this.setColour('%{BKY_PROCEDURES_HUE}');
+    this.setColour('%{BKY_FUNCTIONS_HUE}');
     this.setTooltip(Blockly.Msg['PROCEDURES_DEFNORETURN_TOOLTIP']);
     this.setHelpUrl(Blockly.Msg['PROCEDURES_DEFNORETURN_HELPURL']);
     this.arguments_ = [];
@@ -540,7 +540,7 @@ Blockly.Blocks['custom_procedures_defreturn'] =
                     .appendField('(')
                     .appendField('', 'PARAMS')
                     .appendField(') {');
-                this.setColour('%{BKY_PROCEDURES_HUE}');
+                this.setColour('%{BKY_FUNCTIONS_HUE}');
             }
 
             this.setInputsInline(true);
@@ -602,7 +602,7 @@ const CUSTOM_PROCEDURES_CALL_COMMON = {
     this.appendDummyInput('TOPROW')
         .appendField('', 'NAME');
     this.setHelpUrl(Blockly.Msg['PROCEDURES_CALLNORETURN_HELPURL']);
-    this.setColour('%{BKY_PROCEDURES_HUE}');
+    this.setColour('%{BKY_FUNCTIONS_HUE}');
     this.arguments_ = [];
     this.argVarModels_ = [];
     this.quarkConnections_ = {};
@@ -765,7 +765,7 @@ Blockly.Blocks['custom_procedures_callnoreturn'] =
             .appendField('', 'NAME');
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setColour('%{BKY_PROCEDURES_HUE}');
+        this.setColour('%{BKY_FUNCTIONS_HUE}');
         this.setHelpUrl(Blockly.Msg['PROCEDURES_CALLNORETURN_HELPURL']);
         this.arguments_ = [];
         this.argVarModels_ = [];
@@ -782,7 +782,7 @@ Blockly.Blocks['custom_procedures_callreturn'] =
         this.appendDummyInput('TOPROW')
             .appendField('', 'NAME');
         this.setOutput(true);
-        this.setColour('%{BKY_PROCEDURES_HUE}');
+        this.setColour('%{BKY_FUNCTIONS_HUE}');
         this.setHelpUrl(Blockly.Msg['PROCEDURES_CALLRETURN_HELPURL']);
         this.arguments_ = [];
         this.argVarModels_ = [];
@@ -802,7 +802,7 @@ Blockly.Blocks['custom_procedures_return'] = {
     } else { // Engineer
         this.appendValueInput('VALUE')
             .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER.split('%1')[0]);
-        this.setColour('%{BKY_PROCEDURES_HUE}');
+        this.setColour('%{BKY_FUNCTIONS_HUE}');
     }
 
     this.setInputsInline(true);

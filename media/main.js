@@ -1,9 +1,17 @@
-// Register Blockly field plugins
-// Try to get the field classes from window.
+/**
+ * @fileoverview This is the main script for the piBlockly webview. It handles:
+ * 1.  Defining and managing Blockly themes (Engineer and Angel).
+ * 2.  Initializing the Blockly workspace.
+ * 3.  Handling communication with the VS Code extension backend (e.g., loading/saving files).
+ * 4.  Managing UI elements like the theme switcher and toolbar buttons.
+ * 5.  Implementing application logic like code generation and orphan block detection.
+ */
+
+// Register Blockly field plugins if they exist on the window object.
+// These are custom fields used by some blocks.
 const FieldColour = window.FieldColour || window.Blockly.FieldColour;
 const FieldMultilineInput = window.FieldMultilineInput || window.Blockly.FieldMultilineInput;
 
-// Register the fields using Blockly.registry.register
 if (FieldColour) {
     Blockly.registry.register('field', 'field_colour', FieldColour);
 }
@@ -11,106 +19,99 @@ if (FieldMultilineInput) {
     Blockly.registry.register('field', 'field_multilineinput', FieldMultilineInput);
 }
 
-// --- Theme Definitions ---
-const engineerTheme = Blockly.Theme.defineTheme('engineer', {
-  'base': Blockly.Themes.Classic,
-  'categoryStyles': {
-    'arduino_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
-    'arduino_structure_category': { 'colour': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
-    'arduino_io_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
-    'arduino_time_category': { 'colour': Blockly.Msg.ARDUINO_TIME_HUE },
-    'arduino_serial_category': { 'colour': Blockly.Msg.ARDUINO_SERIAL_HUE },
-    'logic_category': { 'colour': Blockly.Msg.LOGIC_HUE },
-    'loop_category': { 'colour': Blockly.Msg.LOOPS_HUE },
-    'math_category': { 'colour': Blockly.Msg.MATH_HUE },
-    'text_category': { 'colour': Blockly.Msg.TEXT_HUE },
-    'variable_category': { 'colour': Blockly.Msg.VARIABLES_HUE },
-    'procedure_category': { 'colour': Blockly.Msg.FUNCTIONS_HUE },
-    'picar_category': { 'colour': Blockly.Msg.PICAR_HUE },
-    'coding_category': { 'colour': Blockly.Msg.CODING_HUE },
-    'array_category': { 'colour': Blockly.Msg.ARRAY_HUE },
-  },
-  'blockStyles': {
-    'initializes_block': { 'colourPrimary': Blockly.Msg.ARDUINO_STRUCTURE_HUE }, // Placeholder for actual block, will be removed if not directly used
-    'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE },
-    'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE },
-    'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },
-    'arduino_time_block': { 'colourPrimary': Blockly.Msg.ARDUINO_TIME_HUE },
-    'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ARDUINO_SERIAL_HUE },
-    'arduino_math_block': { 'colourPrimary': Blockly.Msg.ARDUINO_MATH_HUE },
-    'logic_blocks': { 'colourPrimary': Blockly.Msg.LOGIC_HUE },
-    'loop_blocks': { 'colourPrimary': Blockly.Msg.LOOPS_HUE },
-    'math_blocks': { 'colourPrimary': Blockly.Msg.MATH_HUE },
-    'text_blocks': { 'colourPrimary': Blockly.Msg.TEXT_HUE },
-    'variable_blocks': { 'colourPrimary': Blockly.Msg.VARIABLES_HUE },
-    'procedure_blocks': { 'colourPrimary': Blockly.Msg.FUNCTIONS_HUE },
+// =============================================================================
+// --- THEME DEFINITIONS ---
+// =============================================================================
+// Defines the visual styles for categories and blocks. All colors are referenced
+// from language files (e.g., en.js) via `Blockly.Msg` to allow for easy customization.
 
-    'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE },
-    'coding_block': { 'colourPrimary': Blockly.Msg.CODING_HUE },
-    'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE },
-  },
+const engineerTheme = Blockly.Theme.defineTheme('engineer', {
+    'base': Blockly.Themes.Classic,
+    'categoryStyles': {
+        'arduino_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
+        'arduino_structure_category': { 'colour': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
+        'arduino_io_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
+        'arduino_time_category': { 'colour': Blockly.Msg.ARDUINO_TIME_HUE },
+        'arduino_serial_category': { 'colour': Blockly.Msg.ARDUINO_SERIAL_HUE },
+        'picar_category': { 'colour': Blockly.Msg.PICAR_HUE },
+        'coding_category': { 'colour': Blockly.Msg.CODING_HUE },
+        'logic_category': { 'colour': Blockly.Msg.LOGIC_HUE },
+        'loop_category': { 'colour': Blockly.Msg.LOOPS_HUE },
+        'math_category': { 'colour': Blockly.Msg.MATH_HUE },
+        'text_category': { 'colour': Blockly.Msg.TEXT_HUE },
+        'variable_category': { 'colour': Blockly.Msg.VARIABLES_HUE },
+        'array_category': { 'colour': Blockly.Msg.ARRAY_HUE },
+        'procedure_category': { 'colour': Blockly.Msg.FUNCTIONS_HUE },
+    },
+    'blockStyles': {
+        'initializes_block': { 'colourPrimary': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
+        'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE },
+        'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE },
+        'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },
+        'arduino_time_block': { 'colourPrimary': Blockly.Msg.ARDUINO_TIME_HUE },
+        'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ARDUINO_SERIAL_HUE },
+        'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE },
+        'coding_block': { 'colourPrimary': Blockly.Msg.CODING_HUE },
+        'logic_blocks': { 'colourPrimary': Blockly.Msg.LOGIC_HUE },
+        'loop_blocks': { 'colourPrimary': Blockly.Msg.LOOPS_HUE },
+        'math_blocks': { 'colourPrimary': Blockly.Msg.MATH_HUE },
+        'text_blocks': { 'colourPrimary': Blockly.Msg.TEXT_HUE },
+        'variable_blocks': { 'colourPrimary': Blockly.Msg.VARIABLES_HUE },
+        'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE },
+        'procedure_blocks': { 'colourPrimary': Blockly.Msg.FUNCTIONS_HUE },
+    },
 });
 
 const angelTheme = Blockly.Theme.defineTheme('angel', {
-  'base': Blockly.Themes.Classic,
-  'categoryStyles': {
-    'arduino_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
-    'arduino_structure_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
-    'arduino_io_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
-    'arduino_time_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
-    'arduino_serial_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
-    'logic_category': { 'colour': Blockly.Msg.LOGIC_HUE },
-    'loop_category': { 'colour': Blockly.Msg.LOOPS_HUE },
-    'math_category': { 'colour': Blockly.Msg.MATH_HUE },
-    // ...
-    'math_blocks': { 'colourPrimary': Blockly.Msg.MATH_HUE },
-    'text_category': { 'colour': Blockly.Msg.TEXT_HUE },
-    // ...
-    'text_blocks': { 'colourPrimary': Blockly.Msg.TEXT_HUE },
-    'variable_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_VARIABLES_HUE },
-    'procedure_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
-    'coding_blocks': { 'colourPrimary': 140 },
-    
-    'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE },
-    'coding_block': { 'colourPrimary': Blockly.Msg.CODING_HUE },
-    'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE },
-  },
+    'base': Blockly.Themes.Classic,
+    'categoryStyles': {
+        'arduino_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
+        'arduino_structure_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_STRUCTURE_HUE },
+        'arduino_io_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_IO_HUE },
+        'arduino_time_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_TIME_HUE },
+        'arduino_serial_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_SERIAL_HUE },
+        'picar_category': { 'colour': Blockly.Msg.ANGEL_PICAR_HUE },
+        'coding_category': { 'colour': Blockly.Msg.ANGEL_CODING_HUE },
+        'logic_category': { 'colour': Blockly.Msg.ANGEL_LOGIC_HUE },
+        'loop_category': { 'colour': Blockly.Msg.ANGEL_LOOPS_HUE },
+        'math_category': { 'colour': Blockly.Msg.ANGEL_MATH_HUE },
+        'text_category': { 'colour': Blockly.Msg.ANGEL_TEXT_HUE },
+        'variable_category': { 'colour': Blockly.Msg.ANGEL_VARIABLES_HUE },
+        'array_category': { 'colour': Blockly.Msg.ANGEL_ARRAY_HUE },
+        'procedure_category': { 'colour': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
+    },
+    'blockStyles': {
+        // Add missing styles from engineerTheme, adapted for Angel theme
+        'initializes_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_STRUCTURE_HUE },
+        'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE }, // Using common HUE
+        'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE }, // Using common HUE
+        'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },   // Using common HUE
+        'arduino_time_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_TIME_HUE },
+        'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_SERIAL_HUE },
+        'logic_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOGIC_HUE },
+        'loop_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOOPS_HUE },
+        
+        // Keep existing Angel styles, including user-specified exceptions
+        'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE }, // Exception: Keep engineer color
+        'coding_block': { 'colourPrimary': Blockly.Msg.ANGEL_CODING_HUE },
+        'text_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_TEXT_HUE },
+        'math_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_MATH_HUE },
+        'variable_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_VARIABLES_HUE },
+        'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE }, // Exception: Keep engineer color
+        'procedure_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
+    },
 });
 
-// A map to store the different message style prefixes (for switching block text)
+/**
+ * A map that defines which language file keys to use for block text in each theme.
+ * This allows the text on blocks (e.g., "if", "do", "set") to change when the theme changes.
+ * The key is the generic Blockly.Msg key, and the value is the theme-specific key.
+ */
 const blockMessageStylesMap = {
     'engineer': {
-        'INITIALIZES_SETUP_APPENDTEXT': 'BKY_INITIALIZES_SETUP_MSG_ENGINEER', // This is the Msg key that changes
+        // Arduino Structure
+        'INITIALIZES_SETUP_APPENDTEXT': 'BKY_INITIALIZES_SETUP_MSG_ENGINEER',
         'INITIALIZES_LOOP_APPENDTEXT': 'BKY_INITIALIZES_LOOP_MSG_ENGINEER',
-        // Logic
-        'LOGIC_COMPARE_MESSAGE': 'BKY_LOGIC_COMPARE_MSG_ENGINEER',
-        'LOGIC_OPERATION_MESSAGE': 'BKY_LOGIC_OPERATION_MSG_ENGINEER',
-        'LOGIC_NEGATE_MESSAGE': 'BKY_LOGIC_NEGATE_MSG_ENGINEER',
-        // Logic Operation Operators
-        'LOGIC_OPERATION_AND': 'BKY_LOGIC_OPERATION_AND_ENGINEER',
-        'LOGIC_OPERATION_OR': 'BKY_LOGIC_OPERATION_OR_ENGINEER',
-        // Logic Boolean
-        'LOGIC_BOOLEAN_TRUE': 'BKY_LOGIC_BOOLEAN_TRUE_ENGINEER',
-        'LOGIC_BOOLEAN_FALSE': 'BKY_LOGIC_BOOLEAN_FALSE_ENGINEER',
-        // Loops
-        'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ENGINEER',
-        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ENGINEER',
-        'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ENGINEER',
-        // Variables
-        'VARIABLES_DECLARE_GLOBAL_MESSAGE': 'BKY_VARIABLES_DECLARE_GLOBAL_MSG_ENGINEER',
-        'VARIABLES_DECLARE_LOCAL_MESSAGE': 'BKY_VARIABLES_DECLARE_LOCAL_MSG_ENGINEER',
-        'VARIABLES_SET_MESSAGE': 'BKY_VARIABLES_SET_MSG_ENGINEER',
-        // Text
-        'TEXT_APPEND_MESSAGE': 'BKY_TEXT_APPEND_MSG_ENGINEER',
-        'TEXT_LENGTH_MESSAGE': 'BKY_TEXT_LENGTH_MESSAGE_ENGINEER',
-        // Functions (these are complex, but we need generic keys for them)
-        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER',
         // Arduino IO
         'ARDUINO_PIN_MODE_MSG': 'BKY_ARDUINO_PIN_MODE_MSG_ENGINEER',
         'ARDUINO_DIGITAL_READ_MSG': 'BKY_ARDUINO_DIGITAL_READ_MSG_ENGINEER',
@@ -128,81 +129,69 @@ const blockMessageStylesMap = {
         'ARDUINO_SERIAL_PRINTLN_MSG': 'BKY_ARDUINO_SERIAL_PRINTLN_MSG_ENGINEER',
         'ARDUINO_SERIAL_AVAILABLE_MSG': 'BKY_ARDUINO_SERIAL_AVAILABLE_MSG_ENGINEER',
         'ARDUINO_SERIAL_READ_MSG': 'BKY_ARDUINO_SERIAL_READ_MSG_ENGINEER',
+
         // Coding
         'CODING_RAW_STATEMENT_MESSAGE': 'BKY_CODING_RAW_STATEMENT_ENGINEER',
         'CODING_RAW_INPUT_MESSAGE': 'BKY_CODING_RAW_INPUT_ENGINEER',
         'CODING_RAW_DEFINITION_MESSAGE': 'BKY_CODING_RAW_DEFINITION_ENGINEER',
         'CODING_RAW_WRAPPER_TOP_MESSAGE': 'BKY_CODING_RAW_WRAPPER_TOP_ENGINEER',
         'CODING_RAW_WRAPPER_BOTTOM_MESSAGE': 'BKY_CODING_RAW_WRAPPER_BOTTOM_ENGINEER',
-        // Arduino Math
-        'ARDUINO_CONSTRAIN_MSG': 'BKY_ARDUINO_CONSTRAIN_MSG_ENGINEER',
-        'ARDUINO_MAP_MSG': 'BKY_ARDUINO_MAP_MSG_ENGINEER',
-        'ARDUINO_MATH_RANDOM_SEED_MSG': 'BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ENGINEER',
-        'ARDUINO_MATH_RANDOM_INT_MSG': 'BKY_ARDUINO_MATH_RANDOM_INT_MSG_ENGINEER',
-        // Controls If
+
+        // Logic
         'CONTROLS_IF_MSG_IF': 'BKY_CONTROLS_IF_MSG_IF_ENGINEER',
         'CONTROLS_IF_MSG_THEN': 'BKY_CONTROLS_IF_MSG_THEN_ENGINEER',
         'CONTROLS_IF_MSG_ELSEIF': 'BKY_CONTROLS_IF_MSG_ELSEIF_ENGINEER',
         'CONTROLS_IF_MSG_ELSE': 'BKY_CONTROLS_IF_MSG_ELSE_ENGINEER',
-        // Array Blocks
-        'ARRAY_DECLARE_GLOBAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TITLE_ENGINEER',
-        'ARRAY_DECLARE_GLOBAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TOOLTIP_ENGINEER',
-        'ARRAY_DECLARE_LOCAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TITLE_ENGINEER',
-        'ARRAY_DECLARE_LOCAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TOOLTIP_ENGINEER',
-        'ARRAY_GET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_GET_BRACKET_OPEN_ENGINEER',
-        'ARRAY_GET_BRACKET_CLOSE_GENERIC': 'BKY_ARRAY_GET_BRACKET_CLOSE_ENGINEER',
-        'ARRAY_GET_TOOLTIP_GENERIC': 'BKY_ARRAY_GET_TOOLTIP_ENGINEER',
-        'ARRAY_SET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_SET_BRACKET_OPEN_ENGINEER',
-        'ARRAY_SET_BRACKET_CLOSE_EQUALS_GENERIC': 'BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ENGINEER',
-        'ARRAY_SET_TOOLTIP_GENERIC': 'BKY_ARRAY_SET_TOOLTIP_ENGINEER',
-        'ARRAY_LENGTH_TITLE_GENERIC': 'BKY_ARRAY_LENGTH_TITLE_ENGINEER',
-        'ARRAY_LENGTH_TOOLTIP_GENERIC': 'BKY_ARRAY_LENGTH_TOOLTIP_ENGINEER',
+        'LOGIC_COMPARE_MESSAGE': 'BKY_LOGIC_COMPARE_MSG_ENGINEER',
+        'LOGIC_OPERATION_MESSAGE': 'BKY_LOGIC_OPERATION_MSG_ENGINEER',
+        'LOGIC_NEGATE_MESSAGE': 'BKY_LOGIC_NEGATE_MSG_ENGINEER',
+        'LOGIC_OPERATION_AND': 'BKY_LOGIC_OPERATION_AND_ENGINEER',
+        'LOGIC_OPERATION_OR': 'BKY_LOGIC_OPERATION_OR_ENGINEER',
+        'LOGIC_BOOLEAN_TRUE': 'BKY_LOGIC_BOOLEAN_TRUE_ENGINEER',
+        'LOGIC_BOOLEAN_FALSE': 'BKY_LOGIC_BOOLEAN_FALSE_ENGINEER',
+
+        // Loops
+        'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ENGINEER',
+        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ENGINEER',
+        'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ENGINEER',
+
+        // Math
+        'ARDUINO_CONSTRAIN_MSG': 'BKY_ARDUINO_CONSTRAIN_MSG_ENGINEER',
+        'ARDUINO_MAP_MSG': 'BKY_ARDUINO_MAP_MSG_ENGINEER',
+        'ARDUINO_MATH_RANDOM_SEED_MSG': 'BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ENGINEER',
+        'ARDUINO_MATH_RANDOM_INT_MSG': 'BKY_ARDUINO_MATH_RANDOM_INT_MSG_ENGINEER',
+
+        // Text
+        'TEXT_APPEND_MESSAGE': 'BKY_TEXT_APPEND_MSG_ENGINEER',
+        'TEXT_LENGTH_MESSAGE': 'BKY_TEXT_LENGTH_MESSAGE_ENGINEER',
+
+        // Variables
+        'VARIABLES_DECLARE_GLOBAL_MESSAGE': 'BKY_VARIABLES_DECLARE_GLOBAL_MSG_ENGINEER',
+        'VARIABLES_DECLARE_LOCAL_MESSAGE': 'BKY_VARIABLES_DECLARE_LOCAL_MSG_ENGINEER',
+        'VARIABLES_SET_MESSAGE': 'BKY_VARIABLES_SET_MSG_ENGINEER',
+
+        // Array
+        'ARRAY_DECLARE_GLOBAL_TITLE': 'BKY_ARRAY_DECLARE_GLOBAL_TITLE_ENGINEER',
+        'ARRAY_DECLARE_LOCAL_TITLE': 'BKY_ARRAY_DECLARE_LOCAL_TITLE_ENGINEER',
+        'ARRAY_GET_BRACKET_OPEN': 'BKY_ARRAY_GET_BRACKET_OPEN_ENGINEER',
+        'ARRAY_GET_BRACKET_CLOSE': 'BKY_ARRAY_GET_BRACKET_CLOSE_ENGINEER',
+        'ARRAY_SET_BRACKET_OPEN': 'BKY_ARRAY_SET_BRACKET_OPEN_ENGINEER',
+        'ARRAY_SET_BRACKET_CLOSE_EQUALS': 'BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ENGINEER',
+        'ARRAY_LENGTH_TITLE': 'BKY_ARRAY_LENGTH_TITLE_ENGINEER',
+
+        // Functions
+        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ENGINEER',
+        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER',
     },
     'angel': {
-        'ARRAY_DECLARE_GLOBAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TITLE_ANGEL',
-        'ARRAY_DECLARE_GLOBAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_GLOBAL_TOOLTIP_ANGEL',
-        'ARRAY_DECLARE_LOCAL_TITLE_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TITLE_ANGEL',
-        'ARRAY_DECLARE_LOCAL_TOOLTIP_GENERIC': 'BKY_ARRAY_DECLARE_LOCAL_TOOLTIP_ANGEL',
-        'ARRAY_GET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_GET_BRACKET_OPEN_ANGEL',
-        'ARRAY_GET_BRACKET_CLOSE_GENERIC': 'BKY_ARRAY_GET_BRACKET_CLOSE_ANGEL',
-        'ARRAY_GET_TOOLTIP_GENERIC': 'BKY_ARRAY_GET_TOOLTIP_ANGEL',
-        'ARRAY_SET_BRACKET_OPEN_GENERIC': 'BKY_ARRAY_SET_BRACKET_OPEN_ANGEL',
-        'ARRAY_SET_BRACKET_CLOSE_EQUALS_GENERIC': 'BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ANGEL',
-        'ARRAY_SET_TOOLTIP_GENERIC': 'BKY_ARRAY_SET_TOOLTIP_ANGEL',
-        'ARRAY_LENGTH_TITLE_GENERIC': 'BKY_ARRAY_LENGTH_TITLE_ANGEL',
-        'ARRAY_LENGTH_TOOLTIP_GENERIC': 'BKY_ARRAY_LENGTH_TOOLTIP_ANGEL',
-
+        // Arduino Structure
         'INITIALIZES_SETUP_APPENDTEXT': 'BKY_INITIALIZES_SETUP_MSG_ANGEL',
         'INITIALIZES_LOOP_APPENDTEXT': 'BKY_INITIALIZES_LOOP_MSG_ANGEL',
-        // Logic
-        'LOGIC_COMPARE_MESSAGE': 'BKY_LOGIC_COMPARE_MSG_ANGEL',
-        'LOGIC_OPERATION_MESSAGE': 'BKY_LOGIC_OPERATION_MSG_ANGEL',
-        'LOGIC_NEGATE_MESSAGE': 'BKY_LOGIC_NEGATE_MSG_ANGEL',
-        // Logic Operation Operators
-        'LOGIC_OPERATION_AND': 'BKY_LOGIC_OPERATION_AND_ANGEL',
-        'LOGIC_OPERATION_OR': 'BKY_LOGIC_OPERATION_OR_ANGEL',
-        // Logic Boolean
-        'LOGIC_BOOLEAN_TRUE': 'BKY_LOGIC_BOOLEAN_TRUE_ANGEL',
-        'LOGIC_BOOLEAN_FALSE': 'BKY_LOGIC_BOOLEAN_FALSE_ANGEL',
-        // Loops
-        'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ANGEL',
-        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ANGEL',
-        'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ANGEL',
-        // Variables
-        'VARIABLES_DECLARE_GLOBAL_MESSAGE': 'BKY_VARIABLES_DECLARE_GLOBAL_MSG_ANGEL',
-        'VARIABLES_DECLARE_LOCAL_MESSAGE': 'BKY_VARIABLES_DECLARE_LOCAL_MSG_ANGEL',
-        'VARIABLES_SET_MESSAGE': 'BKY_VARIABLES_SET_MSG_ANGEL',
-        // Text
-        'TEXT_APPEND_MESSAGE': 'BKY_TEXT_APPEND_MSG_ANGEL',
-        'TEXT_LENGTH_MESSAGE': 'BKY_TEXT_LENGTH_MESSAGE_ANGEL',
-        // Functions
-        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ANGEL',
         // Arduino IO
         'ARDUINO_PIN_MODE_MSG': 'BKY_ARDUINO_PIN_MODE_MSG_ANGEL',
         'ARDUINO_DIGITAL_READ_MSG': 'BKY_ARDUINO_DIGITAL_READ_MSG_ANGEL',
@@ -220,38 +209,88 @@ const blockMessageStylesMap = {
         'ARDUINO_SERIAL_PRINTLN_MSG': 'BKY_ARDUINO_SERIAL_PRINTLN_MSG_ANGEL',
         'ARDUINO_SERIAL_AVAILABLE_MSG': 'BKY_ARDUINO_SERIAL_AVAILABLE_MSG_ANGEL',
         'ARDUINO_SERIAL_READ_MSG': 'BKY_ARDUINO_SERIAL_READ_MSG_ANGEL',
+
         // Coding
         'CODING_RAW_STATEMENT_MESSAGE': 'BKY_CODING_RAW_STATEMENT_ANGEL',
         'CODING_RAW_INPUT_MESSAGE': 'BKY_CODING_RAW_INPUT_ANGEL',
         'CODING_RAW_DEFINITION_MESSAGE': 'BKY_CODING_RAW_DEFINITION_ANGEL',
         'CODING_RAW_WRAPPER_TOP_MESSAGE': 'BKY_CODING_RAW_WRAPPER_TOP_ANGEL',
         'CODING_RAW_WRAPPER_BOTTOM_MESSAGE': 'BKY_CODING_RAW_WRAPPER_BOTTOM_ANGEL',
-        // Arduino Math
-        'ARDUINO_CONSTRAIN_MSG': 'BKY_ARDUINO_CONSTRAIN_MSG_ANGEL',
-        'ARDUINO_MAP_MSG': 'BKY_ARDUINO_MAP_MSG_ANGEL',
-        'ARDUINO_MATH_RANDOM_SEED_MSG': 'BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ANGEL',
-        'ARDUINO_MATH_RANDOM_INT_MSG': 'BKY_ARDUINO_MATH_RANDOM_INT_MSG_ANGEL',
-        // Controls If
+
+        // Logic
         'CONTROLS_IF_MSG_IF': 'BKY_CONTROLS_IF_MSG_IF_ANGEL',
         'CONTROLS_IF_MSG_THEN': 'BKY_CONTROLS_IF_MSG_THEN_ANGEL',
         'CONTROLS_IF_MSG_ELSEIF': 'BKY_CONTROLS_IF_MSG_ELSEIF_ANGEL',
         'CONTROLS_IF_MSG_ELSE': 'BKY_CONTROLS_IF_MSG_ELSE_ANGEL',
+        'LOGIC_COMPARE_MESSAGE': 'BKY_LOGIC_COMPARE_MSG_ANGEL',
+        'LOGIC_OPERATION_MESSAGE': 'BKY_LOGIC_OPERATION_MSG_ANGEL',
+        'LOGIC_NEGATE_MESSAGE': 'BKY_LOGIC_NEGATE_MSG_ANGEL',
+        'LOGIC_OPERATION_AND': 'BKY_LOGIC_OPERATION_AND_ANGEL',
+        'LOGIC_OPERATION_OR': 'BKY_LOGIC_OPERATION_OR_ANGEL',
+        'LOGIC_BOOLEAN_TRUE': 'BKY_LOGIC_BOOLEAN_TRUE_ANGEL',
+        'LOGIC_BOOLEAN_FALSE': 'BKY_LOGIC_BOOLEAN_FALSE_ANGEL',
+
+        // Loops
+        'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ANGEL',
+        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ANGEL',
+        'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ANGEL',
+
+        // Math
+        'ARDUINO_CONSTRAIN_MSG': 'BKY_ARDUINO_CONSTRAIN_MSG_ANGEL',
+        'ARDUINO_MAP_MSG': 'BKY_ARDUINO_MAP_MSG_ANGEL',
+        'ARDUINO_MATH_RANDOM_SEED_MSG': 'BKY_ARDUINO_MATH_RANDOM_SEED_MSG_ANGEL',
+        'ARDUINO_MATH_RANDOM_INT_MSG': 'BKY_ARDUINO_MATH_RANDOM_INT_MSG_ANGEL',
+
+        // Text
+        'TEXT_APPEND_MESSAGE': 'BKY_TEXT_APPEND_MSG_ANGEL',
+        'TEXT_LENGTH_MESSAGE': 'BKY_TEXT_LENGTH_MESSAGE_ANGEL',
+
+        // Variables
+        'VARIABLES_DECLARE_GLOBAL_MESSAGE': 'BKY_VARIABLES_DECLARE_GLOBAL_MSG_ANGEL',
+        'VARIABLES_DECLARE_LOCAL_MESSAGE': 'BKY_VARIABLES_DECLARE_LOCAL_MSG_ANGEL',
+        'VARIABLES_SET_MESSAGE': 'BKY_VARIABLES_SET_MSG_ANGEL',
+
+        // Array
+        'ARRAY_DECLARE_GLOBAL_TITLE': 'BKY_ARRAY_DECLARE_GLOBAL_TITLE_ANGEL',
+        'ARRAY_DECLARE_LOCAL_TITLE': 'BKY_ARRAY_DECLARE_LOCAL_TITLE_ANGEL',
+        'ARRAY_GET_BRACKET_OPEN': 'BKY_ARRAY_GET_BRACKET_OPEN_ANGEL',
+        'ARRAY_GET_BRACKET_CLOSE': 'BKY_ARRAY_GET_BRACKET_CLOSE_ANGEL',
+        'ARRAY_SET_BRACKET_OPEN': 'BKY_ARRAY_SET_BRACKET_OPEN_ANGEL',
+        'ARRAY_SET_BRACKET_CLOSE_EQUALS': 'BKY_ARRAY_SET_BRACKET_CLOSE_EQUALS_ANGEL',
+        'ARRAY_LENGTH_TITLE': 'BKY_ARRAY_LENGTH_TITLE_ANGEL',
+
+        // Functions
+        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ANGEL',
+        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ANGEL',
     }
 };
 
-// Function to apply the chosen style
+/**
+ * Applies the selected theme (colors and text) to the Blockly workspace.
+ * @param {string} themeName The name of the theme to apply ('engineer' or 'angel').
+ * @param {boolean} isInitialLoad True if this is the first load, to prevent unnecessary workspace reloads.
+ */
 function applyStyle(themeName, isInitialLoad = false) {
-    Blockly.Msg.STYLE_MODE = themeName; // Set global style mode
+    // Set a global variable that block definitions can use to know the current style.
+    Blockly.Msg.STYLE_MODE = themeName;
     let currentXml;
+    // If this is not the initial load, we need to save the current workspace state
+    // because changing block messages requires a full reload of the workspace.
     if (!isInitialLoad) {
         currentXml = Blockly.Xml.workspaceToDom(workspace);
     }
 
-    // Apply color theme
+    // 1. Apply the color theme. This changes category and block colors.
     const themeToApply = themeName === 'angel' ? angelTheme : engineerTheme;
     workspace.setTheme(themeToApply);
 
-    // Apply text messages
+    // 2. Apply the text messages. This dynamically overwrites generic Blockly.Msg keys
+    //    with the values from our theme-specific keys.
     const currentMessageMap = blockMessageStylesMap[themeName];
     if (currentMessageMap) {
         for (const genericBlocklyMsgKey in currentMessageMap) {
@@ -261,33 +300,38 @@ function applyStyle(themeName, isInitialLoad = false) {
         }
     }
 
-    // Dynamically set the message for the built-in text_join block
+    // 3. Handle special cases for built-in blocks that don't use the standard message keys.
     if (themeName === 'angel') {
         Blockly.Msg.TEXT_JOIN_TITLE_CREATEWITH = Blockly.Msg.BKY_TEXT_JOIN_MSG_ANGEL;
     } else { // engineer
         Blockly.Msg.TEXT_JOIN_TITLE_CREATEWITH = Blockly.Msg.BKY_TEXT_JOIN_MSG_ENGINEER;
     }
 
-    // Reload workspace to apply changes, but only if it's not the initial load
+    // 4. Reload the workspace to make the text changes take effect.
+    //    This is a destructive operation, which is why we saved the XML state earlier.
     if (!isInitialLoad) {
         workspace.clear();
         Blockly.Xml.domToWorkspace(currentXml, workspace);
     }
 
-    // Save preference
+    // 5. Save the user's theme preference for future sessions.
     localStorage.setItem('blocklyTheme', themeName);
 }
 
 
-// Initializing a basic Blockly workspace
+// =============================================================================
+// --- WORKSPACE INITIALIZATION ---
+// =============================================================================
+
 const toolboxXml = document.getElementById('toolbox-xml').textContent;
 const workspace = Blockly.inject('blocklyDiv', {
     toolbox: toolboxXml,
-    media: '',      // 不載入外部媒體
-    sounds: false,  // 關閉音效模組
+    theme: engineerTheme, // Set a default theme on injection to avoid style flashes.
+    media: '',      // Don't load external media assets.
+    sounds: false,  // Disable sound effects.
     zoom: {
-        controls: true, // 顯示 +/- 按鈕
-        wheel: false,    // 關閉滾輪縮放
+        controls: true,
+        wheel: false,    // Disable zooming with the mouse wheel.
         startScale: 1.0,
         maxScale: 3,
         minScale: 0.3,
@@ -296,91 +340,112 @@ const workspace = Blockly.inject('blocklyDiv', {
     move: {
         scrollbars: {
             vertical: true,
-            horizontal: true,  // 啟用水平滾動
+            horizontal: true,
         },
-        drag: true,      // 可用滑鼠拖動整個畫面
-        wheel: true      // 啟用滾輪可滾動畫面
+        drag: true,      // Allow dragging the workspace canvas.
+        wheel: true      // Allow scrolling the workspace with the mouse wheel.
     }
 });
 
-// Register the button callback for creating a variable
-workspace.registerButtonCallback('CREATE_VARIABLE', function(button) {
+// Register the button callback for the "Create Variable" button in the toolbox.
+workspace.registerButtonCallback('CREATE_VARIABLE', function (button) {
     Blockly.Variables.createVariableButtonHandler(workspace);
 });
 
-// ... rest of main.js content
 
+// =============================================================================
+// --- VSCODE COMMUNICATION & STATE MANAGEMENT ---
+// =============================================================================
 
-// --- State and Communication ---
+// Acquire the VS Code API object to post messages back to the extension.
 const vscode = acquireVsCodeApi();
-let debounceTimer;
-let isDirty = false;
-window.promptCallback = null; // Store callback for prompt response
 
-// --- Functions ---
+// --- Global State Variables ---
+let debounceTimer; // Timer for debouncing code generation.
+let isDirty = false; // Tracks if the workspace has unsaved changes.
+window.promptCallback = null; // Stores the callback for prompt dialogs.
+
+/**
+ * Generates Arduino code from the workspace and sends it to the extension.
+ * This function is debounced to prevent excessive updates during rapid block changes.
+ * @param {Blockly.Event} event The Blockly event that triggered the update.
+ * @param {boolean} suppressDirty If true, this update will not mark the workspace as dirty.
+ */
 function updateCode(event, suppressDirty = false) {
-    // Don't generate code for UI events.
+    // Don't generate code for UI events (e.g., scrolling, selecting a block).
     if (event && event.isUiEvent) {
         return;
     }
-    // NEW: Don't generate code if a drag gesture is in progress.
+    // Don't generate code if a drag gesture is in progress.
     if (workspace.isDragging()) {
         return;
     }
 
-    if (!suppressDirty && !isDirty) { // Only mark dirty if not suppressed and state changes
+    // If this change is not suppressed and the workspace is not already dirty,
+    // mark it as dirty and notify the extension.
+    if (!suppressDirty && !isDirty) {
         isDirty = true;
         vscode.postMessage({ command: 'dirtyStateChanged', isDirty: true });
     }
 
+    // Debounce the code generation.
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         const code = Blockly.Arduino.workspaceToCode(workspace);
         vscode.postMessage({
             command: 'updateCode',
             code: code,
-            inoUri: window.currentInoUri // Include the current .ino URI
+            inoUri: window.currentInoUri // Include the URI of the associated .ino file.
         });
     }, 250);
 }
 
-// --- Event Listeners ---
-
-// Listen for changes in the workspace
+// Listen for any change in the workspace to trigger code generation.
 workspace.addChangeListener(updateCode);
 
-// Listen for messages from the extension
+/**
+ * Main message handler for events sent from the VS Code extension backend.
+ */
 window.addEventListener('message', event => {
     const message = event.data;
     switch (message.command) {
+        // Initializes the workspace with XML content from the extension.
         case 'initializeWorkspace': {
-            Blockly.Events.disable();
+            Blockly.Events.disable(); // Disable events to prevent firing changes during load.
             try {
-                // Apply theme before loading XML
+                // Apply the saved theme before loading the XML.
                 const savedTheme = localStorage.getItem('blocklyTheme') || 'engineer';
-                applyStyle(savedTheme, true); // Apply style without reloading workspace
+                applyStyle(savedTheme, true); // `true` prevents a workspace reload.
 
                 workspace.clear();
                 const xml = Blockly.utils.xml.textToDom(message.xml);
                 Blockly.Xml.domToWorkspace(xml, workspace);
-                window.currentInoUri = message.inoUri; // Store the current .ino URI
+                
+                // Store metadata from the extension.
+                window.currentInoUri = message.inoUri;
                 window.currentXmlName = message.xmlName ? message.xmlName.split(/[\\/]/).pop() : '未命名專案';
-                isDirty = false; // Initial state is clean
+                
+                // Reset the dirty state.
+                isDirty = false;
                 vscode.postMessage({ command: 'dirtyStateChanged', isDirty: false });
             } finally {
-                Blockly.Events.enable();
+                Blockly.Events.enable(); // Re-enable events.
             }
+            // Trigger an initial code generation without marking the workspace as dirty.
             updateCode(undefined, true);
+            // Hide the loading overlay.
             const overlay = document.getElementById('loading-overlay');
             if (overlay) {
                 overlay.style.display = 'none';
             }
             break;
         }
+        // The extension has confirmed that the save is complete.
         case 'saveComplete':
             isDirty = false;
             vscode.postMessage({ command: 'dirtyStateChanged', isDirty: false });
             break;
+        // The extension is requesting the current workspace XML for saving.
         case 'requestSave': {
             const xml = Blockly.Xml.workspaceToDom(workspace);
             const xmlText = Blockly.Xml.domToText(xml);
@@ -391,21 +456,25 @@ window.addEventListener('message', event => {
             });
             break;
         }
+        // The extension has sent the result of a confirmation dialog.
         case 'confirmResponse':
             if (window.confirmCallback) {
                 window.confirmCallback(message.value);
                 window.confirmCallback = null;
             }
             break;
+        // The extension has sent the result of a prompt dialog.
         case 'promptResponse':
             if (window.promptCallback) {
                 window.promptCallback(message.value);
                 window.promptCallback = null;
             }
             break;
+        // The webview panel has become active.
         case 'panelActive':
             document.getElementById('inactive-overlay').style.display = 'none';
             break;
+        // The webview panel has become inactive.
         case 'panelInactive': {
             const overlay = document.getElementById('inactive-overlay');
             overlay.textContent = `請切換至與 [piBlockly: ${window.currentXmlName}] 對應的程式碼頁面以啟用編輯`;
@@ -415,21 +484,29 @@ window.addEventListener('message', event => {
     }
 });
 
-// Add a blur event listener to handle mouse-up events outside the webview
+// Add a blur event listener to handle cases where a drag is released outside the webview.
 window.addEventListener('blur', () => {
-  if (workspace && workspace.isDragging()) {
-    Blockly.Touch.terminate();
-  }
+    if (workspace && workspace.isDragging()) {
+        Blockly.Touch.terminate();
+    }
 });
 
-// --- Orphan Block Handling ---
+// =============================================================================
+// --- ORPHAN BLOCK HANDLING ---
+// =============================================================================
+
+/**
+ * Disables any top-level blocks that are not valid "root" blocks (e.g., setup, loop, functions).
+ * This prevents stray blocks from generating code.
+ * @param {Blockly.Event} event The Blockly event that triggered the check.
+ */
 function updateOrphanBlocks(event) {
-    // If the event is a change to a block's disabled state, ignore it to prevent infinite loops.
+    // Ignore events that are just about a block's disabled state to prevent infinite loops.
     if (event.type === 'change' && event.element === 'disabled') {
         return;
     }
 
-    // We are interested in events that change the block layout or field values.
+    // Only run this check on events that can change the block layout.
     if (event.type !== 'move' &&
         event.type !== 'create' &&
         event.type !== 'delete' &&
@@ -439,32 +516,28 @@ function updateOrphanBlocks(event) {
 
     const allBlocks = workspace.getAllBlocks(true);
 
-    // First, enable all blocks by removing the 'orphan' reason.
+    // First, enable all blocks to reset their state.
     allBlocks.forEach(block => {
         block.setDisabledReason(false, 'orphan');
     });
 
+    // Define which block types are allowed to be at the root of the workspace.
     const allowedRootBlocks = [
         'initializes_setup',
         'initializes_loop',
         'custom_procedures_defreturn',
         'custom_procedures_defnoreturn',
-        'coding_raw_definition', // This is for global raw code, so it can be a root.
-        'array_declare_global', // Allow global array declarations as root blocks.
-        'variables_declare_global' // Allow global variable declarations as root blocks.
+        'coding_raw_definition',
+        'array_declare_global',
+        'variables_declare_global'
     ];
 
     const topBlocks = workspace.getTopBlocks(true);
 
     topBlocks.forEach(topBlock => {
-        let isAllowedRoot = false;
-
-        if (allowedRootBlocks.includes(topBlock.type)) {
-            isAllowedRoot = true;
-        }
-
-        if (!isAllowedRoot) {
-            // This is a true orphan, disable it and its descendants.
+        // If a top-level block is not in the allowed list, it's an orphan.
+        if (!allowedRootBlocks.includes(topBlock.type)) {
+            // Disable the orphan block and all of its children.
             const descendants = topBlock.getDescendants(false);
             descendants.forEach(descendant => {
                 descendant.setDisabledReason(true, 'orphan');
@@ -475,17 +548,22 @@ function updateOrphanBlocks(event) {
 
 workspace.addChangeListener(updateOrphanBlocks);
 
-// --- Initial Load ---
+// =============================================================================
+// --- INITIALIZATION & UI BINDING ---
+// =============================================================================
+
 // Signal to the extension that the webview is ready to be initialized.
 vscode.postMessage({ command: 'webviewReady' });
 
+// Set up UI event listeners once the DOM is fully loaded.
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
-        // Set initial state of toggle based on saved theme
+        // Set the initial state of the toggle based on the saved theme.
         const savedTheme = localStorage.getItem('blocklyTheme') || 'engineer';
         themeToggle.checked = (savedTheme === 'angel');
 
+        // Add a listener to apply the style when the toggle is changed.
         themeToggle.addEventListener('change', (event) => {
             const newTheme = event.target.checked ? 'angel' : 'engineer';
             applyStyle(newTheme);
@@ -493,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Bind toolbar button click events to post messages to the extension.
 document.getElementById('saveButton').addEventListener('click', () => {
     const xml = Blockly.Xml.workspaceToDom(workspace);
     const xmlText = Blockly.Xml.domToText(xml);
@@ -516,6 +595,10 @@ document.getElementById('closeButton').addEventListener('click', () => {
     vscode.postMessage({ command: 'closeEditor' });
 });
 
+/**
+ * Sets up hover effects for a toolbar button.
+ * @param {string} buttonId The ID of the button element.
+ */
 function setupHoverEffects(buttonId) {
     const button = document.getElementById(buttonId);
     const defaultSrc = button.getAttribute('data-src');
@@ -535,21 +618,21 @@ setupHoverEffects('saveAsButton');
 setupHoverEffects('closeButton');
 
 
-
-// Override Blockly's default prompt to use VS Code's input box via the extension.
-Blockly.dialog.setPrompt(function(message, defaultValue, callback) {
+// Override Blockly's default dialogs to use VS Code's native UI.
+// This provides a more integrated user experience.
+Blockly.dialog.setPrompt(function (message, defaultValue, callback) {
     vscode.postMessage({
         command: 'prompt',
         message: message,
         defaultValue: defaultValue
     });
-    window.promptCallback = callback;
+    window.promptCallback = callback; // Store the callback to be invoked later.
 });
 
-Blockly.dialog.setConfirm(function(message, callback) {
+Blockly.dialog.setConfirm(function (message, callback) {
     vscode.postMessage({
         command: 'confirm',
         message: message
     });
-    window.confirmCallback = callback;
+    window.confirmCallback = callback; // Store the callback to be invoked later.
 });

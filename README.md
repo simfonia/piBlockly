@@ -10,10 +10,10 @@
 
 ## 功能特色
 
--   **Blockly 視覺化編輯器：** 完整整合的 Blockly 工作區，用於視覺化程式設計。
+-   **Blockly 視覺化編輯器：** 借助於 Blockly ，用於視覺化程式設計。
 -   **兩套風格的積木 Engineer 與 Angel ：** Engineer 貼近 C++ 原汁原味的語法，讓剛進入 C++ 世界的新手有個平順的過渡期。 Angel 使用口語化的描述，但保留技術層面的語意，例如把 Arduino IO 腳位的 Read 與 Write 表達為讀入與寫出，明確訊號流動方向與原 API 設計的語彙。
 -   **Arduino C++ 程式碼生成：** 自動將 Blockly 積木轉換為簡潔且功能完善的 Arduino C++ 程式碼。
--   **可彈性撰寫程式：** 包含一組進階程式設計的積木 Coding，遇到沒有積木的情況，您完全可以即興發揮。當然，除錯得靠自己。
+-   **彈性：** 除了不限特定開發板，還包含一組進階程式設計的積木 Coding，遇到沒有積木的情況，您完全可以即興發揮。當然，除錯得靠自己。
 -   **自訂擴充積木：** 可從網路載入自行開發的積木(目前此功能未完成)。
 
 
@@ -47,7 +47,7 @@
 
 ## 靈感來源
 
--   Google Blockly: https://developers.google.com/blockly
+-   Blockly: https://developers.google.com/blockly
 -   TextBlockly: https://github.com/timcsy/TextBlockly
 -   BlocklyDuino: https://github.com/BlocklyDuino/BlocklyDuino
 
