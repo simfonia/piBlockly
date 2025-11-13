@@ -104,6 +104,18 @@ const messages = {
     blocklyXmlFiles: {
         'zh': 'Blockly XML 檔案',
         'en': 'Blockly XML Files'
+    },
+    confirmOverwriteExistingFile: {
+        'zh': (filename: string) => `${filename} 已存在，您要取代它嗎？`,
+        'en': (filename: string) => `${filename} already exists. Do you want to replace it?`
+    },
+    replace: {
+        'zh': '取代',
+        'en': 'Replace'
+    },
+    cancelOverwrite: { // Using a different key to avoid conflict with general 'cancel'
+        'zh': '取消',
+        'en': 'Cancel'
     }
 };
 
@@ -181,7 +193,7 @@ export function activate(context: vscode.ExtensionContext) {
                 getLocalizedMessage('overwriteCode')
             );
 
-            if (overwriteChoice !== '覆蓋現有程式碼') {
+            if (overwriteChoice !== getLocalizedMessage('overwriteCode')) {
                 // User chose '取消' or closed the dialog
                 return;
             }
@@ -200,7 +212,7 @@ export function activate(context: vscode.ExtensionContext) {
         let xmlContent: string;
         let xmlName: string | undefined;
 
-        if (choice.label === '新增專案') {
+        if (choice.label === getLocalizedMessage('newProject')) {
             // Prompt for a file path to save the new XML.
             const saveOptions: vscode.SaveDialogOptions = {
                 filters: { [getLocalizedMessage('blocklyXmlFiles')]: ['xml'] }
@@ -218,6 +230,7 @@ export function activate(context: vscode.ExtensionContext) {
   </block>
 </xml>
 `;
+
             fs.writeFileSync(xmlUri.fsPath, xmlContent);
             xmlName = xmlUri.fsPath;
         } else { // Open an existing project
@@ -304,7 +317,8 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
             // Restrict the webview to only loading resources from our extension's media directories.
             localResourceRoots: [
                 vscode.Uri.joinPath(context.extensionUri, 'media'),
-                vscode.Uri.joinPath(context.extensionUri, 'node_modules')
+                vscode.Uri.joinPath(context.extensionUri, 'node_modules'),
+                vscode.Uri.joinPath(context.extensionUri, 'media', 'user_modules') // Allow access to user_modules
             ],
             enableForms: true, // Required for Blockly dialogs
             retainContextWhenHidden: true // Keep the webview state even when not visible
@@ -394,6 +408,39 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
                     panel.webview.postMessage({ command: 'confirmResponse', value: choice === '是' });
                     return;
 
+                // The webview has reported a block selection.
+                case 'selectBlock':
+                    if (associatedEditor) {
+                        const scope = message.scope;
+                        const document = associatedEditor.document;
+                        let targetLine = 0; // Default to top of file for global or unknown scope
+
+                        if (scope === 'setup') {
+                            const match = document.getText().match(/^void\s+setup\s*\(\s*\)\s*\{/m);
+                            if (match && match.index !== undefined) {
+                                targetLine = document.positionAt(match.index).line;
+                            }
+                        } else if (scope === 'loop') {
+                            const match = document.getText().match(/^void\s+loop\s*\(\s*\)\s*\{/m);
+                            if (match && match.index !== undefined) {
+                                targetLine = document.positionAt(match.index).line;
+                            }
+                        } else if (scope.startsWith('function:')) {
+                            const functionName = scope.substring('function:'.length);
+                            // Regex to find function definition: e.g., 'void myFunction(int arg) {'
+                            // This regex is a bit more complex to handle return types and arguments.
+                            const match = document.getText().match(new RegExp(`^(?:void|int|float|String|boolean|byte|char|unsigned\\s+(?:int|long|char)|long|short|double)\\s+${functionName}\\s*\\([^)]*\\)\\s*\\{`, 'm'));
+                            if (match && match.index !== undefined) {
+                                targetLine = document.positionAt(match.index).line;
+                            }
+                        }
+                        // If scope is 'global' or not found, targetLine remains 0.
+
+                        const range = new vscode.Range(targetLine, 0, targetLine, 0);
+                        associatedEditor.revealRange(range, vscode.TextEditorRevealType.AtTop);
+                    }
+                    return;
+                
                 // The webview is reporting a change in its "dirty" state (unsaved changes).
                 case 'dirtyStateChanged':
                     currentPanel.isDirty = message.isDirty;
@@ -489,13 +536,10 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
         const message = getLocalizedMessage('unsavedChanges');
         const options: vscode.MessageOptions = { modal: true };
         const items = [getLocalizedMessage('save'), getLocalizedMessage('doNotSave')];
-        if (canCancel) {
-            items.push(getLocalizedMessage('cancel'));
-        }
 
         const choice = await vscode.window.showWarningMessage(message, options, ...items);
 
-        if (choice === '儲存') {
+        if (choice === getLocalizedMessage('save')) {
             // This is a complex flow: we ask the webview for the XML,
             // wait for its 'saveProject' response, save the file, and then dispose the panel.
             await new Promise<void>(resolve => {
@@ -538,9 +582,9 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
                 // Request the XML from the webview.
                 panel.webview.postMessage({ command: 'requestSave' });
             });
-        } else if (choice === '不儲存') {
+        } else if (choice === getLocalizedMessage('doNotSave')) {
             panel.dispose();
-        } else if (choice === '取消') {
+        } else if (choice === getLocalizedMessage('cancel')) {
             // Do nothing, user cancelled the close action.
         } else { // undefined (dialog closed by user)
             // If cancellation is not an option (e.g., editor was closed),
@@ -620,6 +664,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js')).with({ query: `nonce=${nonce}` });
     const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
+    const manifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'user_modules', 'manifest.json')).with({ query: `nonce=${nonce}` });
 
     // Read the content of the custom language file to get toolbar translations
     const customLangPath = path.join(extensionPath, 'media', customLangFilePath);
@@ -652,7 +697,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
 <head>
     <meta charset="UTF-8">
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data: https: vscode-webview-resource:; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data: https: vscode-webview-resource:; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource: blob:; connect-src ${webview.cspSource} vscode-webview-resource:;">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>piBlockly 編輯器</title>
@@ -782,7 +827,11 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     ${customBlockScriptUris.map(uri => `<script nonce="${nonce}" src="${uri}"></script>`).join('\n    ')}
     ${generatorScriptUris.map(uri => `<script nonce="${nonce}" src="${uri}"></script>`).join('\n    ')}
 
-    <script nonce="${nonce}" src="${mainUri}"></script>
+    <script nonce="${nonce}">
+        window.manifestUri = "${manifestUri}";
+        window.currentLocale = "${locale}"; // Pass the current locale
+    </script>
+    <script nonce="${nonce}" type="module" src="${mainUri}"></script>
 </body>
 </html>`;
 }

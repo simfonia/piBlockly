@@ -1,3 +1,5 @@
+import { loadModule } from './module_loader.js';
+
 /**
  * @fileoverview This is the main script for the piBlockly webview. It handles:
  * 1.  Defining and managing Blockly themes (Engineer and Angel).
@@ -318,39 +320,59 @@ function applyStyle(themeName, isInitialLoad = false) {
     localStorage.setItem('blocklyTheme', themeName);
 }
 
+/**
+ * Loads external Blockly modules defined in manifest.json.
+ * These modules can register new blocks and extend the toolbox.
+ */
+async function loadExternalModules() {
+    try {
+        const manifestResponse = await fetch(window.manifestUri);
+        if (!manifestResponse.ok) {
+            console.warn('No manifest.json found or failed to fetch:', manifestResponse.statusText);
+            return;
+        }
+        const manifest = await manifestResponse.json();
+
+        for (const modConfig of manifest.modules) {
+            // Resolve module URL relative to the manifest.json's URL
+            const baseManifestUrl = new URL(window.manifestUri).origin + new URL(window.manifestUri).pathname.substring(0, new URL(window.manifestUri).pathname.lastIndexOf('/') + 1);
+            const moduleUrl = new URL(modConfig.url, baseManifestUrl).toString();
+            const module = await loadModule(moduleUrl);
+            if (module) {
+                // Merge module-specific messages based on current locale
+                const isChinese = window.currentLocale && window.currentLocale.startsWith('zh');
+                const moduleMessages = isChinese ? module.MSG_SIMFONIA_ZH_HANT : module.MSG_SIMFONIA_EN;
+                if (moduleMessages) {
+                    Object.assign(Blockly.Msg, moduleMessages);
+                }
+
+                if (module.registerBlocks) {
+                    module.registerBlocks(Blockly);
+                }
+                if (module.toolbox) {
+                    const tempDom = Blockly.utils.xml.textToDom(module.toolbox);
+                    // Append each child category from the module's toolbox to the base toolbox
+                    for (let i = 0; i < tempDom.children.length; i++) {
+                        baseToolbox.appendChild(tempDom.children[i].cloneNode(true));
+                    }
+                }
+            }
+        }
+        // Update the workspace toolbox after all modules are loaded
+        if (workspace) { // Ensure workspace is initialized
+            workspace.updateToolbox(baseToolbox);
+        }
+    } catch (e) {
+        console.error('Error loading external modules:', e);
+    }
+}
+
 
 // =============================================================================
 // --- WORKSPACE INITIALIZATION ---
 // =============================================================================
 
-const toolboxXml = document.getElementById('toolbox-xml').textContent;
-const workspace = Blockly.inject('blocklyDiv', {
-    toolbox: toolboxXml,
-    theme: engineerTheme, // Set a default theme on injection to avoid style flashes.
-    media: '',      // Don't load external media assets.
-    sounds: false,  // Disable sound effects.
-    zoom: {
-        controls: true,
-        wheel: false,    // Disable zooming with the mouse wheel.
-        startScale: 1.0,
-        maxScale: 3,
-        minScale: 0.3,
-        scaleSpeed: 1.2
-    },
-    move: {
-        scrollbars: {
-            vertical: true,
-            horizontal: true,
-        },
-        drag: true,      // Allow dragging the workspace canvas.
-        wheel: true      // Allow scrolling the workspace with the mouse wheel.
-    }
-});
 
-// Register the button callback for the "Create Variable" button in the toolbox.
-workspace.registerButtonCallback('CREATE_VARIABLE', function (button) {
-    Blockly.Variables.createVariableButtonHandler(workspace);
-});
 
 
 // =============================================================================
@@ -364,6 +386,19 @@ const vscode = acquireVsCodeApi();
 let debounceTimer; // Timer for debouncing code generation.
 let isDirty = false; // Tracks if the workspace has unsaved changes.
 window.promptCallback = null; // Stores the callback for prompt dialogs.
+let baseToolbox; // Stores the base toolbox XML DOM object.
+let workspace; // Declare workspace globally
+
+// Define which block types are allowed to be at the root of the workspace and define a scope.
+const scopeDefiningRootBlocks = [
+    'initializes_setup',
+    'initializes_loop',
+    'custom_procedures_defreturn',
+    'custom_procedures_defnoreturn',
+    'coding_raw_definition',
+    'array_declare_global',
+    'variables_declare_global'
+];
 
 /**
  * Generates Arduino code from the workspace and sends it to the extension.
@@ -400,8 +435,53 @@ function updateCode(event, suppressDirty = false) {
     }, 250);
 }
 
-// Listen for any change in the workspace to trigger code generation.
-workspace.addChangeListener(updateCode);
+
+
+
+
+/**
+ * Determines the scope of a given block (e.g., 'setup', 'loop', 'function:myFunc', 'global').
+ * @param {Blockly.Block} block The block to analyze.
+ * @returns {string} A string identifying the block's scope.
+ */
+function getBlockScopeIdentifier(block) {
+    let currentBlock = block;
+    let parentBlock = block.getParent();
+
+    // Traverse up the parent chain until we find a scope-defining root block
+    // or we reach a block with no parent (meaning it's a top-level block itself).
+    while (parentBlock) {
+        if (scopeDefiningRootBlocks.includes(parentBlock.type)) {
+            currentBlock = parentBlock; // This is the scope-defining parent.
+            break; // Stop traversing.
+        }
+        currentBlock = parentBlock;
+        parentBlock = currentBlock.getParent();
+    }
+
+    // Now currentBlock is either the original block (if it's a root),
+    // or the first scope-defining ancestor.
+
+    const blockType = currentBlock.type;
+
+    const functionDefiningBlocks = {
+        'initializes_setup': 'setup',
+        'initializes_loop': 'loop',
+        'custom_procedures_defreturn': 'function',
+        'custom_procedures_defnoreturn': 'function',
+    };
+
+    if (functionDefiningBlocks[blockType]) {
+        if (blockType === 'custom_procedures_defreturn' || blockType === 'custom_procedures_defnoreturn') {
+            const functionName = currentBlock.getFieldValue('NAME');
+            return `function:${functionName}`;
+        }
+        return functionDefiningBlocks[blockType];
+    }
+
+    // If it's a top-level block but not a known function/structure, treat as global.
+    return 'global';
+}
 
 /**
  * Main message handler for events sent from the VS Code extension backend.
@@ -413,9 +493,8 @@ window.addEventListener('message', event => {
         case 'initializeWorkspace': {
             Blockly.Events.disable(); // Disable events to prevent firing changes during load.
             try {
-                // Apply the saved theme before loading the XML.
-                const savedTheme = localStorage.getItem('blocklyTheme') || 'engineer';
-                applyStyle(savedTheme, true); // `true` prevents a workspace reload.
+                // const savedTheme = localStorage.getItem('blocklyTheme') || 'engineer';
+                // applyStyle(savedTheme, true); // `true` prevents a workspace reload.
 
                 workspace.clear();
                 const xml = Blockly.utils.xml.textToDom(message.xml);
@@ -522,21 +601,11 @@ function updateOrphanBlocks(event) {
     });
 
     // Define which block types are allowed to be at the root of the workspace.
-    const allowedRootBlocks = [
-        'initializes_setup',
-        'initializes_loop',
-        'custom_procedures_defreturn',
-        'custom_procedures_defnoreturn',
-        'coding_raw_definition',
-        'array_declare_global',
-        'variables_declare_global'
-    ];
-
     const topBlocks = workspace.getTopBlocks(true);
 
     topBlocks.forEach(topBlock => {
         // If a top-level block is not in the allowed list, it's an orphan.
-        if (!allowedRootBlocks.includes(topBlock.type)) {
+        if (!scopeDefiningRootBlocks.includes(topBlock.type)) {
             // Disable the orphan block and all of its children.
             const descendants = topBlock.getDescendants(false);
             descendants.forEach(descendant => {
@@ -546,17 +615,14 @@ function updateOrphanBlocks(event) {
     });
 }
 
-workspace.addChangeListener(updateOrphanBlocks);
+
 
 // =============================================================================
 // --- INITIALIZATION & UI BINDING ---
 // =============================================================================
 
-// Signal to the extension that the webview is ready to be initialized.
-vscode.postMessage({ command: 'webviewReady' });
-
 // Set up UI event listeners once the DOM is fully loaded.
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
         // Set the initial state of the toggle based on the saved theme.
@@ -569,6 +635,68 @@ document.addEventListener('DOMContentLoaded', () => {
             applyStyle(newTheme);
         });
     }
+
+    // Initialize baseToolbox
+    const toolboxXmlText = document.getElementById('toolbox-xml').textContent;
+    baseToolbox = Blockly.utils.xml.textToDom(toolboxXmlText);
+
+    // Load external modules BEFORE Blockly is injected
+    await loadExternalModules();
+
+    workspace = Blockly.inject('blocklyDiv', {
+        toolbox: baseToolbox, // Use the DOM object
+        theme: engineerTheme, // Set a default theme on injection to avoid style flashes.
+        media: '',      // Don't load external media assets.
+        sounds: false,  // Disable sound effects.
+        zoom: {
+            controls: true,
+            wheel: false,    // Disable zooming with the mouse wheel.
+            startScale: 1.0,
+            maxScale: 3,
+            minScale: 0.3,
+            scaleSpeed: 1.2
+        },
+        move: {
+            scrollbars: {
+                vertical: true,
+                horizontal: true,
+            },
+            drag: true,      // Allow dragging the workspace canvas.
+            wheel: true      // Allow scrolling the workspace with the mouse wheel.
+        }
+    });
+
+    // Register the button callback for the "Create Variable" button in the toolbox.
+    workspace.registerButtonCallback('CREATE_VARIABLE', function (button) {
+        Blockly.Variables.createVariableButtonHandler(workspace);
+    });
+
+    // Apply the saved theme after workspace is initialized
+    const savedTheme = localStorage.getItem('blocklyTheme') || 'engineer';
+    applyStyle(savedTheme, true); // Call applyStyle here
+
+    // Listen for any change in the workspace to trigger code generation.
+    workspace.addChangeListener(updateCode);
+
+    // Listen for block selection events and send the selected block's scope to the extension.
+    workspace.addChangeListener((event) => {
+        if (event.type === Blockly.Events.SELECTED && event.newElementId) {
+            const selectedBlock = workspace.getBlockById(event.newElementId);
+            if (selectedBlock) {
+                const scopeIdentifier = getBlockScopeIdentifier(selectedBlock);
+                vscode.postMessage({
+                    command: 'selectBlock',
+                    blockId: event.newElementId, // blockId is still useful for debugging/future enhancements
+                    scope: scopeIdentifier
+                });
+            }
+        }
+    });
+
+    workspace.addChangeListener(updateOrphanBlocks);
+
+    // Signal to the extension that the webview is ready to be initialized.
+    vscode.postMessage({ command: 'webviewReady' });
 });
 
 // Bind toolbar button click events to post messages to the extension.
