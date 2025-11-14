@@ -3,9 +3,11 @@
   Object.assign(Blockly.Msg, {
     // Traditional Chinese language file
     // Toolbar Tooltips
-    "BKY_TOOLBAR_SAVE_TOOLTIP": "儲存積木",
-    "BKY_TOOLBAR_SAVE_AS_TOOLTIP": "另存積木",
+    "BKY_TOOLBAR_SAVE_TOOLTIP": "儲存專案",
+    "BKY_TOOLBAR_SAVE_AS_TOOLTIP": "另存專案",
     "BKY_TOOLBAR_CLOSE_TOOLTIP": "關閉",
+    "BKY_TOOLBAR_NEW_TOOLTIP": "新增專案",
+    "BKY_TOOLBAR_OPEN_TOOLTIP": "開啟專案",
 
     // Toolbar Theme Labels
     "BKY_TOOLBAR_ENGINEER_LABEL": "Engineer",

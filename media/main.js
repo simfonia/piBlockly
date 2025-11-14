@@ -575,45 +575,46 @@ window.addEventListener('blur', () => {
 // --- ORPHAN BLOCK HANDLING ---
 // =============================================================================
 
-/**
- * Disables any top-level blocks that are not valid "root" blocks (e.g., setup, loop, functions).
- * This prevents stray blocks from generating code.
- * @param {Blockly.Event} event The Blockly event that triggered the check.
- */
 function updateOrphanBlocks(event) {
-    // Ignore events that are just about a block's disabled state to prevent infinite loops.
-    if (event.type === 'change' && event.element === 'disabled') {
+    // If the workspace is in the middle of a drag, do nothing.
+    // The logic will run once the drag is complete.
+    if (workspace.isDragging()) {
         return;
     }
 
-    // Only run this check on events that can change the block layout.
-    if (event.type !== 'move' &&
-        event.type !== 'create' &&
-        event.type !== 'delete' &&
-        event.type !== 'change') {
+    // Ignore UI events or changes to the 'disabled' state that this function itself causes.
+    if (event.isUiEvent || (event.type === 'change' && event.element === 'disabled')) {
         return;
     }
 
-    const allBlocks = workspace.getAllBlocks(true);
+    // Start a new, separate event group for our reaction.
+    // This ensures the entire orphan-checking logic is one atomic undo step,
+    // separate from the user's initial action.
+    Blockly.Events.setGroup(true);
+    try {
+        const allBlocks = workspace.getAllBlocks(true);
 
-    // First, enable all blocks to reset their state.
-    allBlocks.forEach(block => {
-        block.setDisabledReason(false, 'orphan');
-    });
+        // First, unconditionally enable all blocks to reset their state.
+        // The event grouping will prevent this from polluting the undo stack.
+        allBlocks.forEach(block => {
+            block.setDisabledReason(false, 'orphan');
+        });
 
-    // Define which block types are allowed to be at the root of the workspace.
-    const topBlocks = workspace.getTopBlocks(true);
+        // Then, find any top-level blocks that are not valid roots and disable them.
+        const topBlocks = workspace.getTopBlocks(true);
 
-    topBlocks.forEach(topBlock => {
-        // If a top-level block is not in the allowed list, it's an orphan.
-        if (!scopeDefiningRootBlocks.includes(topBlock.type)) {
-            // Disable the orphan block and all of its children.
-            const descendants = topBlock.getDescendants(false);
-            descendants.forEach(descendant => {
-                descendant.setDisabledReason(true, 'orphan');
-            });
-        }
-    });
+        topBlocks.forEach(topBlock => {
+            if (!scopeDefiningRootBlocks.includes(topBlock.type)) {
+                // This is an INVALID root. Disable it and its children.
+                topBlock.getDescendants(false).forEach(desc => {
+                    desc.setDisabledReason(true, 'orphan');
+                });
+            }
+        });
+    } finally {
+        // Always close the group to ensure subsequent actions are separate.
+        Blockly.Events.setGroup(false);
+    }
 }
 
 
@@ -701,6 +702,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Bind toolbar button click events to post messages to the extension.
+document.getElementById('newButton').addEventListener('click', () => {
+    vscode.postMessage({ command: 'newProject' });
+});
+
+document.getElementById('openButton').addEventListener('click', () => {
+    vscode.postMessage({ command: 'openProject' });
+});
+
 document.getElementById('saveButton').addEventListener('click', () => {
     const xml = Blockly.Xml.workspaceToDom(workspace);
     const xmlText = Blockly.Xml.domToText(xml);
@@ -742,6 +751,8 @@ function setupHoverEffects(buttonId) {
     });
 }
 
+setupHoverEffects('newButton');
+setupHoverEffects('openButton');
 setupHoverEffects('saveButton');
 setupHoverEffects('saveAsButton');
 setupHoverEffects('closeButton');

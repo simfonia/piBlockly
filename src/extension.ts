@@ -209,49 +209,12 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (!choice) { return; }
 
-        let xmlContent: string;
-        let xmlName: string | undefined;
 
         if (choice.label === getLocalizedMessage('newProject')) {
-            // Prompt for a file path to save the new XML.
-            const saveOptions: vscode.SaveDialogOptions = {
-                filters: { [getLocalizedMessage('blocklyXmlFiles')]: ['xml'] }
-            };
-            const xmlUri = await vscode.window.showSaveDialog(saveOptions);
-            if (!xmlUri) { return; }
-
-            // Create default XML content for a new project.
-            xmlContent = `
-<xml xmlns="https://developers.google.com/blockly/xml">
-  <block type="initializes_setup" id="setup_block" x="100" y="50">
-    <next>
-      <block type="initializes_loop" id="loop_block"></block>
-    </next>
-  </block>
-</xml>
-`;
-
-            fs.writeFileSync(xmlUri.fsPath, xmlContent);
-            xmlName = xmlUri.fsPath;
+            await handleNewProject(context, editor);
         } else { // Open an existing project
-            const openOptions: vscode.OpenDialogOptions = {
-                canSelectMany: false,
-                openLabel: getLocalizedMessage('openBlocklyXml'),
-                filters: { [getLocalizedMessage('blocklyXmlFiles')]: ['xml'] }
-            };
-            const selectedFiles = await vscode.window.showOpenDialog(openOptions);
-            if (!selectedFiles || selectedFiles.length === 0) { return; }
-
-            try {
-                xmlName = selectedFiles[0].fsPath;
-                xmlContent = fs.readFileSync(xmlName, 'utf8');
-            } catch (error: any) {
-                vscode.window.showErrorMessage(getLocalizedMessage('loadProjectFailed', String(error)));
-                return;
-            }
+            await handleOpenProject(context, editor);
         }
-
-        createAndShowPanel(context, xmlContent, xmlName);
     });
 
     // Register an event listener to automatically close the webview panel
@@ -288,18 +251,70 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(startCommand, onDidCloseDocumentSubscription, onDidChangeVisibleEditorsSubscription);
 }
 
+async function handleNewProject(context: vscode.ExtensionContext, editor: vscode.TextEditor) {
+    if (currentPanel) {
+        const canProceed = await closePanel(currentPanel.panel, true);
+        if (!canProceed) {
+            return; // User cancelled closing the current panel
+        }
+    }
+
+    // Prompt for a file path to save the new XML.
+    const saveOptions: vscode.SaveDialogOptions = {
+        filters: { [getLocalizedMessage('blocklyXmlFiles')]: ['xml'] }
+    };
+    const xmlUri = await vscode.window.showSaveDialog(saveOptions);
+    if (!xmlUri) { return; }
+
+    // Create default XML content for a new project.
+    const xmlContent = `
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="initializes_setup" id="setup_block" x="100" y="50">
+    <next>
+      <block type="initializes_loop" id="loop_block"></block>
+    </next>
+  </block>
+</xml>
+`;
+
+    fs.writeFileSync(xmlUri.fsPath, xmlContent);
+    const xmlName = xmlUri.fsPath;
+    createAndShowPanel(context, xmlContent, xmlName, editor);
+}
+
+async function handleOpenProject(context: vscode.ExtensionContext, editor: vscode.TextEditor) {
+    if (currentPanel) {
+        const canProceed = await closePanel(currentPanel.panel, true);
+        if (!canProceed) {
+            return; // User cancelled closing the current panel
+        }
+    }
+
+    const openOptions: vscode.OpenDialogOptions = {
+        canSelectMany: false,
+        openLabel: getLocalizedMessage('openBlocklyXml'),
+        filters: { [getLocalizedMessage('blocklyXmlFiles')]: ['xml'] }
+    };
+    const selectedFiles = await vscode.window.showOpenDialog(openOptions);
+    if (!selectedFiles || selectedFiles.length === 0) { return; }
+
+    try {
+        const xmlName = selectedFiles[0].fsPath;
+        const xmlContent = fs.readFileSync(xmlName, 'utf8');
+        createAndShowPanel(context, xmlContent, xmlName, editor);
+    } catch (error: any) {
+        vscode.window.showErrorMessage(getLocalizedMessage('loadProjectFailed', String(error)));
+        return;
+    }
+}
+
 /**
  * Creates and shows the piBlockly webview panel.
  * @param context The extension context.
  * @param xmlContent The initial XML content to load into the Blockly workspace.
  * @param xmlName The full path of the associated .xml file.
  */
-function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string, xmlName: string | undefined) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-        vscode.window.showErrorMessage(getLocalizedMessage('noActiveEditor'));
-        return;
-    }
+function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string, xmlName: string | undefined, editor: vscode.TextEditor) {
     if (!xmlName) {
         vscode.window.showErrorMessage(getLocalizedMessage('noXmlPath'));
         return;
@@ -516,6 +531,52 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
                 case 'closeEditor':
                     closePanel(panel, true);
                     return;
+                
+                case 'newProject': {
+                    if (!currentPanel) {return;}
+                    const associatedEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === currentPanel!.associatedUriString);
+                    if (!associatedEditor) {
+                        vscode.window.showErrorMessage(getLocalizedMessage('noActiveEditor'));
+                        return;
+                    }
+
+                    const currentContent = associatedEditor.document.getText();
+                    if (currentContent.trim().length > 0) {
+                        const overwriteChoice = await vscode.window.showWarningMessage(
+                            getLocalizedMessage('fileContainsCode'),
+                            { modal: true },
+                            getLocalizedMessage('overwriteCode')
+                        );
+                        if (overwriteChoice !== getLocalizedMessage('overwriteCode')) {
+                            return;
+                        }
+                    }
+                    await handleNewProject(context, associatedEditor);
+                    return;
+                }
+
+                case 'openProject': {
+                    if (!currentPanel) {return;}
+                    const associatedEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === currentPanel!.associatedUriString);
+                    if (!associatedEditor) {
+                        vscode.window.showErrorMessage(getLocalizedMessage('noActiveEditor'));
+                        return;
+                    }
+                    
+                    const currentContent = associatedEditor.document.getText();
+                    if (currentContent.trim().length > 0) {
+                        const overwriteChoice = await vscode.window.showWarningMessage(
+                            getLocalizedMessage('fileContainsCode'),
+                            { modal: true },
+                            getLocalizedMessage('overwriteCode')
+                        );
+                        if (overwriteChoice !== getLocalizedMessage('overwriteCode')) {
+                            return;
+                        }
+                    }
+                    await handleOpenProject(context, associatedEditor);
+                    return;
+                }
             }
         },
         undefined,
@@ -528,21 +589,26 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
  * @param panel The webview panel to close.
  * @param canCancel Whether the closing action can be cancelled by the user.
  */
-async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
-    if (!currentPanel) { return; }
+async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean): Promise<boolean> {
+    if (!currentPanel) { return true; } // No panel open, so effectively "closed"
     const isDirty = currentPanel.isDirty;
 
     if (isDirty) {
         const message = getLocalizedMessage('unsavedChanges');
         const options: vscode.MessageOptions = { modal: true };
         const items = [getLocalizedMessage('save'), getLocalizedMessage('doNotSave')];
+        if (canCancel) {
+            // VS Code's showWarningMessage with modal:true often provides an implicit cancel.
+            // We rely on that implicit cancel (which results in 'choice' being undefined).
+            // So, we don't add an explicit 'cancel' button here.
+        }
 
         const choice = await vscode.window.showWarningMessage(message, options, ...items);
 
         if (choice === getLocalizedMessage('save')) {
             // This is a complex flow: we ask the webview for the XML,
             // wait for its 'saveProject' response, save the file, and then dispose the panel.
-            await new Promise<void>(resolve => {
+            return await new Promise<boolean>(resolve => {
                 const sub = panel.webview.onDidReceiveMessage(async (message) => {
                     if (message.command === 'saveProject') {
                         sub.dispose(); // Stop listening for this message.
@@ -554,8 +620,10 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
                                 vscode.window.showInformationMessage(getLocalizedMessage('projectSaved', path.basename(currentXmlName)));
                                 panel.webview.postMessage({ command: 'saveComplete' });
                                 panel.dispose();
+                                resolve(true);
                             } catch (error: any) {
                                 vscode.window.showErrorMessage(getLocalizedMessage('saveProjectFailed', String(error)));
+                                resolve(false); // Save failed
                             }
                         } else {
                             // Fallback to "Save As" if no name is associated.
@@ -571,12 +639,15 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
                                     vscode.window.showInformationMessage(getLocalizedMessage('projectSaved', path.basename(fileUriToSave.fsPath)));
                                     panel.webview.postMessage({ command: 'saveComplete' });
                                     panel.dispose();
+                                    resolve(true);
                                 } catch (error: any) {
                                     vscode.window.showErrorMessage(getLocalizedMessage('saveProjectFailed', String(error)));
+                                    resolve(false); // Save failed
                                 }
+                            } else {
+                                resolve(false); // User cancelled save as dialog
                             }
                         }
-                        resolve();
                     }
                 });
                 // Request the XML from the webview.
@@ -584,18 +655,13 @@ async function closePanel(panel: vscode.WebviewPanel, canCancel: boolean) {
             });
         } else if (choice === getLocalizedMessage('doNotSave')) {
             panel.dispose();
-        } else if (choice === getLocalizedMessage('cancel')) {
-            // Do nothing, user cancelled the close action.
-        } else { // undefined (dialog closed by user)
-            // If cancellation is not an option (e.g., editor was closed),
-            // we must close the panel. Treat as "Don't Save".
-            if (!canCancel) {
-                panel.dispose();
-            }
-            // Otherwise, do nothing, same as "Cancel".
+            return true;
+        } else { // 'cancel' or undefined (dialog closed)
+            return false;
         }
     } else { // Not dirty, just close it.
         panel.dispose();
+        return true;
     }
 }
 
@@ -661,17 +727,24 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const saveTooltip = messages['BKY_TOOLBAR_SAVE_TOOLTIP'] || '';
     const saveAsTooltip = messages['BKY_TOOLBAR_SAVE_AS_TOOLTIP'] || '';
     const closeTooltip = messages['BKY_TOOLBAR_CLOSE_TOOLTIP'] || '';
+    const newTooltip = messages['BKY_TOOLBAR_NEW_TOOLTIP'] || '';
+    const openTooltip = messages['BKY_TOOLBAR_OPEN_TOOLTIP'] || '';
     const engineerLabel = messages['BKY_TOOLBAR_ENGINEER_LABEL'] || '';
     const angelLabel = messages['BKY_TOOLBAR_ANGEL_LABEL'] || '';
     const saveIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_24dp_1F1F1F.svg'));
     const saveAsIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_as_24dp_1F1F1F.svg'));
     const dangerousIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'dangerous_24dp_1F1F1F.svg'));
+    const newIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'new_24dp_1F1F1F.svg'));
+    const openIconUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'open_24dp_1F1F1F.svg'));
     const saveIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_24dp_FE2F89.svg'));
     const saveAsIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'save_as_24dp_FE2F89.svg'));
     const dangerousIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'dangerous_24dp_FE2F89.svg'));
+    const newIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'new_24dp_FE2F89.svg'));
+    const openIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'open_24dp_FE2F89.svg'));
 
     const toolboxPath = path.join(extensionPath, 'media', 'toolbox.xml');
     const toolboxXml = fs.readFileSync(toolboxPath, 'utf8');
+
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -784,6 +857,8 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     <div id="loading-overlay">載入中...</div>
     <div id="inactive-overlay" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); color: white; font-size: 2em; z-index: 1000; text-align: center; padding: 20px;"></div>
     <div id="toolbar">
+        <img id="newButton" src="${newIconUri}" data-src="${newIconUri}" data-hover-src="${newIconHoverUri}" alt="${newTooltip}" title="${newTooltip}">
+        <img id="openButton" src="${openIconUri}" data-src="${openIconUri}" data-hover-src="${openIconHoverUri}" alt="${openTooltip}" title="${openTooltip}">
         <img id="saveButton" src="${saveIconUri}" data-src="${saveIconUri}" data-hover-src="${saveIconHoverUri}" alt="${saveTooltip}" title="${saveTooltip}">
         <img id="saveAsButton" src="${saveAsIconUri}" data-src="${saveAsIconUri}" data-hover-src="${saveAsIconHoverUri}" alt="${saveAsTooltip}" title="${saveAsTooltip}">
         <div class="theme-switch-wrapper">

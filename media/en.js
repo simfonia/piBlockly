@@ -3,9 +3,11 @@
   Object.assign(Blockly.Msg, {
     // English language file
     // Toolbar Tooltips
-    "BKY_TOOLBAR_SAVE_TOOLTIP": "Save Blocks",
-    "BKY_TOOLBAR_SAVE_AS_TOOLTIP": "Save Blocks As",
+    "BKY_TOOLBAR_SAVE_TOOLTIP": "Save Project",
+    "BKY_TOOLBAR_SAVE_AS_TOOLTIP": "Save Project As",
     "BKY_TOOLBAR_CLOSE_TOOLTIP": "Close",
+    "BKY_TOOLBAR_NEW_TOOLTIP": "New Project",
+    "BKY_TOOLBAR_OPEN_TOOLTIP": "Open Project",
 
     // Toolbar Theme Labels
     "BKY_TOOLBAR_ENGINEER_LABEL": "Engineer",
