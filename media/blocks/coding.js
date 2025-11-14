@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 // Coding Blocks
 Blockly.Blocks['coding_raw_statement'] = {
   init: function() {
@@ -95,4 +94,4 @@ Blockly.Blocks['coding_raw_wrapper'] = {
     });
   }
 };
-}(Blockly));
+}

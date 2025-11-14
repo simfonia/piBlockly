@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // CODING BLOCK GENERATORS
 // =============================================================================
@@ -24,3 +25,4 @@ Blockly.Arduino.forBlock['coding_raw_wrapper'] = function(block) {
 
 // Assign the stack processor (defined in _lib.js) to the raw definition block.
 Blockly.Arduino.forBlock['coding_raw_definition'] = processDefinitionStack;
+}

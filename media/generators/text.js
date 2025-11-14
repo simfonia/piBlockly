@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // TEXT BLOCKS
 // =============================================================================
@@ -41,3 +42,4 @@ Blockly.Arduino.forBlock['text_length'] = function(block) {
   const code = value + '.length()';
   return [code, Blockly.Arduino.ORDER_MEMBER];
 };
+}

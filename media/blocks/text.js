@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 // Text Blocks
 Blockly.Blocks['text_append'] = {
   init: function() {
@@ -46,4 +45,4 @@ Blockly.Blocks['text_length'] = {
     });
   }
 };
-}(Blockly));
+}

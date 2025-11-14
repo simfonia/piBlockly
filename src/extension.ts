@@ -429,7 +429,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
                             const functionName = scope.substring('function:'.length);
                             // Regex to find function definition: e.g., 'void myFunction(int arg) {'
                             // This regex is a bit more complex to handle return types and arguments.
-                            const match = document.getText().match(new RegExp(`^(?:void|int|float|String|boolean|byte|char|unsigned\\s+(?:int|long|char)|long|short|double)\\s+${functionName}\\s*\\([^)]*\\)\\s*\\{`, 'm'));
+                            const match = document.getText().match(new RegExp(`^(?:void|int|float|String|boolean|byte|char|unsigned\s+(?:int|long|char)|long|short|double)\s+${functionName}\s*\([^)]*\)\s*\{`, 'm'));
                             if (match && match.index !== undefined) {
                                 targetLine = document.positionAt(match.index).line;
                             }
@@ -640,27 +640,8 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const blocklyUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly.js')).with({ query: `nonce=${nonce}` });
     const langUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, blocklyLangFilePath)).with({ query: `nonce=${nonce}` });
     const customLangUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, customLangFilePath)).with({ query: `nonce=${nonce}` });
-    const customBlocksDir = vscode.Uri.joinPath(mediaPath, 'blocks');
-    const customBlockFiles = fs.readdirSync(path.join(extensionPath, 'media', 'blocks'));
-    const customBlockScriptUris = customBlockFiles
-        .filter(file => file.endsWith('.js'))
-        .map(file => webview.asWebviewUri(vscode.Uri.joinPath(customBlocksDir, file)).with({ query: `nonce=${nonce}` }));
-    
-    // Dynamically load all generator files from the new generators directory
-    const generatorsDir = vscode.Uri.joinPath(mediaPath, 'generators');
-    const generatorFiles = fs.readdirSync(path.join(extensionPath, 'media', 'generators'));
-    // Sort to ensure _core.js is loaded first, followed by _lib.js
-    generatorFiles.sort((a, b) => {
-        if (a === '_core.js') {return -1;}
-        if (b === '_core.js') {return 1;}
-        if (a === '_lib.js') {return -1;}
-        if (b === '_lib.js') {return 1;}
-        return a.localeCompare(b);
-    });
-    const generatorScriptUris = generatorFiles
-        .filter(file => file.endsWith('.js'))
-        .map(file => webview.asWebviewUri(vscode.Uri.joinPath(generatorsDir, file)).with({ query: `nonce=${nonce}` }));
-
+    const coreGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'generators', '_core.js')).with({ query: `nonce=${nonce}` });
+    const libGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'generators', '_lib.js')).with({ query: `nonce=${nonce}` });
     const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js')).with({ query: `nonce=${nonce}` });
     const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
@@ -671,7 +652,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const customLangContent = fs.readFileSync(customLangPath, 'utf8');
 
     const messages: { [key: string]: string } = {};
-    const regex = /"([^"]+)":\s*"([^"]*)"/g;
+    const regex = /"([^\"]+)":\s*"([^\"]*)"/g;
     let match;
     while ((match = regex.exec(customLangContent)) !== null) {
         messages[match[1]] = match[2];
@@ -822,10 +803,12 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     <script nonce="${nonce}" src="${blocklyUri}"></script>
     <script nonce="${nonce}" src="${langUri}"></script>
     <script nonce="${nonce}" src="${customLangUri}"></script>
+    <script nonce="${nonce}" src="${coreGeneratorUri}"></script>
+    <script nonce="${nonce}" src="${libGeneratorUri}"></script>
     <script nonce="${nonce}" src="${fieldColourUri}"></script>
     <script nonce="${nonce}" src="${fieldMultilineInputUri}"></script>
-    ${customBlockScriptUris.map(uri => `<script nonce="${nonce}" src="${uri}"></script>`).join('\n    ')}
-    ${generatorScriptUris.map(uri => `<script nonce="${nonce}" src="${uri}"></script>`).join('\n    ')}
+
+
 
     <script nonce="${nonce}">
         window.manifestUri = "${manifestUri}";

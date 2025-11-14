@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // TIME BLOCKS
 // =============================================================================
@@ -23,3 +24,4 @@ Blockly.Arduino.forBlock['arduino_micros'] = function(block) {
   var code = 'micros()';
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };
+}

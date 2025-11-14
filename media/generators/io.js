@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // I/O BLOCKS
 // =============================================================================
@@ -44,3 +45,4 @@ Blockly.Arduino.forBlock['arduino_analog_write'] = function(block) {
   var code = 'analogWrite(' + pin + ', ' + value + ');\n';
   return code;
 };
+}

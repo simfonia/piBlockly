@@ -1,9 +1,10 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // PICAR DEPENDENCY MANAGEMENT
 // =============================================================================
 
 const ensurePiCarMotorDependencies = () => {
-  Blockly.Arduino.macros_['define_picar_motor_pins'] = 
+  Blockly.Arduino.macros_['define_picar_motor_pins'] =
     '// Motor Pins\n' +
     '#define pinM1A 8\n' +
     '#define pinM1B 9\n' +
@@ -13,14 +14,14 @@ const ensurePiCarMotorDependencies = () => {
 };
 
 const ensurePiCarUltrasonicDependencies = () => {
-  Blockly.Arduino.macros_['define_picar_ultrasonic_pins'] = 
+  Blockly.Arduino.macros_['define_picar_ultrasonic_pins'] =
     '#define pinTrig 28\n' +
     '#define pinEcho 7\n';
   Blockly.Arduino.setups_['setup_ultrasonic'] = 'pinMode(pinTrig, OUTPUT);\n  pinMode(pinEcho, INPUT);\n';
 };
 
 const ensurePiCarIRDependencies = () => {
-  Blockly.Arduino.macros_['define_picar_ir_pins'] = 
+  Blockly.Arduino.macros_['define_picar_ir_pins'] =
     '#define pinIR_D 26\n' +
     '#define pinIR_A 27\n';
   Blockly.Arduino.setups_['setup_ir'] = 'pinMode(pinIR_D, INPUT);\n  pinMode(pinIR_A, INPUT);\n';
@@ -45,13 +46,13 @@ const ensurePiCarButtonDependencies = () => {
 
 const ensurePiCarServoDependencies = () => {
   Blockly.Arduino.includes_['define_servo_header'] = '#include <Servo.h>\\n';
-  Blockly.Arduino.macros_['define_picar_servo_pins'] = 
+  Blockly.Arduino.macros_['define_picar_servo_pins'] =
     '#define pinServoL 12\n' +
     '#define pinServoR 13\n';
-  Blockly.Arduino.definitions_['define_picar_servo_objects'] = 
+  Blockly.Arduino.definitions_['define_picar_servo_objects'] =
     'Servo handL;\n' +
     'Servo handR;\n';
-  Blockly.Arduino.definitions_['define_picar_servo_globals'] = 
+  Blockly.Arduino.definitions_['define_picar_servo_globals'] =
     'int g_hand_range = 180;\n' +
     'int g_s_angle_L = 180;\n' +
     'int g_s_angle_R = 0;\n';
@@ -158,7 +159,7 @@ int checkGray() {  // detection grayscale
   // Returns a value between 0 and 1023.
   int IR_A = analogRead(pinIR_A);
   delay(1);  // Pause to prevent noise caused by frequent reads.
-  return (1023 - IR_A);  // Invert, 0:black  1023:white 
+  return (1023 - IR_A);  // Invert, 0:black  1023:white
 }
 `;
 
@@ -235,10 +236,10 @@ Blockly.Arduino.forBlock['picar_init'] = function(block) {
 
   // Define the boot sequence function
   Blockly.Arduino.definitions_['define_inPosition'] =
-    'void inPosition(){  // Servo motor initial positioning\n' + 
-    '  handL.write(180);\n' + 
-    '  handR.write(0);\n' + 
-    '  delay(1000);\n' + 
+    'void inPosition(){  // Servo motor initial positioning\n' +
+    '  handL.write(180);\n' +
+    '  handR.write(0);\n' +
+    '  delay(1000);\n' +
     '}\n';
 
   // Add the boot sequence to the setup
@@ -258,8 +259,8 @@ Blockly.Arduino.forBlock['picar_set_hand_range'] = function(block) {
 
 Blockly.Arduino.forBlock['picar_resetPiCar'] = function(block) {
   Blockly.Arduino.definitions_['define_resetPiCar'] =
-    'void resetPiCar() {\n' + 
-    '  watchdog_reboot(0, 0, 0);\n' + 
+    'void resetPiCar() {\n' +
+    '  watchdog_reboot(0, 0, 0);\n' +
     '}\n';
   return 'resetPiCar();\n';
 };
@@ -429,3 +430,4 @@ Blockly.Arduino.forBlock['picar_no_tone'] = function(block) {
   var code = 'noTone(' + pin + ');\n';
   return code;
 };
+}

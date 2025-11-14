@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // VARIABLE BLOCKS
 // =============================================================================
@@ -8,7 +9,7 @@ Blockly.Arduino.forBlock['variables_declare_global'] = processDefinitionStack;
 Blockly.Arduino.forBlock['variables_declare_local'] = function(block) {
   var type = block.getFieldValue('TYPE');
   var varId = block.getFieldValue('VAR');
-  var variable = block.workspace.getVariableById(varId);
+  var variable = block.workspace.getVariableMap().getVariableById(varId);
   var varName = variable ? variable.name : 'UNKNOWN_VAR';
   var value = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC);
 
@@ -37,7 +38,8 @@ Blockly.Arduino.forBlock['variables_set'] = function(block) {
   var argument0 = Blockly.Arduino.valueToCode(block, 'VALUE',
       Blockly.Arduino.ORDER_ASSIGNMENT) || '0';
   var varId = block.getFieldValue('VAR');
-  var variable = block.workspace.getVariableById(varId);
+  var variable = block.workspace.getVariableMap().getVariableById(varId);
   var varName = variable.name;
   return varName + ' = ' + argument0 + ';\n';
 };
+}

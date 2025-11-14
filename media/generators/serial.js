@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // SERIAL BLOCKS
 // =============================================================================
@@ -24,3 +25,4 @@ Blockly.Arduino.forBlock['arduino_serial_available'] = function(block) {
 Blockly.Arduino.forBlock['arduino_serial_read'] = function(block) {
   return ['Serial.read()', Blockly.Arduino.ORDER_ATOMIC];
 };
+}

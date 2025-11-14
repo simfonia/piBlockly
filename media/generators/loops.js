@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // LOOP BLOCKS
 // =============================================================================
@@ -131,3 +132,4 @@ Blockly.Arduino.forBlock['controls_flow_statements'] = function(block) {
   }
   throw new Error('Unknown flow statement.');
 };
+}

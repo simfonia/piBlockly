@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 // piCar Blocks
 Blockly.Blocks['picar_init'] = {
   init: function() {
@@ -443,4 +442,4 @@ Blockly.Blocks['picar_no_tone'] = {
     });
   }
 };
-}(Blockly));
+}

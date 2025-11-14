@@ -349,6 +349,9 @@ async function loadExternalModules() {
                 if (module.registerBlocks) {
                     module.registerBlocks(Blockly);
                 }
+                if (module.registerGenerators) { // Add this check
+                    module.registerGenerators(Blockly); // Call registerGenerators
+                }
                 if (module.toolbox) {
                     const tempDom = Blockly.utils.xml.textToDom(module.toolbox);
                     // Append each child category from the module's toolbox to the base toolbox
@@ -498,9 +501,7 @@ window.addEventListener('message', event => {
 
                 workspace.clear();
                 const xml = Blockly.utils.xml.textToDom(message.xml);
-                Blockly.Xml.domToWorkspace(xml, workspace);
-                
-                // Store metadata from the extension.
+                                                        Blockly.Xml.domToWorkspace(xml, workspace);                // Store metadata from the extension.
                 window.currentInoUri = message.inoUri;
                 window.currentXmlName = message.xmlName ? message.xmlName.split(/[\\/]/).pop() : '未命名專案';
                 
@@ -566,7 +567,7 @@ window.addEventListener('message', event => {
 // Add a blur event listener to handle cases where a drag is released outside the webview.
 window.addEventListener('blur', () => {
     if (workspace && workspace.isDragging()) {
-        Blockly.Touch.terminate();
+        Blockly.Gesture.clearForced();
     }
 });
 

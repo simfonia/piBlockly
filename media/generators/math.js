@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // MATH BLOCKS
 // =============================================================================
@@ -152,3 +153,4 @@ Blockly.Arduino.forBlock['math_random_int'] = function(block) {
   }
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };
+}

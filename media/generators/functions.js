@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // FUNCTION BLOCKS
 // =============================================================================
@@ -69,3 +70,4 @@ Blockly.Arduino.forBlock['custom_procedures_callreturn_manual'] = function(block
   var code = funcName + '(' + argsStr + ')';
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };
+}

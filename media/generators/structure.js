@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // STRUCTURE & CORE BLOCKS
 // =============================================================================
@@ -11,3 +12,4 @@ Blockly.Arduino.forBlock['initializes_setup'] = function(block) {
 Blockly.Arduino.forBlock['initializes_loop'] = function(block) {
   return Blockly.Arduino.statementToCode(block, 'CONTENT');
 };
+}

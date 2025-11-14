@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 // Loops Blocks
 Blockly.Blocks['controls_whileUntil'] = {
   init: function() {
@@ -168,4 +167,4 @@ Blockly.Blocks['controls_flow_statements'] = {
     });
   }
 };
-}(Blockly));
+}

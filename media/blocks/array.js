@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 // Array Blocks
 Blockly.Blocks['array_declare_global'] = {
   init: function() {
@@ -115,4 +114,4 @@ Blockly.Blocks['array_length'] = {
     this.setHelpUrl("");
   }
 };
-}(Blockly));
+}

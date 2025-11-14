@@ -36,7 +36,7 @@ function processDefinitionStack(block) {
     if (currentBlock.type === 'variables_declare_global') {
         const type = currentBlock.getFieldValue('TYPE');
         const varId = currentBlock.getFieldValue('VAR');
-        const variable = currentBlock.workspace.getVariableById(varId);
+        const variable = currentBlock.workspace.getVariableMap().getVariableById(varId);
         const varName = variable ? variable.name : 'UNKNOWN_VAR';
         const value = Blockly.Arduino.valueToCode(currentBlock, 'VALUE', Blockly.Arduino.ORDER_ATOMIC);
         const defaultValue = (type === 'String') ? '""' : (type === 'bool') ? 'false' : '0';

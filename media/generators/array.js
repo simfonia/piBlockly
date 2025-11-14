@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // ARRAY BLOCKS
 // =============================================================================
@@ -39,3 +40,4 @@ Blockly.Arduino.forBlock['array_length'] = function(block) {
   var code = 'sizeof(' + varName + ') / sizeof(' + varName + '[0])';
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };
+}

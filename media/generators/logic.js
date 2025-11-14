@@ -1,3 +1,4 @@
+export function registerGenerators(Blockly) {
 // =============================================================================
 // LOGIC BLOCKS
 // =============================================================================
@@ -56,3 +57,4 @@ Blockly.Arduino.forBlock['logic_boolean'] = function(block) {
   var code = (block.getFieldValue('BOOL') === 'TRUE') ? 'true' : 'false';
   return [code, Blockly.Arduino.ORDER_ATOMIC];
 };
+}

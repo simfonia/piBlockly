@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 Blockly.Blocks['logic_compare'] = {
   init: function() {
     this.jsonInit({
@@ -110,4 +109,4 @@ Blockly.Blocks['logic_boolean'] = {
     });
   }
 };
-}(Blockly));
+}

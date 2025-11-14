@@ -1,4 +1,3 @@
-(function(Blockly) {
 // Function Blocks
 const CUSTOM_PROCEDURES_CALL_MANUAL_COMMON = {
   /**
@@ -349,7 +348,7 @@ const CUSTOM_PROCEDURES_DEF_COMMON = {
         newVar => newVar.getId() === oldVar.getId()
       );
       if (!isStillPresent) {
-        this.workspace.deleteVariableById(oldVar.getId());
+        this.workspace.getVariableMap().deleteVariableById(oldVar.getId());
       }
     }
   },
@@ -380,13 +379,13 @@ const CUSTOM_PROCEDURES_DEF_COMMON = {
     return this.argumentVarModels_;
   },
   renameVarById: function(oldId, newId) {
-    const oldVar = this.workspace.getVariableById(oldId);
+    const oldVar = this.workspace.getVariableMap().getVariableById(oldId);
     if (Blockly.Names.equals(oldVar.name, this.getFieldValue('NAME'))) {
       return; // Can't rename procedure name.
     }
     for (let i = 0; i < this.argumentVarModels_.length; i++) {
       if (this.argumentVarModels_[i].getId() === oldId) {
-        this.argumentVarModels_[i] = this.workspace.getVariableById(newId);
+        this.argumentVarModels_[i] = this.workspace.getVariableMap().getVariableById(newId);
       }
     }
     this.mutatorRebuild_(this.mutator.getWorkspace().getTopBlocks(false)[0]);
@@ -758,6 +757,8 @@ const CUSTOM_PROCEDURES_CALL_COMMON = {
   defType_: 'procedures_defreturn',
 };
 
+export function registerBlocks(Blockly) {
+
 Blockly.Blocks['custom_procedures_callnoreturn'] =
     Object.assign({}, CUSTOM_PROCEDURES_CALL_COMMON, {
       init: function() {
@@ -834,6 +835,6 @@ Blockly.Blocks['custom_procedures_return'] = {
       }
     });
   },
-  FUNCTION_TYPES: ['custom_procedures_defreturn', 'custom_procedures_defnoreturn'],
-};
-}(Blockly));
+          FUNCTION_TYPES: ['custom_procedures_defreturn', 'custom_procedures_defnoreturn'],
+        };
+}

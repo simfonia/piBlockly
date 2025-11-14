@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 // Variables Blocks
 Blockly.Blocks['variables_declare_global'] = {
   init: function() {
@@ -115,4 +114,4 @@ Blockly.Blocks['variables_set'] = {
   },
   contextMenuType_: 'variables_get'
 };
-}(Blockly));
+}

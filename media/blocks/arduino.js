@@ -1,5 +1,4 @@
-
-(function(Blockly) {
+export function registerBlocks(Blockly) {
 // Arduino Blocks
 Blockly.Blocks['initializes_setup'] = {
   init: function() {
@@ -487,4 +486,4 @@ Blockly.Blocks['math_random_int'] = {
     });
   }
 };
-}(Blockly));
+}
