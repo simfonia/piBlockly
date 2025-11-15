@@ -1,6 +1,6 @@
 // piblockly/media/module_loader.js
 
-export async function loadModule(url) {
+export async function loadModule(url, suppressError = false) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -15,7 +15,9 @@ export async function loadModule(url) {
     // Return the module which should contain registerBlocks and toolbox
     return module;
   } catch (e) {
-    console.error('Error loading module:', url, e);
+    if (!suppressError) {
+      console.error('Error loading module:', url, e);
+    }
     return null;
   }
 }

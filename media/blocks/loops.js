@@ -1,9 +1,9 @@
 export function registerBlocks(Blockly) {
 // Loops Blocks
-Blockly.Blocks['controls_whileUntil'] = {
+Blockly.Blocks['controls_while'] = {
   init: function() {
     this.jsonInit({
-      "message0": "%{BKY_CONTROLS_WHILEUNTIL_MESSAGE}",
+      "message0": "%{BKY_CONTROLS_WHILE_MESSAGE}",
       "args0": [
         {
           "type": "input_value",
@@ -18,13 +18,12 @@ Blockly.Blocks['controls_whileUntil'] = {
           "name": "DO"
         }
       ],
-      "message2": "}",
       "inputsInline": true,
       "previousStatement": true,
       "nextStatement": true,
       "style": "loop_blocks",
-      "tooltip": Blockly.Msg.CONTROLS_WHILEUNTIL_TOOLTIP,
-      "helpUrl": Blockly.Msg.CONTROLS_WHILEUNTIL_HELPURL
+      "tooltip": Blockly.Msg.CONTROLS_WHILE_TOOLTIP,
+      "helpUrl": Blockly.Msg.CONTROLS_WHILE_HELPURL
     });
   }
 };

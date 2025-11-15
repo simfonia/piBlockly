@@ -115,13 +115,13 @@
     "BKY_ARDUINO_MILLIS_MSG_ENGINEER": "millis()",
     "BKY_ARDUINO_MICROS_MSG_ENGINEER": "micros()",
     // Angel
-    "BKY_ARDUINO_DELAY_MSG_ANGEL": "wait for %1 ms",
-    "BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ANGEL": "wait for %1 μs",
-    "BKY_ARDUINO_MILLIS_MSG_ANGEL": "running time (ms)",
-    "BKY_ARDUINO_MICROS_MSG_ANGEL": "running time (μs)",
+    "BKY_ARDUINO_DELAY_MSG_ANGEL": "Wait %1 milliseconds, then continue",
+    "BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ANGEL": "Wait %1 microseconds, then continue",
+    "BKY_ARDUINO_MILLIS_MSG_ANGEL": "Uptime (milliseconds) since boot",
+    "BKY_ARDUINO_MICROS_MSG_ANGEL": "Uptime (microseconds) since boot",
     // Tooltips
-    "ARDUINO_DELAY_TOOLTIP": "Waits for the specified number of milliseconds.",
-    "ARDUINO_DELAY_MICROSECONDS_TOOLTIP": "Waits for the specified number of microseconds.",
+    "ARDUINO_DELAY_TOOLTIP": "Pause program execution for the specified number of milliseconds.",
+    "ARDUINO_DELAY_MICROSECONDS_TOOLTIP": "Pause program execution for the specified number of microseconds.",
     "ARDUINO_MILLIS_TOOLTIP": "Returns the number of milliseconds since the Arduino board began running the current program.",
     "ARDUINO_MICROS_TOOLTIP": "Returns the number of microseconds since the Arduino board began running the current program.",
 
@@ -296,15 +296,15 @@
     // Loops
     // *********************************************************
     // Engineer
-    "BKY_CONTROLS_WHILEUNTIL_MSG_ENGINEER": "while (%1) {",
+    "BKY_CONTROLS_WHILE_MSG_ENGINEER": "while (%1) {",
     "BKY_CONTROLS_FOR_MSG_ENGINEER": "for (int %1 = %2; %3 %4 %5; %6 %7 %8) {",
     "BKY_CONTROLS_FLOW_STATEMENTS_MSG_ENGINEER": "%1",
     // Angel
-    "BKY_CONTROLS_WHILEUNTIL_MSG_ANGEL": "while %1",
-    "BKY_CONTROLS_FOR_MSG_ANGEL": "count with %1 from %2 to %5 by %8 (%3%4%6%7)",
+    "BKY_CONTROLS_WHILE_MSG_ANGEL": "while %1",
+    "BKY_CONTROLS_FOR_MSG_ANGEL": "Count, variable %1 = %2 ; %3%4%5 ; each change (%6%7 %8)",
     "BKY_CONTROLS_FLOW_STATEMENTS_MSG_ANGEL": "%1 loop",
     // Tooltip
-    "CONTROLS_WHILEUNTIL_TOOLTIP": "While a condition is true, then do some statements.",
+    "CONTROLS_WHILE_TOOLTIP": "While a condition is true, then do some statements.",
     "CONTROLS_FOR_TOOLTIP": "Loop with %1 from %2 to %3 by %4.",
     "CONTROLS_FLOW_STATEMENTS_TOOLTIP": "Break out of the inner loop or continue with the next iteration.",
 

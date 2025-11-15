@@ -154,7 +154,7 @@ const blockMessageStylesMap = {
 
         // Loops
         'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ENGINEER',
-        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ENGINEER',
+        'CONTROLS_WHILE_MESSAGE': 'BKY_CONTROLS_WHILE_MSG_ENGINEER',
         'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ENGINEER',
 
         // Math
@@ -234,7 +234,7 @@ const blockMessageStylesMap = {
 
         // Loops
         'CONTROLS_FOR_MESSAGE': 'BKY_CONTROLS_FOR_MSG_ANGEL',
-        'CONTROLS_WHILEUNTIL_MESSAGE': 'BKY_CONTROLS_WHILEUNTIL_MSG_ANGEL',
+        'CONTROLS_WHILE_MESSAGE': 'BKY_CONTROLS_WHILE_MSG_ANGEL',
         'CONTROLS_FLOW_STATEMENTS_MESSAGE': 'BKY_CONTROLS_FLOW_STATEMENTS_MSG_ANGEL',
 
         // Math
@@ -297,7 +297,10 @@ function applyStyle(themeName, isInitialLoad = false) {
     if (currentMessageMap) {
         for (const genericBlocklyMsgKey in currentMessageMap) {
             if (Object.prototype.hasOwnProperty.call(currentMessageMap, genericBlocklyMsgKey)) {
-                Blockly.Msg[genericBlocklyMsgKey] = Blockly.Msg[currentMessageMap[genericBlocklyMsgKey]];
+                const valueToAssign = Blockly.Msg[currentMessageMap[genericBlocklyMsgKey]];
+                if (valueToAssign !== undefined && valueToAssign !== null) {
+                    Blockly.Msg[genericBlocklyMsgKey] = valueToAssign;
+                }
             }
         }
     }
@@ -322,7 +325,9 @@ function applyStyle(themeName, isInitialLoad = false) {
 
 /**
  * Loads external Blockly modules defined in manifest.json.
- * These modules can register new blocks and extend the toolbox.
+ * This function supports two types of modules:
+ * 1. Single-file modules (legacy): A single JS file exporting all parts.
+ * 2. Directory modules: A directory containing separate files for blocks, generators, etc.
  */
 async function loadExternalModules() {
     try {
@@ -332,39 +337,118 @@ async function loadExternalModules() {
             return;
         }
         const manifest = await manifestResponse.json();
+        const loadedModules = [];
 
-        for (const modConfig of manifest.modules) {
-            // Resolve module URL relative to the manifest.json's URL
+        const loadPromises = manifest.modules.map(async (modConfig) => {
             const baseManifestUrl = new URL(window.manifestUri).origin + new URL(window.manifestUri).pathname.substring(0, new URL(window.manifestUri).pathname.lastIndexOf('/') + 1);
-            const moduleUrl = new URL(modConfig.url, baseManifestUrl).toString();
-            const module = await loadModule(moduleUrl);
-            if (module) {
-                // Merge module-specific messages based on current locale
-                const isChinese = window.currentLocale && window.currentLocale.startsWith('zh');
-                const moduleMessages = isChinese ? module.MSG_SIMFONIA_ZH_HANT : module.MSG_SIMFONIA_EN;
-                if (moduleMessages) {
-                    Object.assign(Blockly.Msg, moduleMessages);
+            
+            if (modConfig.url.endsWith('/')) {
+                // --- It's a DIRECTORY module ---
+                const module = {};
+                const path = new URL(modConfig.url, baseManifestUrl).toString();
+
+                // Load blocks, toolbox, and language files concurrently
+                const [
+                    blocksModule,
+                    toolboxXml,
+                    enModule,
+                    zhModule
+                ] = await Promise.all([
+                    loadModule(path + 'blocks.js').catch(() => null),
+                    fetch(path + 'toolbox.xml').then(res => res.ok ? res.text() : null).catch(() => null),
+                    loadModule(path + 'en.js').catch(() => null),
+                    loadModule(path + 'zh-hant.js').catch(() => null)
+                ]);
+
+                // Load generators sequentially to avoid unnecessary error logs for fallback
+                let finalGeneratorsModule = await loadModule(path + 'generators.js', true); // Suppress error on first try
+                if (!finalGeneratorsModule) {
+                    // If generators.js failed, try javascript.js (without suppressing error, as it's the last resort)
+                    finalGeneratorsModule = await loadModule(path + 'javascript.js').catch(() => null);
                 }
 
-                if (module.registerBlocks) {
-                    module.registerBlocks(Blockly);
+                // Aggregate the parts into a single module object
+                if (blocksModule && blocksModule.registerBlocks) {
+                    module.registerBlocks = blocksModule.registerBlocks;
                 }
-                if (module.registerGenerators) { // Add this check
-                    module.registerGenerators(Blockly); // Call registerGenerators
+                
+                if (finalGeneratorsModule && finalGeneratorsModule.registerGenerators) {
+                    module.registerGenerators = finalGeneratorsModule.registerGenerators;
                 }
-                if (module.toolbox) {
-                    const tempDom = Blockly.utils.xml.textToDom(module.toolbox);
-                    // Append each child category from the module's toolbox to the base toolbox
-                    for (let i = 0; i < tempDom.children.length; i++) {
-                        baseToolbox.appendChild(tempDom.children[i].cloneNode(true));
+
+                if (toolboxXml) {
+                    module.toolbox = toolboxXml;
+                }
+                if (enModule) {
+                    Object.assign(module, enModule);
+                }
+                if (zhModule) {
+                    Object.assign(module, zhModule);
+                }
+                return module;
+
+            } else {
+                // --- It's a SINGLE FILE module (legacy) ---
+                const moduleUrl = new URL(modConfig.url, baseManifestUrl).toString();
+                return loadModule(moduleUrl).catch(() => null);
+            }
+        });
+
+        const resolvedModules = await Promise.all(loadPromises);
+        loadedModules.push(...resolvedModules.filter(m => m && Object.keys(m).length > 0));
+
+        // Pass 2: Populate Blockly.Msg with all messages from all modules
+        const allModuleMessages = {};
+        const isChinese = window.currentLocale && window.currentLocale.startsWith('zh');
+        for (const module of loadedModules) {
+            for (const key in module) {
+                if (key.startsWith('MSG_')) {
+                    if (isChinese && key.endsWith('_ZH_HANT')) {
+                        Object.assign(allModuleMessages, module[key]);
+                    } else if (!isChinese && key.endsWith('_EN')) {
+                        Object.assign(allModuleMessages, module[key]);
                     }
                 }
             }
         }
-        // Update the workspace toolbox after all modules are loaded
-        if (workspace) { // Ensure workspace is initialized
+        Object.assign(Blockly.Msg, allModuleMessages);
+
+        // Pass 3: Register all blocks and generators
+        for (const module of loadedModules) {
+            if (module.registerBlocks) {
+                module.registerBlocks(Blockly);
+            }
+            if (module.registerGenerators) {
+                module.registerGenerators(Blockly);
+            }
+        }
+
+        // Pass 4: Process all toolboxes
+        for (const module of loadedModules) {
+            if (module.toolbox) {
+                const cleanXml = module.toolbox.replace(/>\s+</g, '><').trim();
+                const tempDom = Blockly.utils.xml.textToDom(cleanXml);
+                
+                // tempDom.children is a collection of the top-level nodes from the module's toolbox XML
+                // (e.g., the <category> elements).
+                const moduleNodes = tempDom.children;
+
+                if (moduleNodes) {
+                    // Append each node from the module's toolbox directly to the baseToolbox fragment.
+                    // This makes them siblings of the existing base categories.
+                    // We iterate over a static copy as appendChild modifies the live HTMLCollection.
+                    Array.from(moduleNodes).forEach(node => {
+                        baseToolbox.appendChild(node.cloneNode(true));
+                    });
+                }
+            }
+        }
+
+        // Pass 5: Update the workspace toolbox
+        if (workspace) {
             workspace.updateToolbox(baseToolbox);
         }
+
     } catch (e) {
         console.error('Error loading external modules:', e);
     }
@@ -388,6 +472,7 @@ const vscode = acquireVsCodeApi();
 // --- Global State Variables ---
 let debounceTimer; // Timer for debouncing code generation.
 let isDirty = false; // Tracks if the workspace has unsaved changes.
+let isPanelActive = true; // Tracks if the webview panel is currently active/visible.
 window.promptCallback = null; // Stores the callback for prompt dialogs.
 let baseToolbox; // Stores the base toolbox XML DOM object.
 let workspace; // Declare workspace globally
@@ -416,6 +501,11 @@ function updateCode(event, suppressDirty = false) {
     }
     // Don't generate code if a drag gesture is in progress.
     if (workspace.isDragging()) {
+        return;
+    }
+
+    // Only send updateCode messages if the panel is active.
+    if (!isPanelActive) {
         return;
     }
 
@@ -553,12 +643,14 @@ window.addEventListener('message', event => {
         // The webview panel has become active.
         case 'panelActive':
             document.getElementById('inactive-overlay').style.display = 'none';
+            isPanelActive = true;
             break;
         // The webview panel has become inactive.
         case 'panelInactive': {
             const overlay = document.getElementById('inactive-overlay');
             overlay.textContent = `請切換至與 [piBlockly: ${window.currentXmlName}] 對應的程式碼頁面以啟用編輯`;
             overlay.style.display = 'flex';
+            isPanelActive = false;
             break;
         }
     }

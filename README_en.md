@@ -2,70 +2,59 @@
 
 [English](README_en.md) | [繁體中文](README.md)
 
-## A Blockly Extension for Visual Studio Code / Arduino IDE 2
+## Blockly Extension for Visual Studio Code / Arduino IDE 2
 
-πBlockly is a Visual Studio Code extension that integrates Blockly, a web-based visual programming editor, directly into your Arduino development workflow. It allows you to program your Arduino board using intuitive drag-and-drop blocks, which are then converted into standard Arduino C++ code.
+πBlockly is a Visual Studio Code extension that integrates Blockly (a web-based visual programming editor) directly into your Arduino development workflow. It allows you to program your Arduino board using intuitive drag-and-drop blocks, which are then converted into standard Arduino C++ code.
 
-This extension is designed to work seamlessly with Arduino IDE 2, leveraging its VS Code-based core to provide a unified development experience. Visually generate your Arduino C++ code, then use the full power of Arduino IDE 2 for compiling, uploading, and other advanced features.
+Although this is a VS Code extension, it can also run within Arduino IDE 2, leveraging its VS Code-based core to provide a unified development experience. It visually generates your Arduino C++ code, which you can then use Arduino IDE 2 for compilation, uploading, and other functionalities.
 
 ## Features
 
--   **Blockly Visual Editor:** A fully integrated Blockly workspace for visual programming.
--   **C++-style Blocks:** Provides a smooth transition for beginners entering the world of C++.
--   **Arduino C++ Code Generation:** Automatically converts Blockly blocks into clean and functional Arduino C++ code.
--   **Custom Block Support:** Includes custom blocks for specific hardware (piCar) and advanced programming structures (Coding).
--   **Array Blocks:** A complete set of blocks for C++ array manipulation:
-    -   **Declare Array:** Declare an array with a specified data type (int, float, String, bool) and size. Supports both global and local scope declaration.
-    -   **Get Array Element:** Access an element of an array using an index.
-    -   **Set Array Element:** Assign a value to an element at a specified index in an array.
-    -   **Array Length:** Get the number of elements in an array.
--   **Global/Local Scope Control:** For array declarations, easily switch between global and local scope with appropriate visual feedback in the workspace.
--   **Synchronized Panel Closing:** Closing the piBlockly webview panel automatically closes its associated `.ino` file, ensuring a clean workspace.
--   **Enhanced Webview Security:** Implements a Content Security Policy (CSP) with a nonce to mitigate XSS vulnerabilities and restrict resource loading.
--   **Interactive Toolbar Icons:** Toolbar icons for common actions (Save, Save As, Close) with visual hover effects.
+-   **Blockly Visual Editor:** Powered by Blockly for visual programming.
+-   **Two Block Styles: Engineer and Angel:** The Engineer style closely mirrors native C++ syntax, providing a smooth transition for newcomers to the C++ world. The Angel style uses more colloquial descriptions while retaining technical semantics. For example, Arduino I/O pin Read and Write are expressed as "read in" and "write out," clearly indicating signal flow direction and the original API design vocabulary.
+
+    Engineer Style Example:
+    ![Engineer Style](./assets/demo_Engineer_en.png)
+
+    Angel Style Example:
+    ![Angel Style](./assets/demo_Angel_en.png)
+-   **Arduino C++ Code Generation:** Automatically converts Blockly blocks into clean and fully functional Arduino C++ code.
+-   **Flexibility:** Not limited to specific development boards, it also includes a set of advanced programming blocks for "Coding." If you encounter situations without a specific block, you can improvise. Of course, debugging is up to you.
+-   **Custom Extension Blocks:** Ability to load self-developed blocks from the internet (this feature is currently not completed).
 
 ## Installation
 
-Although this is a VS Code extension, it can also be run in Arduino IDE 2.3.6.
-
-**Installation steps for Arduino IDE 2 (using Windows 11 as an example):**
+**Installation Steps for Arduino IDE 2 (Example: Windows 11):**
 
 1.  Close Arduino IDE 2.
-2.  **Remove old versions:**
+2.  **Remove Old Versions:**
     *   Go to `C:\Users\[user name]\.arduinoIDE\deployedPlugins` and delete all `piblockly-x.x.x` folders.
-    *   Go to `C:\Users\[user name]\.arduinoIDE\plugins` (if this folder does not exist, create it, paying attention to the 's' in 'plugins') and delete all `piblockly-x.x.x.vsix` files.
+    *   Go to `C:\Users\[user name]\.arduinoIDE\plugins` (create this folder if it doesn't exist, note the 's' in 'plugins') and delete all `piblockly-x.x.x.vsix` files.
 3.  **Download the latest `piblockly-x.x.x.vsix` file.**
-    *   Place the downloaded `.vsix` file into `C:\Users\[user name]\.arduinoIDE\plugins` (if this folder does not exist, create it, paying attention to the 's' in 'plugins').
-4.  Start Arduino IDE 2. You should see a pink π icon in the upper right corner. Click it to launch the piBlockly editor.
+    *   Place the downloaded `.vsix` file into `C:\Users\[user name]\.arduinoIDE\plugins` (create this folder if it doesn't exist, note the 's' in 'plugins').
+4.  Launch Arduino IDE 2. You should see a pink π icon in the top right corner. Click it to start the piBlockly editor.
 
 ## Usage
 
 1.  Open an Arduino `.ino` file in Arduino IDE 2.
-2.  Click the "π" button in the upper right corner of the editor to launch the piBlockly editor. If there is no "π" button, you can press Shift + Ctrl + P and enter `piBlockly: Start piBlockly Editor` in the command palette.
+2.  Click the "π" button in the top right corner of the editor to launch the piBlockly editor. If the "π" button is not present, press Shift + Ctrl + P and type `piBlockly: Start piBlockly Editor` in the command palette.
 3.  Choose to create a new project or open an existing `.xml` Blockly project file.
 4.  Drag and drop blocks from the toolbox to build your program.
-5.  The generated Arduino C++ code will be displayed in the associated `.ino` editor on the left.
+5.  The generated Arduino C++ code will be displayed in the associated `.ino` editor on the left. This code page is managed by Arduino IDE, and πBlockly **will not** actively save the `.ino` file.
 6.  Use the toolbar buttons above the block editing area on the right to save your Blockly project (`.xml`) or close the editor.
 
-## Development Status
+## Known Issues
 
-simfonia is not a professional programmer, so development progress may be slow. I apologize for this.
-The main implemented features include:
+-   Undo functionality is limited by Blockly's event logging mechanism; one action may require multiple undo steps.
+-   When selecting a specific block, the code can currently only navigate to the beginning of its containing function. For blocks in the global scope, it can only navigate to the very beginning of the code. If there is a lot of globally defined code, precise positioning will not be possible.
+-   The block editing area's title tab has an "X" that can close the entire πBlockly panel. However, it does not check if the block file has been modified before closing directly. Please use with caution. It is recommended to use the close button on the far right of the toolbar to close the πBlockly panel.
+-   πBlockly has only been tested on Windows 11 + VS Code 1.105 + Arduino IDE 2.3.6. Normal operation on other platforms is not guaranteed.
 
--   Core Blockly integration and Arduino C++ code generation.
--   Custom blocks for the author's current teaching-purpose wheeled robot, piCar, and general programming tools.
--   The appearance of the blocks maintains the original C++ flavor as much as possible, and blocks under the "Coding" category are provided for users to write freely. If you encounter a situation where there is no block, you can improvise.
--   Handling of webview lifecycle and security.
+## Inspiration
 
-Future plans include dynamically loading third-party blocks from the web, theme switching, and further security enhancements.
-
-
-## Issues
-
--   Between the block editing area and the code editing area, there may be some user interface malfunctions due to many unresolved technical issues.
--   The close button in the upper right corner of the block editing area works normally in VS Code, reminding to save and closing the block editing area, but it does not work in Arduino IDE 2. To use it in Arduino IDE 2, the best way is to press the "Save" or "Save As" button above the block editing area, and then press the "X" on the title tab to close the entire panel.
--   The title tab of the block editing area has an "X" to close the entire panel, but it will close directly without checking if the block file has been modified. Please use it with caution.
--   This extension has only been tested on Windows 11 + VS Code 1.105 + Arduino IDE 2.3.6.
+-   Blockly: https://developers.google.com/blockly
+-   TextBlockly: https://github.com/timcsy/TextBlockly
+-   BlocklyDuino: https://github.com/BlocklyDuino/BlocklyDuino
 
 ## License
 

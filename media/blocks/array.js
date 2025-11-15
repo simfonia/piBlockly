@@ -13,10 +13,7 @@ Blockly.Blocks['array_declare_global'] = {
         .appendField(new Blockly.FieldTextInput('myGlobalArray'), 'VAR')
         .appendField('[');
     this.appendValueInput('SIZE')
-        .setCheck('Number')
-        .setShadowDom(Blockly.utils.xml.textToDom(
-            '<shadow type="math_number"><field name="NUM">10</field></shadow>'
-        ));
+        .setCheck('Number');
     this.appendDummyInput()
         .appendField(']');
     this.setInputsInline(true);
@@ -41,10 +38,7 @@ Blockly.Blocks['array_declare_local'] = {
         .appendField(new Blockly.FieldTextInput('myLocalArray'), 'VAR')
         .appendField('[');
     this.appendValueInput('SIZE')
-        .setCheck('Number')
-        .setShadowDom(Blockly.utils.xml.textToDom(
-            '<shadow type="math_number"><field name="NUM">10</field></shadow>'
-        ));
+        .setCheck('Number');
     this.appendDummyInput()
         .appendField(']');
     this.setInputsInline(true);
@@ -63,10 +57,7 @@ Blockly.Blocks['array_get'] = {
         .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
         .appendField(Blockly.Msg.ARRAY_GET_BRACKET_OPEN);
     this.appendValueInput('INDEX')
-        .setCheck('Number')
-        .setShadowDom(Blockly.utils.xml.textToDom(
-            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
-        ));
+        .setCheck('Number');
     this.appendDummyInput()
         .appendField(Blockly.Msg.ARRAY_GET_BRACKET_CLOSE);
     this.setInputsInline(true);
@@ -84,10 +75,7 @@ Blockly.Blocks['array_set'] = {
         .appendField(new Blockly.FieldTextInput('myArray'), 'VAR')
         .appendField(Blockly.Msg.ARRAY_SET_BRACKET_OPEN);
     this.appendValueInput('INDEX')
-        .setCheck('Number')
-        .setShadowDom(Blockly.utils.xml.textToDom(
-            '<shadow type="math_number"><field name="NUM">0</field></shadow>'
-        ));
+        .setCheck('Number');
     this.appendDummyInput()
         .appendField(Blockly.Msg.ARRAY_SET_BRACKET_CLOSE_EQUALS);
     this.appendValueInput('VALUE')

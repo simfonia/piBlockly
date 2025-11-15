@@ -1,5 +1,43 @@
 export function registerBlocks(Blockly) {
 // Arduino Blocks
+
+Blockly.Blocks['arduino_pin_shadow'] = {
+  init: function() {
+    // Kept in imperative style due to jsonInit issues with FieldTextInput in shadow blocks.
+    this.appendDummyInput()
+        .appendField(Blockly.Msg.ARDUINO_PIN_LABEL)
+        .appendField(new Blockly.FieldTextInput(""), "PIN");
+    this.setOutput(true, ["Number", "String"]);
+    this.setColour(Blockly.Msg.ARDUINO_CONTROL_HUE);
+    this.setTooltip("");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['arduino_pin_mode_mode_shadow'] = {
+  init: function() {
+    // Kept in imperative style due to jsonInit issues with FieldDropdown in shadow blocks.
+    this.jsonInit({
+      "message0": Blockly.Msg.ARDUINO_MODE_LABEL + " %1",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "MODE",
+          "options": [
+            [Blockly.Msg.ARDUINO_PIN_MODE_OUTPUT, "OUTPUT"],
+            [Blockly.Msg.ARDUINO_PIN_MODE_INPUT, "INPUT"],
+            [Blockly.Msg.ARDUINO_PIN_MODE_INPUT_PULLUP, "INPUT_PULLUP"]
+          ]
+        }
+      ],
+      "output": "String",
+      "colour": Blockly.Msg.ARDUINO_CONTROL_HUE,
+      "tooltip": "",
+      "helpUrl": ""
+    });
+  }
+};
+
 Blockly.Blocks['initializes_setup'] = {
   init: function() {
     this.jsonInit({
@@ -65,43 +103,6 @@ Blockly.Blocks['arduino_pin_mode'] = {
       "nextStatement": true,
       "colour": Blockly.Msg.ARDUINO_CONTROL_HUE,
       "tooltip": Blockly.Msg.ARDUINO_PIN_MODE_TOOLTIP,
-      "helpUrl": ""
-    });
-  }
-};
-
-Blockly.Blocks['arduino_pin_shadow'] = {
-  init: function() {
-    // Kept in imperative style due to jsonInit issues with FieldTextInput in shadow blocks.
-    this.appendDummyInput()
-        .appendField(Blockly.Msg.ARDUINO_PIN_LABEL)
-        .appendField(new Blockly.FieldTextInput(""), "PIN");
-    this.setOutput(true, ["Number", "String"]);
-    this.setColour(Blockly.Msg.ARDUINO_CONTROL_HUE);
-    this.setTooltip("");
-    this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['arduino_pin_mode_mode_shadow'] = {
-  init: function() {
-    // Kept in imperative style due to jsonInit issues with FieldDropdown in shadow blocks.
-    this.jsonInit({
-      "message0": Blockly.Msg.ARDUINO_MODE_LABEL + " %1",
-      "args0": [
-        {
-          "type": "field_dropdown",
-          "name": "MODE",
-          "options": [
-            [Blockly.Msg.ARDUINO_PIN_MODE_OUTPUT, "OUTPUT"],
-            [Blockly.Msg.ARDUINO_PIN_MODE_INPUT, "INPUT"],
-            [Blockly.Msg.ARDUINO_PIN_MODE_INPUT_PULLUP, "INPUT_PULLUP"]
-          ]
-        }
-      ],
-      "output": "String",
-      "colour": Blockly.Msg.ARDUINO_CONTROL_HUE,
-      "tooltip": "",
       "helpUrl": ""
     });
   }

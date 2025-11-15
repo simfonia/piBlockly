@@ -1,3 +1,8 @@
+<!-- 
+    此檔案僅作為開發參考或模板使用。
+    實際上，webview 的 HTML 內容是由後端 (extension.ts) 動態生成的，
+    本檔案並未在執行時被正式使用。
+-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,11 +14,10 @@
     <div id="blocklyDiv" style="height: 100vh; width: 100vw;"></div>
 
     <!-- Blockly Core -->
-    <script src="./blockly_compressed.js"></script>
-    <!-- Built-in Blocks -->
-    <script src="./blocks_compressed.js"></script>
+    <script src="./blockly.js"></script>
+
     <!-- Language Files -->
-    <script src="./msg/en.js"></script>
+    <script src="./en.js"></script>
 
     <!-- Custom Blocks & Toolbox -->
     <!-- These will be added later -->

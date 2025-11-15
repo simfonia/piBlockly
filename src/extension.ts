@@ -314,7 +314,7 @@ async function handleOpenProject(context: vscode.ExtensionContext, editor: vscod
  * @param xmlContent The initial XML content to load into the Blockly workspace.
  * @param xmlName The full path of the associated .xml file.
  */
-function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string, xmlName: string | undefined, editor: vscode.TextEditor) {
+async function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string, xmlName: string | undefined, editor: vscode.TextEditor) {
     if (!xmlName) {
         vscode.window.showErrorMessage(getLocalizedMessage('noXmlPath'));
         return;
@@ -361,7 +361,7 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
 
 
     // Set the webview's initial HTML content.
-    panel.webview.html = getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
+    panel.webview.html = await getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
 
     // Handle messages from the webview.
     panel.webview.onDidReceiveMessage(
@@ -430,6 +430,11 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
                         const document = associatedEditor.document;
                         let targetLine = 0; // Default to top of file for global or unknown scope
 
+                        // Helper function to escape strings for use in a regular expression.
+                        const escapeRegExp = (str: string) => {
+                            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+                        };
+
                         if (scope === 'setup') {
                             const match = document.getText().match(/^void\s+setup\s*\(\s*\)\s*\{/m);
                             if (match && match.index !== undefined) {
@@ -442,9 +447,10 @@ function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: string
                             }
                         } else if (scope.startsWith('function:')) {
                             const functionName = scope.substring('function:'.length);
-                            // Regex to find function definition: e.g., 'void myFunction(int arg) {'
-                            // This regex is a bit more complex to handle return types and arguments.
-                            const match = document.getText().match(new RegExp(`^(?:void|int|float|String|boolean|byte|char|unsigned\s+(?:int|long|char)|long|short|double)\s+${functionName}\s*\([^)]*\)\s*\{`, 'm'));
+                            const escapedFuncName = escapeRegExp(functionName);
+                            // This more flexible regex allows for any valid C++-like type, including pointers and custom classes.
+                            const regex = new RegExp(`^([a-zA-Z_][a-zA-Z0-9_\\*\\s&]*?)\\s+${escapedFuncName}\\s*\\([^)]*\\)\\s*\\{`, 'm');
+                            const match = document.getText().match(regex);
                             if (match && match.index !== undefined) {
                                 targetLine = document.positionAt(match.index).line;
                             }
@@ -685,7 +691,7 @@ function getNonce() {
  * @param extensionPath The file path of the extension's root directory.
  * @returns The full HTML string for the webview.
  */
-function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, extensionPath: string) {
+async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, extensionPath: string) {
     const mediaPath = vscode.Uri.joinPath(extensionUri, 'media');
     const nonce = getNonce();
 
@@ -715,7 +721,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
 
     // Read the content of the custom language file to get toolbar translations
     const customLangPath = path.join(extensionPath, 'media', customLangFilePath);
-    const customLangContent = fs.readFileSync(customLangPath, 'utf8');
+    const customLangContent = await fs.promises.readFile(customLangPath, 'utf8');
 
     const messages: { [key: string]: string } = {};
     const regex = /"([^\"]+)":\s*"([^\"]*)"/g;
@@ -743,7 +749,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, ex
     const openIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'open_24dp_FE2F89.svg'));
 
     const toolboxPath = path.join(extensionPath, 'media', 'toolbox.xml');
-    const toolboxXml = fs.readFileSync(toolboxPath, 'utf8');
+    const toolboxXml = await fs.promises.readFile(toolboxPath, 'utf8');
 
 
     return `<!DOCTYPE html>

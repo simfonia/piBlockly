@@ -115,13 +115,13 @@
     "BKY_ARDUINO_MILLIS_MSG_ENGINEER": "millis()",
     "BKY_ARDUINO_MICROS_MSG_ENGINEER": "micros()",
     // Angel
-    "BKY_ARDUINO_DELAY_MSG_ANGEL": "等待 %1 毫秒",
-    "BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ANGEL": "等待 %1 微秒",
-    "BKY_ARDUINO_MILLIS_MSG_ANGEL": "運行時間 (毫秒)",
-    "BKY_ARDUINO_MICROS_MSG_ANGEL": "運行時間 (微秒)",
+    "BKY_ARDUINO_DELAY_MSG_ANGEL": "等待 %1 毫秒，再往下執行",
+    "BKY_ARDUINO_DELAY_MICROSECONDS_MSG_ANGEL": "等待 %1 微秒，再往下執行",
+    "BKY_ARDUINO_MILLIS_MSG_ANGEL": "從開機到現在的運行時間 (毫秒)",
+    "BKY_ARDUINO_MICROS_MSG_ANGEL": "從開機到現在的運行時間 (微秒)",
     // Tooltips
-    "ARDUINO_DELAY_TOOLTIP": "暫停指定的毫秒數。",
-    "ARDUINO_DELAY_MICROSECONDS_TOOLTIP": "暫停指定的微秒數。",
+    "ARDUINO_DELAY_TOOLTIP": "暫停程式往下執行，直到指定的毫秒數。",
+    "ARDUINO_DELAY_MICROSECONDS_TOOLTIP": "暫停程式往下執行，直到指定的微秒數。",
     "ARDUINO_MILLIS_TOOLTIP": "回傳從 Arduino 開機到現在的毫秒數。",
     "ARDUINO_MICROS_TOOLTIP": "回傳從 Arduino 開機到現在的微秒數。",
 
@@ -296,15 +296,15 @@
     // Loops
     // *********************************************************
     // Engineer
-    "BKY_CONTROLS_WHILEUNTIL_MSG_ENGINEER": "while (%1) {",
+    "BKY_CONTROLS_WHILE_MSG_ENGINEER": "while (%1) {",
     "BKY_CONTROLS_FOR_MSG_ENGINEER": "for (int %1 = %2; %3 %4 %5; %6 %7 %8) {",
     "BKY_CONTROLS_FLOW_STATEMENTS_MSG_ENGINEER": "%1",
     // Angel
-    "BKY_CONTROLS_WHILEUNTIL_MSG_ANGEL": "當 %1",
-    "BKY_CONTROLS_FOR_MSG_ANGEL": "計數，變數 %1 從 %2 到 %5，間隔 %8 (%3%4%6%7)",
+    "BKY_CONTROLS_WHILE_MSG_ANGEL": "當 %1",
+    "BKY_CONTROLS_FOR_MSG_ANGEL": "計數，變數%1 = %2 ; %3%4%5 ; 每次變動(%6%7 %8) ",
     "BKY_CONTROLS_FLOW_STATEMENTS_MSG_ANGEL": "%1 迴圈",
     // Tooltip
-    "CONTROLS_WHILEUNTIL_TOOLTIP": "當條件為真時，重複執行一些語句。",
+    "CONTROLS_WHILE_TOOLTIP": "當條件為真時，重複執行一些語句。",
     "CONTROLS_FOR_TOOLTIP": "讓變數 從開始值到結束值，按照指定的間隔計數，並執行指定的積木。",
     "CONTROLS_FLOW_STATEMENTS_TOOLTIP": "跳出(break)一層迴圈或繼續(continue)下一次迭代。",
 

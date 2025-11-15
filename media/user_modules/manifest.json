@@ -2,8 +2,8 @@
   "version": "1.0.0",
   "modules": [
     {
-      "name": "Simfonia Sensors",
-      "url": "./simfonia_sensors.js"
+      "name": "Core Hardware",
+      "url": "./_piblockly_hw_lib/"
     },
     {
       "name": "Arduino Blocks",

@@ -1,0 +1,18 @@
+<xml>
+<category name="%{BKY_PIBLOCKLY_HW_CATEGORY}" colour="#5C81A6">
+  <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_SENSORS}" colour="#70A8FF">
+    <block type="simfonia_ultrasonic_distance"></block>
+    <block type="simfonia_dht_read"></block>
+  </category>
+  <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_ACTUATORS}" colour="#B58463">
+  </category>
+  <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_AI}" colour="#8BC34A">
+    <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_HUSKYLENS}" colour="#8BC34A">
+        <block type="huskylens_init"></block>
+        <block type="huskylens_set_algorithm"></block>
+        <block type="huskylens_request_and_check"></block>
+        <block type="huskylens_get_result_property"></block>
+    </category>
+  </category>
+</category>
+</xml>

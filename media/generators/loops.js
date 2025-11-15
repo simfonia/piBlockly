@@ -43,16 +43,11 @@ Blockly.Arduino.forBlock['controls_repeat_ext'] = function(block) {
   return code;
 };
 
-Blockly.Arduino.forBlock['controls_whileUntil'] = function(block) {
-  // While/until loop.
-  var until = block.getFieldValue('MODE') === 'UNTIL';
+Blockly.Arduino.forBlock['controls_while'] = function(block) {
+  // While loop.
   var argument0 = Blockly.Arduino.valueToCode(block, 'BOOL',
-      until ? Blockly.Arduino.ORDER_LOGICAL_NOT :
       Blockly.Arduino.ORDER_NONE) || 'false';
   var branch = Blockly.Arduino.statementToCode(block, 'DO');
-  if (until) {
-    argument0 = '!' + argument0;
-  }
   return 'while (' + argument0 + ') {\n' + branch + '}\n';
 };
 
