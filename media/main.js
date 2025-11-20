@@ -26,83 +26,9 @@ if (FieldMultilineInput) {
 // =============================================================================
 // Defines the visual styles for categories and blocks. All colors are referenced
 // from language files (e.g., en.js) via `Blockly.Msg` to allow for easy customization.
-
-const engineerTheme = Blockly.Theme.defineTheme('engineer', {
-    'base': Blockly.Themes.Classic,
-    'categoryStyles': {
-        'arduino_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
-        'arduino_structure_category': { 'colour': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
-        'arduino_io_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
-        'arduino_time_category': { 'colour': Blockly.Msg.ARDUINO_TIME_HUE },
-        'arduino_serial_category': { 'colour': Blockly.Msg.ARDUINO_SERIAL_HUE },
-        'picar_category': { 'colour': Blockly.Msg.PICAR_HUE },
-        'coding_category': { 'colour': Blockly.Msg.CODING_HUE },
-        'logic_category': { 'colour': Blockly.Msg.LOGIC_HUE },
-        'loop_category': { 'colour': Blockly.Msg.LOOPS_HUE },
-        'math_category': { 'colour': Blockly.Msg.MATH_HUE },
-        'text_category': { 'colour': Blockly.Msg.TEXT_HUE },
-        'variable_category': { 'colour': Blockly.Msg.VARIABLES_HUE },
-        'array_category': { 'colour': Blockly.Msg.ARRAY_HUE },
-        'procedure_category': { 'colour': Blockly.Msg.FUNCTIONS_HUE },
-    },
-    'blockStyles': {
-        'initializes_block': { 'colourPrimary': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
-        'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE },
-        'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE },
-        'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },
-        'arduino_time_block': { 'colourPrimary': Blockly.Msg.ARDUINO_TIME_HUE },
-        'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ARDUINO_SERIAL_HUE },
-        'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE },
-        'coding_block': { 'colourPrimary': Blockly.Msg.CODING_HUE },
-        'logic_blocks': { 'colourPrimary': Blockly.Msg.LOGIC_HUE },
-        'loop_blocks': { 'colourPrimary': Blockly.Msg.LOOPS_HUE },
-        'math_blocks': { 'colourPrimary': Blockly.Msg.MATH_HUE },
-        'text_blocks': { 'colourPrimary': Blockly.Msg.TEXT_HUE },
-        'variable_blocks': { 'colourPrimary': Blockly.Msg.VARIABLES_HUE },
-        'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE },
-        'procedure_blocks': { 'colourPrimary': Blockly.Msg.FUNCTIONS_HUE },
-    },
-});
-
-const angelTheme = Blockly.Theme.defineTheme('angel', {
-    'base': Blockly.Themes.Classic,
-    'categoryStyles': {
-        'arduino_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
-        'arduino_structure_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_STRUCTURE_HUE },
-        'arduino_io_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_IO_HUE },
-        'arduino_time_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_TIME_HUE },
-        'arduino_serial_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_SERIAL_HUE },
-        'picar_category': { 'colour': Blockly.Msg.ANGEL_PICAR_HUE },
-        'coding_category': { 'colour': Blockly.Msg.ANGEL_CODING_HUE },
-        'logic_category': { 'colour': Blockly.Msg.ANGEL_LOGIC_HUE },
-        'loop_category': { 'colour': Blockly.Msg.ANGEL_LOOPS_HUE },
-        'math_category': { 'colour': Blockly.Msg.ANGEL_MATH_HUE },
-        'text_category': { 'colour': Blockly.Msg.ANGEL_TEXT_HUE },
-        'variable_category': { 'colour': Blockly.Msg.ANGEL_VARIABLES_HUE },
-        'array_category': { 'colour': Blockly.Msg.ANGEL_ARRAY_HUE },
-        'procedure_category': { 'colour': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
-    },
-    'blockStyles': {
-        // Add missing styles from engineerTheme, adapted for Angel theme
-        'initializes_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_STRUCTURE_HUE },
-        'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE }, // Using common HUE
-        'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE }, // Using common HUE
-        'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },   // Using common HUE
-        'arduino_time_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_TIME_HUE },
-        'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_SERIAL_HUE },
-        'logic_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOGIC_HUE },
-        'loop_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOOPS_HUE },
-        
-        // Keep existing Angel styles, including user-specified exceptions
-        'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE }, // Exception: Keep engineer color
-        'coding_block': { 'colourPrimary': Blockly.Msg.ANGEL_CODING_HUE },
-        'text_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_TEXT_HUE },
-        'math_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_MATH_HUE },
-        'variable_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_VARIABLES_HUE },
-        'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE }, // Exception: Keep engineer color
-        'procedure_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
-    },
-});
+// NOTE: Themes are now defined inside DOMContentLoaded after language files are loaded.
+let engineerTheme;
+let angelTheme;
 
 /**
  * A map that defines which language file keys to use for block text in each theme.
@@ -736,6 +662,83 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load external modules BEFORE Blockly is injected
     await loadExternalModules();
+
+    engineerTheme = Blockly.Theme.defineTheme('engineer', {
+        'base': Blockly.Themes.Classic,
+        'categoryStyles': {
+            'arduino_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
+            'arduino_structure_category': { 'colour': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
+            'arduino_io_category': { 'colour': Blockly.Msg.ARDUINO_HUE },
+            'arduino_time_category': { 'colour': Blockly.Msg.ARDUINO_TIME_HUE },
+            'arduino_serial_category': { 'colour': Blockly.Msg.ARDUINO_SERIAL_HUE },
+            'picar_category': { 'colour': Blockly.Msg.PICAR_HUE },
+            'coding_category': { 'colour': Blockly.Msg.CODING_HUE },
+            'logic_category': { 'colour': Blockly.Msg.LOGIC_HUE },
+            'loop_category': { 'colour': Blockly.Msg.LOOPS_HUE },
+            'math_category': { 'colour': Blockly.Msg.MATH_HUE },
+            'text_category': { 'colour': Blockly.Msg.TEXT_HUE },
+            'variable_category': { 'colour': Blockly.Msg.VARIABLES_HUE },
+            'array_category': { 'colour': Blockly.Msg.ARRAY_HUE },
+            'procedure_category': { 'colour': Blockly.Msg.FUNCTIONS_HUE },
+        },
+        'blockStyles': {
+            'initializes_block': { 'colourPrimary': Blockly.Msg.ARDUINO_STRUCTURE_HUE },
+            'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE },
+            'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE },
+            'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },
+            'arduino_time_block': { 'colourPrimary': Blockly.Msg.ARDUINO_TIME_HUE },
+            'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ARDUINO_SERIAL_HUE },
+            'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE },
+            'coding_block': { 'colourPrimary': Blockly.Msg.CODING_HUE },
+            'logic_blocks': { 'colourPrimary': Blockly.Msg.LOGIC_HUE },
+            'loop_blocks': { 'colourPrimary': Blockly.Msg.LOOPS_HUE },
+            'math_blocks': { 'colourPrimary': Blockly.Msg.MATH_HUE },
+            'text_blocks': { 'colourPrimary': Blockly.Msg.TEXT_HUE },
+            'variable_blocks': { 'colourPrimary': Blockly.Msg.VARIABLES_HUE },
+            'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE },
+            'procedure_blocks': { 'colourPrimary': Blockly.Msg.FUNCTIONS_HUE },
+        },
+    });
+
+    angelTheme = Blockly.Theme.defineTheme('angel', {
+        'base': Blockly.Themes.Classic,
+        'categoryStyles': {
+            'arduino_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_HUE },
+            'arduino_structure_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_STRUCTURE_HUE },
+            'arduino_io_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_IO_HUE },
+            'arduino_time_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_TIME_HUE },
+            'arduino_serial_category': { 'colour': Blockly.Msg.ANGEL_ARDUINO_SERIAL_HUE },
+            'picar_category': { 'colour': Blockly.Msg.ANGEL_PICAR_HUE },
+            'coding_category': { 'colour': Blockly.Msg.ANGEL_CODING_HUE },
+            'logic_category': { 'colour': Blockly.Msg.ANGEL_LOGIC_HUE },
+            'loop_category': { 'colour': Blockly.Msg.ANGEL_LOOPS_HUE },
+            'math_category': { 'colour': Blockly.Msg.ANGEL_MATH_HUE },
+            'text_category': { 'colour': Blockly.Msg.ANGEL_TEXT_HUE },
+            'variable_category': { 'colour': Blockly.Msg.ANGEL_VARIABLES_HUE },
+            'array_category': { 'colour': Blockly.Msg.ANGEL_ARRAY_HUE },
+            'procedure_category': { 'colour': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
+        },
+        'blockStyles': {
+            // Add missing styles from engineerTheme, adapted for Angel theme
+            'initializes_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_STRUCTURE_HUE },
+            'arduino_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_CONTROL_HUE }, // Using common HUE
+            'digital_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_DIGITAL_IO_HUE }, // Using common HUE
+            'analog_io_block': { 'colourPrimary': Blockly.Msg.ARDUINO_ANALOG_IO_HUE },   // Using common HUE
+            'arduino_time_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_TIME_HUE },
+            'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_SERIAL_HUE },
+            'logic_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOGIC_HUE },
+            'loop_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOOPS_HUE },
+            
+            // Keep existing Angel styles, including user-specified exceptions
+            'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE }, // Exception: Keep engineer color
+            'coding_block': { 'colourPrimary': Blockly.Msg.ANGEL_CODING_HUE },
+            'text_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_TEXT_HUE },
+            'math_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_MATH_HUE },
+            'variable_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_VARIABLES_HUE },
+            'array_block': { 'colourPrimary': Blockly.Msg.ARRAY_HUE }, // Exception: Keep engineer color
+            'procedure_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_FUNCTIONS_HUE },
+        },
+    });
 
     workspace = Blockly.inject('blocklyDiv', {
         toolbox: baseToolbox, // Use the DOM object

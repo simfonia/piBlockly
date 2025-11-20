@@ -1,11 +1,120 @@
-<xml>
+﻿<xml>
 <category name="%{BKY_PIBLOCKLY_HW_CATEGORY}" colour="#5C81A6">
   <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_SENSORS}" colour="#70A8FF">
-    <block type="simfonia_ultrasonic_distance"></block>
-    <block type="simfonia_dht_read"></block>
+    <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_COMMON}" id="PIBLOCKLY_HW_CATEGORY_COMMON" colour="#70A8FF">
+      <block type="piblockly_hw_ultrasonic_distance"></block>
+      <block type="piblockly_hw_dht_read"></block>
+    </category>
+    <category name="%{BKY_PIBLOCKLY_HW_SENSORS_MPU9250}" id="PIBLOCKLY_HW_SENSORS_MPU9250" colour="#70A8FF">
+        <block type="piblockly_hw_mpu9250_accel_begin"></block>
+        <block type="piblockly_hw_mpu9250_accel_fetch"></block>
+        <block type="piblockly_hw_mpu9250_accel_3axis"></block>
+        <block type="piblockly_hw_mpu9250_gyro_begin"></block>
+        <block type="piblockly_hw_mpu9250_gyro_fetch"></block>
+        <block type="piblockly_hw_mpu9250_gyro_3axis"></block>
+        <block type="piblockly_hw_mpu9250_mag_begin"></block>
+        <block type="piblockly_hw_mpu9250_mag_fetch"></block>
+        <block type="piblockly_hw_mpu9250_mag_3axis"></block>
+        <block type="piblockly_hw_mpu9250_accel_pitch_roll"></block>
+    </category>
+    <category name="MAX30105" colour="#70A8FF">
+      <block type="PIBLOCKLY_HW_max30105_init">
+        <value name="LED_RED">
+          <block type="math_number">
+            <field name="NUM">50</field>
+          </block>
+        </value>
+      </block>
+      <block type="PIBLOCKLY_HW_max30105_check"></block>
+      <block type="PIBLOCKLY_HW_max30105_get_beat_rate">
+        <value name="AVG">
+          <block type="math_number">
+            <field name="NUM">4</field>
+          </block>
+        </value>
+      </block>
+      <block type="PIBLOCKLY_HW_max30105_get_spo2"></block>
+      <block type="PIBLOCKLY_HW_max30105_get_temperature"></block>
+      <block type="PIBLOCKLY_HW_max30105_set_beat_range">
+        <value name="MIN">
+          <block type="math_number">
+            <field name="NUM">20</field>
+          </block>
+        </value>
+        <value name="MAX">
+          <block type="math_number">
+            <field name="NUM">250</field>
+          </block>
+        </value>
+      </block>
+      <block type="PIBLOCKLY_HW_max30105_set_spo2_clear"></block>
+    </category>
+    <category name="PS2" colour="#70A8FF">
+      <block type="PIBLOCKLY_HW_ps2_initial">
+        <value name="CLK">
+          <block type="math_number">
+            <field name="NUM">13</field>
+          </block>
+        </value>
+        <value name="CMD">
+          <block type="math_number">
+            <field name="NUM">11</field>
+          </block>
+        </value>
+        <value name="CS">
+          <block type="math_number">
+            <field name="NUM">10</field>
+          </block>
+        </value>
+        <value name="DAT">
+          <block type="math_number">
+            <field name="NUM">12</field>
+          </block>
+        </value>
+      </block>
+      <block type="PIBLOCKLY_HW_ps2_read">
+        <value name="val">
+          <block type="math_number">
+            <field name="NUM">0</field>
+          </block>
+        </value>
+      </block>
+      <block type="PIBLOCKLY_HW_ps2_button_event"></block>
+      <block type="PIBLOCKLY_HW_ps2_stick_direction"></block>
+      <block type="PIBLOCKLY_HW_ps2_analog_read"></block>
+      <block type="PIBLOCKLY_HW_ps2_pressures_read"></block>
+      <block type="PIBLOCKLY_HW_ps2_initial_func"></block>
+      <block type="PIBLOCKLY_HW_ps2_state"></block>
+      <block type="PIBLOCKLY_HW_ps2_receiver_state"></block>
+    </category>
   </category>
   <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_ACTUATORS}" colour="#B58463">
-  </category>
+      <category name="%{BKY_PIBLOCKLY_HW_ACTUATORS_L293D}" id="PIBLOCKLY_HW_ACTUATORS_L293D" colour="#B58463">
+        <block type="piblockly_hw_l293d_motor_run"></block>
+        <block type="piblockly_hw_l293d_motor_stop"></block>
+        <block type="piblockly_hw_l293d_stepper_init"></block>
+        <block type="piblockly_hw_l293d_stepper_speed"></block>
+        <block type="piblockly_hw_l293d_stepper_run"></block>
+        <block type="piblockly_hw_l293d_stepper_stop"></block>
+        <block type="piblockly_hw_l293d_servo_run"></block>
+        <block type="piblockly_hw_l293d_servo_detach"></block>
+      </category>
+      <category name="%{BKY_PIBLOCKLY_HW_ACTUATORS_PCA9685}" id="PIBLOCKLY_HW_ACTUATORS_PCA9685" colour="#B58463">
+        <block type="piblockly_hw_pca9685_init"></block>
+        <block type="piblockly_hw_pca9685_pwm_write"></block>
+        <block type="piblockly_hw_pca9685_servo_init"></block>
+        <block type="piblockly_hw_pca9685_servo_write"></block>
+      </category>
+      <category name="%{BKY_PIBLOCKLY_HW_ACTUATORS_STEPPER}" id="PIBLOCKLY_HW_ACTUATORS_STEPPER" colour="#B58463">
+        <block type="piblockly_hw_stepper_init"></block>
+        <block type="piblockly_hw_stepper_set_speed"></block>
+        <block type="piblockly_hw_stepper_set_accel"></block>
+        <block type="piblockly_hw_stepper_move_to"></block>
+        <block type="piblockly_hw_stepper_move"></block>
+        <block type="piblockly_hw_stepper_run"></block>
+        <block type="piblockly_hw_stepper_stop"></block>
+      </category>
+    </category>
   <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_AI}" colour="#8BC34A">
     <category name="%{BKY_PIBLOCKLY_HW_CATEGORY_HUSKYLENS}" colour="#8BC34A">
         <block type="huskylens_init"></block>
@@ -16,3 +125,4 @@
   </category>
 </category>
 </xml>
+
