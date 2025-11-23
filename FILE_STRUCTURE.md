@@ -9,9 +9,9 @@
 ```
 piblockly/
 ├── src/
-│   └── extension.ts
+│   └── extension.ts (後端)
 └── media/
-    ├── blocks/
+    ├── blocks/ (積木描述)
     │   ├── arduino.js
     │   ├── array.js
     │   ├── coding.js
@@ -21,7 +21,7 @@ piblockly/
     │   ├── picar.js
     │   ├── text.js
     │   └── variables.js
-    ├── generators/
+    ├── generators/ (程式產生器)
     │   ├── _core.js
     │   ├── _lib.js
     │   ├── array.js
@@ -39,15 +39,22 @@ piblockly/
     │   └── variables.js
     ├── icons/
     │   └── ... (圖示檔案)
-    ├── blockly.js
-    ├── en.js
-    ├── field-colour.js
-    ├── field-multilineinput.js
-    ├── index.html
-    ├── main.js
+    ├── user_modules/  (自訂積木模組)
+    │   ├── _piblockly_hw_lib (核心提供的硬體積木模組)
+    │   │   ├── en.js, zh-hant.js (語言檔)
+    │   │   ├── blocks.js (積木描述檔)
+    │   │   ├── generators.js (程式產生器檔)
+    │   │   └── toolbox.xml (本模組積木工具箱選單)
+    │   └── manifest.json (載入模組URL)
+    ├── blockly.js (Blockly核心)
+    ├── en.js (語言檔)
+    ├── field-colour.js (Blockly第三方模組，提供顏色選單)
+    ├── field-multilineinput.js (Blockly第三方模組，提供多行文字編輯)
+    ├── index.html (只是模板，本專案不直接採用)
+    ├── main.js (Webview前端)
     ├── style.css
-    ├── toolbox.xml
-    └── zh-hant.js
+    ├── toolbox.xml (核心積木選單)
+    └── zh-hant.js (語言檔)
 ```
 
 - **`src/`**: 存放擴充功能的 TypeScript 原始碼。
