@@ -20,7 +20,8 @@
     ![Angel 風格](./assets/demo_Angel_zh-hants.png)
 -   **Arduino C++ 程式碼生成：** 自動將 Blockly 積木轉換為簡潔且功能完善的 Arduino C++ 程式碼。
 -   **彈性：** 除了不限特定開發板，還包含一組進階程式設計的積木 Coding，遇到沒有積木的情況，您完全可以即興發揮。當然，除錯得靠自己。
--   **自訂擴充積木：** 可從網路載入自行開發的積木(目前此功能未完成)。
+-   **自訂擴充積木：** πBlockly 支援高度客製化。您可以透過在 `media/user_modules` 目錄中建立自己的模組，來擴展積木庫。每個自訂模組都包含其獨特的積木定義、程式碼產生器、工具箱配置和多語言支援。
+    *   詳情請參考文件：`doc/custum_module/create_custom_block_module_tutorial.md`。
 
 
 ## 安裝

@@ -1,0 +1,8 @@
+{
+  "modules": [
+    {
+      "name": "My New Custom Module",
+      "url": "./my_new_module/"
+    }
+  ]
+}

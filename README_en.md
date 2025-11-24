@@ -20,7 +20,8 @@ Although this is a VS Code extension, it can also run within Arduino IDE 2, leve
     ![Angel Style](./assets/demo_Angel_en.png)
 -   **Arduino C++ Code Generation:** Automatically converts Blockly blocks into clean and fully functional Arduino C++ code.
 -   **Flexibility:** Not limited to specific development boards, it also includes a set of advanced programming blocks for "Coding." If you encounter situations without a specific block, you can improvise. Of course, debugging is up to you.
--   **Custom Extension Blocks:** Ability to load self-developed blocks from the internet (this feature is currently not completed).
+-   **Custom Extension Blocks:** πBlockly supports high customizability. You can extend the block library by creating your own modules in the `media/user_modules` directory. Each custom module includes its unique block definitions, code generators, toolbox configurations, and multilingual support.
+    *   For details, please refer to the documentation: `doc/custum_module/create_custom_block_module_tutorial.md`.
 
 ## Installation
 

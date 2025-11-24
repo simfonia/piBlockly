@@ -442,6 +442,8 @@
     "PROCEDURES_CALLRETURN_TOOLTIP": "執行使用者定義的函式，並使用其輸出。",
     "PROCEDURES_IFRETURN_TOOLTIP": "從函式傳回一個值。",
     "PROCEDURES_MUTATORARG_TOOLTIP": "為函式添加一個輸入參數。",
+    "PROCEDURES_CALLNORETURN_TITLE": "呼叫 ",
+    "PROCEDURES_CALLRETURN_TITLE": "取得函式回傳值 ",
     "PROCEDURES_RETURN_TOOLTIP": "從函式傳回一個值。",
 
   });

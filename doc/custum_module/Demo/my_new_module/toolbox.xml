@@ -1,0 +1,6 @@
+<xml>
+  <category name="%{BKY_MY_NEW_MODULE_CATEGORY}" colour="160">
+    <block type="my_new_module_hello_world"></block>
+    <block type="my_new_module_get_time"></block>
+  </category>
+</xml>

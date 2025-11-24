@@ -709,13 +709,13 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     }
 
     const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'style.css')).with({ query: `nonce=${nonce}` });
-    const blocklyUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly.js')).with({ query: `nonce=${nonce}` });
+    const blocklyUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly', 'core', 'blockly.js')).with({ query: `nonce=${nonce}` });
     const langUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, blocklyLangFilePath)).with({ query: `nonce=${nonce}` });
     const customLangUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, customLangFilePath)).with({ query: `nonce=${nonce}` });
     const coreGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'generators', '_core.js')).with({ query: `nonce=${nonce}` });
     const libGeneratorUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'generators', '_lib.js')).with({ query: `nonce=${nonce}` });
-    const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js')).with({ query: `nonce=${nonce}` });
-    const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
+    const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly', 'plugins', 'field-colour.js')).with({ query: `nonce=${nonce}` });
+    const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly', 'plugins', 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
     const manifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'manifest.json')).with({ query: `nonce=${nonce}` });
     const userModulesConfigUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'user_modules', 'user_modules_config.json')).with({ query: `nonce=${nonce}` });

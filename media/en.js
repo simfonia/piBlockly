@@ -442,6 +442,8 @@
     "PROCEDURES_CALLRETURN_TOOLTIP": "Execute the user-defined function and use its output.",
     "PROCEDURES_IFRETURN_TOOLTIP": "Returns a value from a function if a value is true.",
     "PROCEDURES_MUTATORARG_TOOLTIP": "Add an input to the function.",
+    "PROCEDURES_CALLNORETURN_TITLE": "Call ",
+    "PROCEDURES_CALLRETURN_TITLE": "Get Value from ",
     "PROCEDURES_RETURN_TOOLTIP": "Returns a value from a function.",
 
   });

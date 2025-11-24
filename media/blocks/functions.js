@@ -95,40 +95,27 @@ const CUSTOM_PROCEDURES_CALL_MANUAL_COMMON = {
         this.removeInput('END_ROW');
     }
 
-    if (Blockly.Msg.STYLE_MODE === 'angel') {
-        // For Angel style, update the PARAMS field
-        let paramString = '';
-        if (this.arguments_.length > 0) {
-            paramString = this.arguments_.map((argName, idx) => {
-                return this.argTypes_[idx] + ' ' + argName;
-            }).join(', ');
-        }
-        if (this.getField('PARAMS')) {
-            this.setFieldValue(paramString, 'PARAMS');
-        }
+    // Rebuild inputs and reconnect for Engineer style (now always)
+    for (i = 0; i < this.arguments_.length; i++) {
+      const argName = this.arguments_[i];
+      const input = this.appendValueInput('ARG' + i)
+          .setAlign(Blockly.ALIGN_RIGHT);
+      if (i === 0) {
+        input.appendField('(');
+      } else {
+        input.appendField(',');
+      }
+      // Reconnect the old block if it exists
+      if (connections && connections[argName]) {
+        input.connection.connect(connections[argName]);
+      }
+    }
+    // Add closing parenthesis
+    const endRow = this.appendDummyInput('END_ROW');
+    if (this.arguments_.length === 0) {
+      endRow.appendField('()');
     } else {
-        // Rebuild inputs and reconnect for Engineer style
-        for (i = 0; i < this.arguments_.length; i++) {
-          const argName = this.arguments_[i];
-          const input = this.appendValueInput('ARG' + i)
-              .setAlign(Blockly.ALIGN_RIGHT);
-          if (i === 0) {
-            input.appendField('(');
-          } else {
-            input.appendField(',');
-          }
-          // Reconnect the old block if it exists
-          if (connections && connections[argName]) {
-            input.connection.connect(connections[argName]);
-          }
-        }
-        // Add closing parenthesis
-        const endRow = this.appendDummyInput('END_ROW');
-        if (this.arguments_.length === 0) {
-          endRow.appendField('()');
-        } else {
-          endRow.appendField(')');
-        }
+      endRow.appendField(')');
     }
     this.setInputsInline(true);
   }
@@ -136,21 +123,10 @@ const CUSTOM_PROCEDURES_CALL_MANUAL_COMMON = {
 
 Blockly.Blocks['custom_procedures_callnoreturn_manual'] = Object.assign({}, CUSTOM_PROCEDURES_CALL_MANUAL_COMMON, {
   init: function() {
-    if (Blockly.Msg.STYLE_MODE === 'angel') {
-        const message = Blockly.Msg.BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ANGEL || 'do task %1 (%2)';
-        const parts = message.split(/%\d/); // Split by %1, %2
-        this.appendDummyInput('TOPROW')
-            .appendField(parts[0])
-            .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME')
-            .appendField(parts[1]) // This will be " ("
-            .appendField('', 'PARAMS') // The field for parameters
-            .appendField(parts[2] || ''); // This will be ")"
-        this.setColour('%{BKY_FUNCTIONS_HUE}');
-    } else { // Engineer
-        this.appendDummyInput('TOPROW')
-            .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
-        this.setColour('%{BKY_FUNCTIONS_HUE}');
-    }
+    this.appendDummyInput('TOPROW')
+        .appendField(Blockly.Msg.PROCEDURES_CALLNORETURN_TITLE || 'Call ')
+        .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
+    this.setColour('%{BKY_FUNCTIONS_HUE}');
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setTooltip(Blockly.Msg['PROCEDURES_CALLNORETURN_TOOLTIP']);
@@ -164,21 +140,10 @@ Blockly.Blocks['custom_procedures_callnoreturn_manual'] = Object.assign({}, CUST
 
 Blockly.Blocks['custom_procedures_callreturn_manual'] = Object.assign({}, CUSTOM_PROCEDURES_CALL_MANUAL_COMMON, {
   init: function() {
-    if (Blockly.Msg.STYLE_MODE === 'angel') {
-        const message = Blockly.Msg.BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ANGEL || 'get report from task %1 (%2)';
-        const parts = message.split(/%\d/); // Split by %1, %2
-        this.appendDummyInput('TOPROW')
-            .appendField(parts[0])
-            .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME')
-            .appendField(parts[1]) // This will be " ("
-            .appendField('', 'PARAMS') // The field for parameters
-            .appendField(parts[2] || ''); // This will be ")"
-        this.setColour('%{BKY_FUNCTIONS_HUE}');
-    } else { // Engineer
-        this.appendDummyInput('TOPROW')
-            .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
-        this.setColour('%{BKY_FUNCTIONS_HUE}');
-    }
+    this.appendDummyInput('TOPROW')
+        .appendField(Blockly.Msg.PROCEDURES_CALLRETURN_TITLE || 'Get Value from ')
+        .appendField(new Blockly.FieldTextInput('myFunction'), 'NAME');
+    this.setColour('%{BKY_FUNCTIONS_HUE}');
     this.setOutput(true, null);
     this.setTooltip(Blockly.Msg['PROCEDURES_CALLRETURN_TOOLTIP']);
     this.setHelpUrl('');
@@ -193,13 +158,8 @@ Blockly.Blocks['custom_procedures_callreturn_manual'] = Object.assign({}, CUSTOM
 
 Blockly.Blocks['custom_procedures_mutatorcontainer'] = {
   init: function() {
-    if (Blockly.Msg.STYLE_MODE === 'angel') {
-      this.appendDummyInput()
-          .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ANGEL);
-    } else {
-      this.appendDummyInput()
-          .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER);
-    }
+    this.appendDummyInput()
+        .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER);
     this.appendStatementInput('STACK');
     this.setColour('%{BKY_FUNCTIONS_HUE}');
     this.setTooltip(Blockly.Msg['PROCEDURES_MUTATORCONTAINER_TOOLTIP']);
@@ -209,27 +169,15 @@ Blockly.Blocks['custom_procedures_mutatorcontainer'] = {
 
 Blockly.Blocks['custom_procedures_mutatorarg'] = {
   init: function() {
-    if (Blockly.Msg.STYLE_MODE === 'angel') {
-        this.appendDummyInput()
-            .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ANGEL)
-            .appendField(new Blockly.FieldDropdown([
-                ['int', 'int'],
-                ['float', 'float'],
-                ['String', 'String'],
-                ['bool', 'bool']
-            ]), 'TYPE')
-            .appendField(new Blockly.FieldTextInput('x'), 'NAME');
-    } else {
-        this.appendDummyInput()
-            .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ENGINEER)
-            .appendField(new Blockly.FieldDropdown([
-                ['int', 'int'],
-                ['float', 'float'],
-                ['String', 'String'],
-                ['bool', 'bool']
-            ]), 'TYPE')
-            .appendField(new Blockly.FieldTextInput('x'), 'NAME');
-    }
+    this.appendDummyInput()
+        .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ENGINEER)
+        .appendField(new Blockly.FieldDropdown([
+            ['int', 'int'],
+            ['float', 'float'],
+            ['String', 'String'],
+            ['bool', 'bool']
+        ]), 'TYPE')
+        .appendField(new Blockly.FieldTextInput('x'), 'NAME');
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour('%{BKY_FUNCTIONS_HUE}');
@@ -439,25 +387,13 @@ Blockly.Blocks['custom_procedures_defnoreturn'] =
         init: function() {
             this.nameField_ = new Blockly.FieldTextInput('myFunction', this.validateName_.bind(this));
 
-            if (Blockly.Msg.STYLE_MODE === 'angel') {
-                const message = Blockly.Msg.BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ANGEL || 'to do task %1 with inputs %2';
-                const parts = message.split(/%\d/);
-                this.appendDummyInput('TOPROW')
-                    .appendField(parts[0])
-                    .appendField(this.nameField_, 'NAME')
-                    .appendField(parts[1])
-                    .appendField('', 'PARAMS')
-                    .appendField(parts[2] || '');
-                this.setColour("%{BKY_FUNCTIONS_HUE}");
-            } else { // Engineer
-                this.appendDummyInput('TOPROW')
-                    .appendField('void')
-                    .appendField(this.nameField_, 'NAME')
-                    .appendField('(')
-                    .appendField('', 'PARAMS')
-                    .appendField(') {');
-                this.setColour('%{BKY_FUNCTIONS_HUE}');
-            }
+            this.appendDummyInput('TOPROW')
+                .appendField('void')
+                .appendField(this.nameField_, 'NAME')
+                .appendField('(')
+                .appendField('', 'PARAMS')
+                .appendField(') {');
+            this.setColour('%{BKY_FUNCTIONS_HUE}');
 
             this.setInputsInline(true);
             this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
@@ -474,9 +410,7 @@ Blockly.Blocks['custom_procedures_defnoreturn'] =
             this.argumentVarModels_ = [];
             this.setStatements_(true);
             this.statementConnection_ = null;
-            if (Blockly.Msg.STYLE_MODE !== 'angel') {
-                this.appendDummyInput('BOTTOMROW').appendField('}');
-            }
+            this.appendDummyInput('BOTTOMROW').appendField('}');
         },
         setStatements_: function(hasStatements) {
             if (this.hasStatements_ === hasStatements) {
@@ -510,37 +444,19 @@ Blockly.Blocks['custom_procedures_defreturn'] =
         init: function() {
             this.nameField_ = new Blockly.FieldTextInput('myFunction', this.validateName_.bind(this));
 
-            if (Blockly.Msg.STYLE_MODE === 'angel') {
-                const message = Blockly.Msg.BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ANGEL || 'to do task %2 with inputs %3 and report back %1';
-                const parts = message.split(/%\d/);
-                this.appendDummyInput('TOPROW')
-                    .appendField(parts[0]) // "to do task "
-                    .appendField(this.nameField_, 'NAME')
-                    .appendField(parts[1]) // " with inputs "
-                    .appendField('', 'PARAMS')
-                    .appendField(parts[2]) // " and report back "
-                    .appendField(new Blockly.FieldDropdown([
-                        ['int', 'int'],
-                        ['float', 'float'],
-                        ['String', 'String'],
-                        ['bool', 'bool']
-                    ]), 'TYPE');
-                this.setColour("%{BKY_FUNCTIONS_HUE}");
-            } else { // Engineer
-                this.appendDummyInput('TOPROW')
-                    .appendField(new Blockly.FieldDropdown([
-                        ['int', 'int'],
-                        ['float', 'float'],
-                        ['String', 'String'],
-                        ['bool', 'bool']
-                    ]), 'TYPE')
-                    .appendField(' ')
-                    .appendField(this.nameField_, 'NAME')
-                    .appendField('(')
-                    .appendField('', 'PARAMS')
-                    .appendField(') {');
-                this.setColour('%{BKY_FUNCTIONS_HUE}');
-            }
+            this.appendDummyInput('TOPROW')
+                .appendField(new Blockly.FieldDropdown([
+                    ['int', 'int'],
+                    ['float', 'float'],
+                    ['String', 'String'],
+                    ['bool', 'bool']
+                ]), 'TYPE')
+                .appendField(' ')
+                .appendField(this.nameField_, 'NAME')
+                .appendField('(')
+                .appendField('', 'PARAMS')
+                .appendField(') {');
+            this.setColour('%{BKY_FUNCTIONS_HUE}');
 
             this.setInputsInline(true);
             this.setMutator(new Blockly.icons.MutatorIcon(['custom_procedures_mutatorarg'], this));
@@ -557,9 +473,7 @@ Blockly.Blocks['custom_procedures_defreturn'] =
             this.argumentVarModels_ = [];
             this.setStatements_(true);
             this.statementConnection_ = null;
-            if (Blockly.Msg.STYLE_MODE !== 'angel') {
-                this.appendDummyInput('BOTTOMROW').appendField('}');
-            }
+            this.appendDummyInput('BOTTOMROW').appendField('}');
         },
         setStatements_: function(hasStatements) {
             if (this.hasStatements_ === hasStatements) {
@@ -796,15 +710,9 @@ Blockly.Blocks['custom_procedures_callreturn'] =
 
 Blockly.Blocks['custom_procedures_return'] = {
   init: function() {
-    if (Blockly.Msg.STYLE_MODE === 'angel') {
-        this.appendValueInput('VALUE')
-            .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_RETURN_MSG_ANGEL.split('%1')[0]);
-        this.setColour('%{BKY_FUNCTIONS_HUE}');
-    } else { // Engineer
-        this.appendValueInput('VALUE')
-            .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER.split('%1')[0]);
-        this.setColour('%{BKY_FUNCTIONS_HUE}');
-    }
+    this.appendValueInput('VALUE')
+        .appendField(Blockly.Msg.BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER.split('%1')[0]);
+    this.setColour('%{BKY_FUNCTIONS_HUE}');
 
     this.setInputsInline(true);
     this.setPreviousStatement(true, null);

@@ -19,6 +19,7 @@ Blockly.Blocks['controls_while'] = {
         }
       ],
       "inputsInline": true,
+      "message2": "}",
       "previousStatement": true,
       "nextStatement": true,
       "style": "loop_blocks",
