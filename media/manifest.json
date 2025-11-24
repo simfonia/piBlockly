@@ -3,107 +3,107 @@
   "modules": [
     {
       "name": "Core Hardware",
-      "url": "./_piblockly_hw_lib/"
+      "url": "./modules/piblockly_hw_blocks/"
     },
     {
       "name": "Arduino Blocks",
-      "url": "../blocks/arduino.js"
+      "url": "blocks/arduino.js"
     },
     {
       "name": "Array Blocks",
-      "url": "../blocks/array.js"
+      "url": "blocks/array.js"
     },
     {
       "name": "Coding Blocks",
-      "url": "../blocks/coding.js"
+      "url": "blocks/coding.js"
     },
     {
       "name": "Functions Blocks",
-      "url": "../blocks/functions.js"
+      "url": "blocks/functions.js"
     },
     {
       "name": "Logic Blocks",
-      "url": "../blocks/logic.js"
+      "url": "blocks/logic.js"
     },
     {
       "name": "Loops Blocks",
-      "url": "../blocks/loops.js"
+      "url": "blocks/loops.js"
     },
     {
       "name": "PiCar Blocks",
-      "url": "../blocks/picar.js"
+      "url": "blocks/picar.js"
     },
     {
       "name": "Text Blocks",
-      "url": "../blocks/text.js"
+      "url": "blocks/text.js"
     },
     {
       "name": "Variables Blocks",
-      "url": "../blocks/variables.js"
+      "url": "blocks/variables.js"
     },
     {
       "name": "Array Generators",
-      "url": "../generators/array.js",
+      "url": "generators/array.js",
       "type": "generator"
     },
     {
       "name": "Coding Generators",
-      "url": "../generators/coding.js",
+      "url": "generators/coding.js",
       "type": "generator"
     },
     {
       "name": "Functions Generators",
-      "url": "../generators/functions.js",
+      "url": "generators/functions.js",
       "type": "generator"
     },
     {
       "name": "IO Generators",
-      "url": "../generators/io.js",
+      "url": "generators/io.js",
       "type": "generator"
     },
     {
       "name": "Logic Generators",
-      "url": "../generators/logic.js",
+      "url": "generators/logic.js",
       "type": "generator"
     },
     {
       "name": "Loops Generators",
-      "url": "../generators/loops.js",
+      "url": "generators/loops.js",
       "type": "generator"
     },
     {
       "name": "Math Generators",
-      "url": "../generators/math.js",
+      "url": "generators/math.js",
       "type": "generator"
     },
     {
       "name": "PiCar Generators",
-      "url": "../generators/picar.js",
+      "url": "generators/picar.js",
       "type": "generator"
     },
     {
       "name": "Serial Generators",
-      "url": "../generators/serial.js",
+      "url": "generators/serial.js",
       "type": "generator"
     },
     {
       "name": "Structure Generators",
-      "url": "../generators/structure.js",
+      "url": "generators/structure.js",
       "type": "generator"
     },
     {
       "name": "Text Generators",
-      "url": "../generators/text.js",
+      "url": "generators/text.js",
       "type": "generator"
     },
     {
       "name": "Variables Generators",
-      "url": "../generators/variables.js",
+      "url": "generators/variables.js",
       "type": "generator"
     },
     {
       "name": "Time Generators",
-      "url": "../generators/time.js",
+      "url": "generators/time.js",
       "type": "generator"
     }
   ]

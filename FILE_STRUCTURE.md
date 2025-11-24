@@ -39,19 +39,22 @@ piblockly/
     │   └── variables.js
     ├── icons/
     │   └── ... (圖示檔案)
-    ├── user_modules/  (自訂積木模組)
-    │   ├── _piblockly_hw_lib (核心提供的硬體積木模組)
-    │   │   ├── en.js, zh-hant.js (語言檔)
-    │   │   ├── blocks.js (積木描述檔)
-    │   │   ├── generators.js (程式產生器檔)
-    │   │   └── toolbox.xml (本模組積木工具箱選單)
-    │   └── manifest.json (載入模組URL)
+    ├── manifest.json (系統核心模組的載入設定檔)
+    ├── modules/  (系統核心提供的積木模組)
+    │   └── piblockly_hw_blocks/ (核心提供的硬體積木模組，包含多種感測器和致動器積木)
+    │       ├── en.js, zh-hant.js (語言檔)
+    │       ├── blocks.js (積木描述檔)
+    │       ├── generators.js (程式產生器檔)
+    │       └── toolbox.xml (本模組積木工具箱選單)
+    ├── user_modules/  (使用者自訂積木模組)
+    │   └── user_modules_config.json (使用者自訂積木模組的載入設定檔)
     ├── blockly.js (Blockly核心)
     ├── en.js (語言檔)
     ├── field-colour.js (Blockly第三方模組，提供顏色選單)
     ├── field-multilineinput.js (Blockly第三方模組，提供多行文字編輯)
     ├── index.html (只是模板，本專案不直接採用)
     ├── main.js (Webview前端)
+    ├── module_loader.js (載入模組)
     ├── style.css
     ├── toolbox.xml (核心積木選單)
     └── zh-hant.js (語言檔)
@@ -61,13 +64,19 @@ piblockly/
     - `extension.ts`: 擴充功能的主要進入點。負責處理 VS Code 的啟動事件、註冊指令、建立和管理 Webview 面板，以及協調 Webview 與 VS Code 後端之間的通訊。
 
 - **`media/`**: 存放所有用於 Blockly Webview 的前端資源。
-    - `index.html`: Webview 的基礎 HTML 結構。實際內容由 `extension.ts` 在執行時期動態生成。
-    - `main.js`: Webview 的主要 JavaScript 檔案，負責初始化 Blockly 工作區、定義主題、註冊事件監聽器等。
-    - `style.css`: Webview 的主要樣式表。
-    - `toolbox.xml`: 定義 Blockly 工具箱中的積木分類與顯示的積木。
+    - `manifest.json`: 系統核心模組的載入設定檔，定義了 Blockly 載入時預設會載入的積木模組 (例如核心硬體積木、Arduino 積木等)。
+    - `modules/`: 存放系統核心提供的模組，例如硬體相關的積木和產生器。
+        - `piblockly_hw_blocks/`: πBlockly 提供的基礎硬體積木，包含常用感測器、致動器等積木及其程式碼產生器、工具箱選單和多語言檔案。
+    - `user_modules/`: 存放使用者自訂的積木模組，以及其載入設定檔。
+        - `user_modules_config.json`: 用於載入使用者自訂積木模組的設定檔，與系統核心模組的設定分離，以增強安全性。
     - `blockly.js`: 核心 Blockly 函式庫。
     - `en.js`, `zh-hant.js`: 用於國際化 (i18n) 的語言檔案，包含積木文字、UI 介面翻譯字串以及主題顏色定義。
     - `field-colour.js`, `field-multilineinput.js`: Blockly 的自訂欄位插件。
+    - `index.html`: Webview 的基礎 HTML 結構。實際內容由 `extension.ts` 在執行時期動態生成。
+    - `main.js`: Webview 的主要 JavaScript 檔案，負責初始化 Blockly 工作區、定義主題、註冊事件監聽器等。
+    - `module_loader.js`: 載入模組
+    - `style.css`: Webview 的主要樣式表。
+    - `toolbox.xml`: 定義 Blockly 工具箱中的積木分類與顯示的積木。
     - `blocks/`: 存放模組化的積木**定義** (積木的外觀與結構)。
         - `arduino.js`: 定義 Arduino 相關積木 (結構、I/O、時間、序列埠、數學等)。
         - `picar.js`: 定義 PiCar 小車專用積木。

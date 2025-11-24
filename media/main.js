@@ -256,22 +256,46 @@ function applyStyle(themeName, isInitialLoad = false) {
  * 2. Directory modules: A directory containing separate files for blocks, generators, etc.
  */
 async function loadExternalModules() {
+    let allModules = [];
+
+    // Load system modules from manifest.json
     try {
         const manifestResponse = await fetch(window.manifestUri);
-        if (!manifestResponse.ok) {
-            console.warn('No manifest.json found or failed to fetch:', manifestResponse.statusText);
-            return;
-        }
-        const manifest = await manifestResponse.json();
-        const loadedModules = [];
-
-        const loadPromises = manifest.modules.map(async (modConfig) => {
+        if (manifestResponse.ok) {
+            const manifest = await manifestResponse.json();
             const baseManifestUrl = new URL(window.manifestUri).origin + new URL(window.manifestUri).pathname.substring(0, new URL(window.manifestUri).pathname.lastIndexOf('/') + 1);
+            allModules.push({ type: 'system', modules: manifest.modules, baseUrl: baseManifestUrl });
+        } else {
+            console.warn('No manifest.json found or failed to fetch:', manifestResponse.statusText);
+        }
+    } catch (e) {
+        console.error('Error loading system manifest.json:', e);
+    }
+
+    // Load user modules from user_modules_config.json
+    try {
+        const userModulesConfigResponse = await fetch(window.userModulesConfigUri);
+        if (userModulesConfigResponse.ok) {
+            const userModulesConfig = await userModulesConfigResponse.json();
+            const baseUserModulesUrl = new URL(window.userModulesConfigUri).origin + new URL(window.userModulesConfigUri).pathname.substring(0, new URL(window.userModulesConfigUri).pathname.lastIndexOf('/') + 1);
+            allModules.push({ type: 'user', modules: userModulesConfig.modules, baseUrl: baseUserModulesUrl });
+        } else {
+            console.warn('No user_modules_config.json found or failed to fetch:', userModulesConfigResponse.statusText);
+        }
+    } catch (e) {
+        console.error('Error loading user_modules_config.json:', e);
+    }
+
+    const loadedModules = [];
+
+    for (const source of allModules) {
+        const loadPromises = source.modules.map(async (modConfig) => {
+            const currentBaseUrl = source.baseUrl;
             
             if (modConfig.url.endsWith('/')) {
                 // --- It's a DIRECTORY module ---
                 const module = {};
-                const path = new URL(modConfig.url, baseManifestUrl).toString();
+                const path = new URL(modConfig.url, currentBaseUrl).toString();
 
                 // Load blocks, toolbox, and language files concurrently
                 const [
@@ -315,68 +339,65 @@ async function loadExternalModules() {
 
             } else {
                 // --- It's a SINGLE FILE module (legacy) ---
-                const moduleUrl = new URL(modConfig.url, baseManifestUrl).toString();
+                const moduleUrl = new URL(modConfig.url, currentBaseUrl).toString();
                 return loadModule(moduleUrl).catch(() => null);
             }
         });
 
-        const resolvedModules = await Promise.all(loadPromises);
-        loadedModules.push(...resolvedModules.filter(m => m && Object.keys(m).length > 0));
+        loadedModules.push(...(await Promise.all(loadPromises)).filter(m => m && Object.keys(m).length > 0));
+    }
 
-        // Pass 2: Populate Blockly.Msg with all messages from all modules
-        const allModuleMessages = {};
-        const isChinese = window.currentLocale && window.currentLocale.startsWith('zh');
-        for (const module of loadedModules) {
-            for (const key in module) {
-                if (key.startsWith('MSG_')) {
-                    if (isChinese && key.endsWith('_ZH_HANT')) {
-                        Object.assign(allModuleMessages, module[key]);
-                    } else if (!isChinese && key.endsWith('_EN')) {
-                        Object.assign(allModuleMessages, module[key]);
-                    }
+
+    // Pass 2: Populate Blockly.Msg with all messages from all modules
+    const allModuleMessages = {};
+    const isChinese = window.currentLocale && window.currentLocale.startsWith('zh');
+    for (const module of loadedModules) {
+        for (const key in module) {
+            if (key.startsWith('MSG_')) {
+                if (isChinese && key.endsWith('_ZH_HANT')) {
+                    Object.assign(allModuleMessages, module[key]);
+                } else if (!isChinese && key.endsWith('_EN')) {
+                    Object.assign(allModuleMessages, module[key]);
                 }
             }
         }
-        Object.assign(Blockly.Msg, allModuleMessages);
+    }
+    Object.assign(Blockly.Msg, allModuleMessages);
 
-        // Pass 3: Register all blocks and generators
-        for (const module of loadedModules) {
-            if (module.registerBlocks) {
-                module.registerBlocks(Blockly);
-            }
-            if (module.registerGenerators) {
-                module.registerGenerators(Blockly);
+    // Pass 3: Register all blocks and generators
+    for (const module of loadedModules) {
+        if (module.registerBlocks) {
+            module.registerBlocks(Blockly);
+        }
+        if (module.registerGenerators) {
+            module.registerGenerators(Blockly);
+        }
+    }
+
+    // Pass 4: Process all toolboxes
+    for (const module of loadedModules) {
+        if (module.toolbox) {
+            const cleanXml = module.toolbox.replace(/>\s+</g, '><').trim();
+            const tempDom = Blockly.utils.xml.textToDom(cleanXml);
+            
+            // tempDom.children is a collection of the top-level nodes from the module's toolbox XML
+            // (e.g., the <category> elements).
+            const moduleNodes = tempDom.children;
+
+            if (moduleNodes) {
+                // Append each node from the module's toolbox directly to the baseToolbox fragment.
+                // This makes them siblings of the existing base categories.
+                // We iterate over a static copy as appendChild modifies the live HTMLCollection.
+                Array.from(moduleNodes).forEach(node => {
+                    baseToolbox.appendChild(node.cloneNode(true));
+                });
             }
         }
+    }
 
-        // Pass 4: Process all toolboxes
-        for (const module of loadedModules) {
-            if (module.toolbox) {
-                const cleanXml = module.toolbox.replace(/>\s+</g, '><').trim();
-                const tempDom = Blockly.utils.xml.textToDom(cleanXml);
-                
-                // tempDom.children is a collection of the top-level nodes from the module's toolbox XML
-                // (e.g., the <category> elements).
-                const moduleNodes = tempDom.children;
-
-                if (moduleNodes) {
-                    // Append each node from the module's toolbox directly to the baseToolbox fragment.
-                    // This makes them siblings of the existing base categories.
-                    // We iterate over a static copy as appendChild modifies the live HTMLCollection.
-                    Array.from(moduleNodes).forEach(node => {
-                        baseToolbox.appendChild(node.cloneNode(true));
-                    });
-                }
-            }
-        }
-
-        // Pass 5: Update the workspace toolbox
-        if (workspace) {
-            workspace.updateToolbox(baseToolbox);
-        }
-
-    } catch (e) {
-        console.error('Error loading external modules:', e);
+    // Pass 5: Update the workspace toolbox
+    if (workspace) {
+        workspace.updateToolbox(baseToolbox);
     }
 }
 

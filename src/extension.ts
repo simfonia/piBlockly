@@ -717,7 +717,8 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-colour.js')).with({ query: `nonce=${nonce}` });
     const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
-    const manifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'user_modules', 'manifest.json')).with({ query: `nonce=${nonce}` });
+    const manifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'manifest.json')).with({ query: `nonce=${nonce}` });
+    const userModulesConfigUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'user_modules', 'user_modules_config.json')).with({ query: `nonce=${nonce}` });
 
     // Read the content of the custom language file to get toolbar translations
     const customLangPath = path.join(extensionPath, 'media', customLangFilePath);
@@ -893,6 +894,7 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
 
     <script nonce="${nonce}">
         window.manifestUri = "${manifestUri}";
+        window.userModulesConfigUri = "${userModulesConfigUri}";
         window.currentLocale = "${locale}"; // Pass the current locale
     </script>
     <script nonce="${nonce}" type="module" src="${mainUri}"></script>
