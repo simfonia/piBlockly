@@ -310,12 +310,8 @@ async function loadExternalModules() {
                     loadModule(path + 'zh-hant.js').catch(() => null)
                 ]);
 
-                // Load generators sequentially to avoid unnecessary error logs for fallback
-                let finalGeneratorsModule = await loadModule(path + 'generators.js', true); // Suppress error on first try
-                if (!finalGeneratorsModule) {
-                    // If generators.js failed, try javascript.js (without suppressing error, as it's the last resort)
-                    finalGeneratorsModule = await loadModule(path + 'javascript.js').catch(() => null);
-                }
+                // Load generators
+                let finalGeneratorsModule = await loadModule(path + 'generators.js').catch(() => null);
 
                 // Aggregate the parts into a single module object
                 if (blocksModule && blocksModule.registerBlocks) {

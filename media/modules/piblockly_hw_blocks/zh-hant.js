@@ -240,7 +240,7 @@ export const MSG_PIBLOCKLY_HW_ZH_HANT = {
   "PIBLOCKLY_HW_STEPPER_PIN2_LABEL": "pin2",
   "PIBLOCKLY_HW_STEPPER_PIN3_LABEL": "pin3",
   "PIBLOCKLY_HW_STEPPER_PIN4_LABEL": "pin4",
-  "PIBLOCKLY_HW_STEPPER_INIT_MESSAGE": "步進馬達 初始化 馬達 %1 介面 %2 步數 %3 pin1 %4 pin2 %5 pin3 %6 pin4 %7",
+  "PIBLOCKLY_HW_STEPPER_INIT_MESSAGE": "步進馬達 初始化 馬達 %1 介面 %2 步數 %3 腳位1 %4 腳位2 %5 腳位3 %6 腳位4 %7",
 
   "PIBLOCKLY_HW_STEPPER_INIT_TOOLTIP": "初始化步進馬達，設定馬達類型、介面類型、步數及連接腳位。",
   "PIBLOCKLY_HW_STEPPER_SET_SPEED_TOOLTIP": "設定步進馬達的轉速（RPM）。",
@@ -268,8 +268,8 @@ export const MSG_PIBLOCKLY_HW_ZH_HANT = {
   "PIBLOCKLY_HW_HUSKYLENS_INIT_TOOLTIP": "透過 I2C 初始化 HuskyLens 感測器。可設定 I2C 腳位。需要安裝 DFRobot 的 'HUSKYLENS' 函式庫。",
 
   "PIBLOCKLY_HW_HUSKYLENS_UART_INIT_TITLE": "Huskylens：透過UART(序列埠)初始化",
-  "PIBLOCKLY_HW_HUSKYLENS_UART_INIT_TOOLTIP": "透過UART(SoftwareSerial)初始化Huskylens感測器。需要DFRobot的'HUSKYLENS'庫。",
-  "PIBLOCKLY_HW_HUSKYLENS_UART_INIT_MESSAGE": "Huskylens：透過UART(序列埠)初始化 RX Pin %1 TX Pin %2",
+  "PIBLOCKLY_HW_HUSKYLENS_UART_INIT_TOOLTIP": "透過UART(SoftwareSerial)初始化Huskylens感測器。需要DFRobot的'HUSKYLENS'函式庫。",
+  "PIBLOCKLY_HW_HUSKYLENS_UART_INIT_MESSAGE": "Huskylens：透過UART(序列埠)初始化 RX 腳位 %1 TX 腳位 %2",
 
   "PIBLOCKLY_HW_HUSKYLENS_SET_ALGORITHM_TITLE": "設定 HuskyLens 演算法為",
   "PIBLOCKLY_HW_HUSKYLENS_SET_ALGORITHM_TOOLTIP": "切換 HuskyLens 當前運行的演算法。",

@@ -391,6 +391,10 @@ Blockly.Arduino.forBlock['picar_note_to_frequency'] = function(block) {
   var noteName = block.getFieldValue('NOTE_NAME');
   var octave = parseInt(block.getFieldValue('OCTAVE'), 10);
 
+  if (noteName === "REST_INDICATOR") {
+    return [0, Blockly.Arduino.ORDER_ATOMIC]; // Return 0 for rest
+  }
+
   var semitonesFromC = 0;
   switch (noteName) {
     case 'C': semitonesFromC = 0; break;

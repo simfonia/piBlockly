@@ -217,6 +217,7 @@
     "PICAR_TONE_TOOLTIP": "Generates a tone on the specified pin. The default buzzer is on pin 22.",
     "PICAR_NO_TONE": "Stop tone on pin %1",
     "PICAR_NO_TONE_TOOLTIP": "Stops the tone playing on the specified pin. The default buzzer is on pin 22.",
+    "PICAR_NOTE_NAME_REST": "Rest",
 
     // *********************************************************
     // Coding

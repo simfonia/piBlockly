@@ -336,6 +336,7 @@ Blockly.Blocks['picar_note_to_frequency'] = {
           "type": "field_dropdown",
           "name": "NOTE_NAME",
           "options": [
+            [Blockly.Msg["PICAR_NOTE_NAME_REST"], "REST_INDICATOR"],
             ["C", "C"],
             ["C#", "CS"],
             ["D", "D"],
