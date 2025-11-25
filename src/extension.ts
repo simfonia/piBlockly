@@ -717,7 +717,11 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     const fieldColourUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly', 'plugins', 'field-colour.js')).with({ query: `nonce=${nonce}` });
     const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly', 'plugins', 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
-    const manifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'manifest.json')).with({ query: `nonce=${nonce}` });
+    // Base URL for remote modules hosted on GitHub Pages
+    const REMOTE_MODULES_BASE_URL = 'https://simfonia.github.io/piBlockly-modules/';
+
+    const coreExtensionManifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'core_extension_manifest.json')).with({ query: `nonce=${nonce}` });
+    const remoteModulesManifestUri = webview.asWebviewUri(vscode.Uri.parse(REMOTE_MODULES_BASE_URL + 'manifest.json')).with({ query: `nonce=${nonce}` });
     const userModulesConfigUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'user_modules', 'user_modules_config.json')).with({ query: `nonce=${nonce}` });
 
     // Read the content of the custom language file to get toolbar translations
@@ -758,7 +762,7 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
 <head>
     <meta charset="UTF-8">
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data: https: vscode-webview-resource:; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource: blob:; connect-src ${webview.cspSource} vscode-webview-resource:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data: https: vscode-webview-resource:; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource: blob:; connect-src ${webview.cspSource} vscode-webview-resource: https://simfonia.github.io;">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>piBlockly 編輯器</title>
@@ -893,7 +897,8 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
 
 
     <script nonce="${nonce}">
-        window.manifestUri = "${manifestUri}";
+        window.coreExtensionManifestUri = "${coreExtensionManifestUri}";
+        window.remoteModulesManifestUri = "${remoteModulesManifestUri}";
         window.userModulesConfigUri = "${userModulesConfigUri}";
         window.currentLocale = "${locale}"; // Pass the current locale
     </script>

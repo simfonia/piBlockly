@@ -1,10 +1,7 @@
 {
   "version": "1.0.0",
   "modules": [
-    {
-      "name": "Core Hardware",
-      "url": "./modules/piblockly_hw_blocks/"
-    },
+
     {
       "name": "Arduino Blocks",
       "url": "blocks/arduino.js"

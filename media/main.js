@@ -258,18 +258,35 @@ function applyStyle(themeName, isInitialLoad = false) {
 async function loadExternalModules() {
     let allModules = [];
 
-    // Load system modules from manifest.json
+    // Load local core extension modules from core_extension_manifest.json
     try {
-        const manifestResponse = await fetch(window.manifestUri);
-        if (manifestResponse.ok) {
-            const manifest = await manifestResponse.json();
-            const baseManifestUrl = new URL(window.manifestUri).origin + new URL(window.manifestUri).pathname.substring(0, new URL(window.manifestUri).pathname.lastIndexOf('/') + 1);
-            allModules.push({ type: 'system', modules: manifest.modules, baseUrl: baseManifestUrl });
+        const coreManifestResponse = await fetch(window.coreExtensionManifestUri);
+        if (coreManifestResponse.ok) {
+            const manifest = await coreManifestResponse.json();
+            const baseManifestUrl = new URL(window.coreExtensionManifestUri).origin + new URL(window.coreExtensionManifestUri).pathname.substring(0, new URL(window.coreExtensionManifestUri).pathname.lastIndexOf('/') + 1);
+            allModules.push({ type: 'core', modules: manifest.modules, baseUrl: baseManifestUrl });
         } else {
-            console.warn('No manifest.json found or failed to fetch:', manifestResponse.statusText);
+            console.warn('No core_extension_manifest.json found or failed to fetch:', coreManifestResponse.statusText);
         }
     } catch (e) {
-        console.error('Error loading system manifest.json:', e);
+        console.error('Error loading core extension manifest:', e);
+    }
+
+    // Load remote modules from remote manifest.json (e.g., GitHub Pages)
+    // Only attempt to load if remoteModulesManifestUri is defined and not empty
+    if (window.remoteModulesManifestUri) {
+        try {
+            const remoteManifestResponse = await fetch(window.remoteModulesManifestUri);
+            if (remoteManifestResponse.ok) {
+                const manifest = await remoteManifestResponse.json();
+                const baseManifestUrl = new URL(window.remoteModulesManifestUri).origin + new URL(window.remoteModulesManifestUri).pathname.substring(0, new URL(window.remoteModulesManifestUri).pathname.lastIndexOf('/') + 1);
+                allModules.push({ type: 'remote', modules: manifest.modules, baseUrl: baseManifestUrl });
+            } else {
+                console.warn('No remote manifest.json found or failed to fetch:', remoteManifestResponse.statusText);
+            }
+        } catch (e) {
+            console.error('Error loading remote modules manifest:', e);
+        }
     }
 
     // Load user modules from user_modules_config.json
