@@ -2,6 +2,9 @@ import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 
 export default [{
+    // Ignore third-party Blockly core file
+    ignores: ["media/blockly/core/blockly.js"],
+}, {
     files: ["**/*.ts"],
 }, {
     plugins: {

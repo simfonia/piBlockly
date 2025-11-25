@@ -330,10 +330,10 @@
 </category>
 
 <category id="category_functions" name="%{BKY_FUNCTIONS_CATEGORY}" categorystyle="procedure_category">
-        <block type="custom_procedures_defnoreturn"></block>
-        <block type="custom_procedures_defreturn"></block>
-        <block type="custom_procedures_return"></block>
-        <block type="custom_procedures_callnoreturn_manual"></block>
-        <block type="custom_procedures_callreturn_manual"></block>
+        <block type="custom_functions_defnoreturn"></block>
+        <block type="custom_functions_defreturn"></block>
+        <block type="custom_functions_return"></block>
+        <block type="custom_functions_callnoreturn_manual"></block>
+        <block type="custom_functions_callreturn_manual"></block>
     </category>
 <sep></sep>

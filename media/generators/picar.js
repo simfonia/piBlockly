@@ -28,9 +28,9 @@ const ensurePiCarIRDependencies = () => {
 };
 
 const ensurePiCarLEDDependencies = () => {
-  Blockly.Arduino.includes_['define_neopixel_header'] = '#include <Adafruit_NeoPixel.h>\\n';
+  Blockly.Arduino.includes_['define_neopixel_header'] = '#include <Adafruit_NeoPixel.h>\n';
   Blockly.Arduino.macros_['define_picar_led_pins'] = '#define pinRGB 18\n';
-  Blockly.Arduino.definitions_['define_picar_led_object'] = 'Adafruit_NeoPixel strip(2, pinRGB, NEO_GRB + NEO_KHZ800);\\n';
+  Blockly.Arduino.definitions_['define_picar_led_object'] = 'Adafruit_NeoPixel strip(2, pinRGB, NEO_GRB + NEO_KHZ800);\n';
   Blockly.Arduino.setups_['setup_rgb_led'] = 'strip.begin();\n  strip.setBrightness(10);\n';
 };
 
@@ -45,7 +45,7 @@ const ensurePiCarButtonDependencies = () => {
 };
 
 const ensurePiCarServoDependencies = () => {
-  Blockly.Arduino.includes_['define_servo_header'] = '#include <Servo.h>\\n';
+  Blockly.Arduino.includes_['define_servo_header'] = '#include <Servo.h>\n';
   Blockly.Arduino.macros_['define_picar_servo_pins'] =
     '#define pinServoL 12\n' +
     '#define pinServoR 13\n';

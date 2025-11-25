@@ -3,7 +3,7 @@ export function registerGenerators(Blockly) {
 // FUNCTION BLOCKS
 // =============================================================================
 
-Blockly.Arduino.forBlock['custom_procedures_defnoreturn'] = function(block) {
+Blockly.Arduino.forBlock['custom_functions_defnoreturn'] = function(block) {
   var funcName = block.getFieldValue('NAME');
   var branch = Blockly.Arduino.statementToCode(block, 'STACK');
   var args = [];
@@ -23,7 +23,7 @@ Blockly.Arduino.forBlock['custom_procedures_defnoreturn'] = function(block) {
   return null;
 };
 
-Blockly.Arduino.forBlock['custom_procedures_defreturn'] = function(block) {
+Blockly.Arduino.forBlock['custom_functions_defreturn'] = function(block) {
   var funcName = block.getFieldValue('NAME');
   var returnType = block.getFieldValue('TYPE');
   var branch = Blockly.Arduino.statementToCode(block, 'STACK');
@@ -44,12 +44,12 @@ Blockly.Arduino.forBlock['custom_procedures_defreturn'] = function(block) {
   return null;
 };
 
-Blockly.Arduino.forBlock['custom_procedures_return'] = function(block) {
+Blockly.Arduino.forBlock['custom_functions_return'] = function(block) {
   var value_return = Blockly.Arduino.valueToCode(block, 'VALUE', Blockly.Arduino.ORDER_ATOMIC) || '';
   return '  return ' + value_return + ';\n';
 };
 
-Blockly.Arduino.forBlock['custom_procedures_callnoreturn_manual'] = function(block) {
+Blockly.Arduino.forBlock['custom_functions_callnoreturn_manual'] = function(block) {
   var funcName = block.getFieldValue('NAME');
   var args = [];
   for (var i = 0; i < block.arguments_.length; i++) {
@@ -60,7 +60,7 @@ Blockly.Arduino.forBlock['custom_procedures_callnoreturn_manual'] = function(blo
   return code;
 };
 
-Blockly.Arduino.forBlock['custom_procedures_callreturn_manual'] = function(block) {
+Blockly.Arduino.forBlock['custom_functions_callreturn_manual'] = function(block) {
   var funcName = block.getFieldValue('NAME');
   var args = [];
   for (var i = 0; i < block.arguments_.length; i++) {

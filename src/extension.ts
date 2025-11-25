@@ -721,7 +721,7 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     const REMOTE_MODULES_BASE_URL = 'https://simfonia.github.io/piBlockly-modules/';
 
     const coreExtensionManifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'core_extension_manifest.json')).with({ query: `nonce=${nonce}` });
-    const remoteModulesManifestUri = webview.asWebviewUri(vscode.Uri.parse(REMOTE_MODULES_BASE_URL + 'manifest.json')).with({ query: `nonce=${nonce}` });
+    const remoteModulesManifestUri = REMOTE_MODULES_BASE_URL + 'manifest.json';
     const userModulesConfigUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'user_modules', 'user_modules_config.json')).with({ query: `nonce=${nonce}` });
 
     // Read the content of the custom language file to get toolbar translations

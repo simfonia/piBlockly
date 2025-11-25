@@ -108,13 +108,13 @@ const blockMessageStylesMap = {
         'ARRAY_LENGTH_TITLE': 'BKY_ARRAY_LENGTH_TITLE_ENGINEER',
 
         // Functions
-        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ENGINEER',
-        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ENGINEER',
+        'CUSTOM_FUNCTIONS_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_DEFNORETURN_MSG_ENGINEER',
+        'CUSTOM_FUNCTIONS_DEFRETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_DEFRETURN_MSG_ENGINEER',
+        'CUSTOM_FUNCTIONS_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_CALLNORETURN_MSG_ENGINEER',
+        'CUSTOM_FUNCTIONS_CALLRETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_CALLRETURN_MSG_ENGINEER',
+        'CUSTOM_FUNCTIONS_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_MUTATORCONTAINER_MSG_ENGINEER',
+        'CUSTOM_FUNCTIONS_MUTATORARG_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_MUTATORARG_MSG_ENGINEER',
+        'CUSTOM_FUNCTIONS_RETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_RETURN_MSG_ENGINEER',
     },
     'angel': {
         // Arduino Structure
@@ -188,13 +188,13 @@ const blockMessageStylesMap = {
         'ARRAY_LENGTH_TITLE': 'BKY_ARRAY_LENGTH_TITLE_ANGEL',
 
         // Functions
-        'CUSTOM_PROCEDURES_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFNORETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_DEFRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_DEFRETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLNORETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_CALLRETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_CALLRETURN_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORCONTAINER_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_MUTATORARG_MESSAGE': 'BKY_CUSTOM_PROCEDURES_MUTATORARG_MSG_ANGEL',
-        'CUSTOM_PROCEDURES_RETURN_MESSAGE': 'BKY_CUSTOM_PROCEDURES_RETURN_MSG_ANGEL',
+        'CUSTOM_FUNCTIONS_DEFNORETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_DEFNORETURN_MSG_ANGEL',
+        'CUSTOM_FUNCTIONS_DEFRETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_DEFRETURN_MSG_ANGEL',
+        'CUSTOM_FUNCTIONS_CALLNORETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_CALLNORETURN_MSG_ANGEL',
+        'CUSTOM_FUNCTIONS_CALLRETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_CALLRETURN_MSG_ANGEL',
+        'CUSTOM_FUNCTIONS_MUTATORCONTAINER_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_MUTATORCONTAINER_MSG_ANGEL',
+        'CUSTOM_FUNCTIONS_MUTATORARG_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_MUTATORARG_MSG_ANGEL',
+        'CUSTOM_FUNCTIONS_RETURN_MESSAGE': 'BKY_CUSTOM_FUNCTIONS_RETURN_MSG_ANGEL',
     }
 };
 
@@ -238,14 +238,39 @@ function applyStyle(themeName, isInitialLoad = false) {
         Blockly.Msg.TEXT_JOIN_TITLE_CREATEWITH = Blockly.Msg.BKY_TEXT_JOIN_MSG_ENGINEER;
     }
 
-    // 4. Reload the workspace to make the text changes take effect.
+    // 4. Create a new toolbox DOM with theme-specific category names.
+    const newToolbox = baseToolbox.cloneNode(true);
+    const categories = newToolbox.querySelectorAll('category');
+    const styleSuffix = `_${themeName.toUpperCase()}`; // e.g., _ENGINEER or _ANGEL
+
+    categories.forEach(category => {
+        const nameAttr = category.getAttribute('name');
+        if (nameAttr && nameAttr.startsWith('%{BKY_') && nameAttr.endsWith('}')) {
+            const baseKey = nameAttr.substring(6, nameAttr.length - 1); // e.g., "LOGIC_CATEGORY"
+            const styledKey = baseKey + styleSuffix; // e.g., "LOGIC_CATEGORY_ANGEL"
+
+            if (Blockly.Msg[styledKey]) {
+                category.setAttribute('name', Blockly.Msg[styledKey]);
+            } else if (Blockly.Msg[baseKey]) {
+                category.setAttribute('name', Blockly.Msg[baseKey]);
+            }
+        }
+    });
+    
+    // 5. Update the toolbox.
+    workspace.updateToolbox(newToolbox);
+
+
+    // 6. Reload the workspace to make the text changes take effect.
     //    This is a destructive operation, which is why we saved the XML state earlier.
     if (!isInitialLoad) {
-        workspace.clear();
+        // We MUST clear the workspace before loading the XML,
+        // otherwise it will just append the blocks and create duplicates.
+        workspace.clear(); // Explicitly clear the workspace to prevent duplication
         Blockly.Xml.domToWorkspace(currentXml, workspace);
     }
 
-    // 5. Save the user's theme preference for future sessions.
+    // 7. Save the user's theme preference for future sessions.
     localStorage.setItem('blocklyTheme', themeName);
 }
 
@@ -441,8 +466,8 @@ let workspace; // Declare workspace globally
 const scopeDefiningRootBlocks = [
     'initializes_setup',
     'initializes_loop',
-    'custom_procedures_defreturn',
-    'custom_procedures_defnoreturn',
+    'custom_functions_defreturn',
+    'custom_functions_defnoreturn',
     'coding_raw_definition',
     'array_declare_global',
     'variables_declare_global'
@@ -520,12 +545,12 @@ function getBlockScopeIdentifier(block) {
     const functionDefiningBlocks = {
         'initializes_setup': 'setup',
         'initializes_loop': 'loop',
-        'custom_procedures_defreturn': 'function',
-        'custom_procedures_defnoreturn': 'function',
+        'custom_functions_defreturn': 'function',
+        'custom_functions_defnoreturn': 'function',
     };
 
     if (functionDefiningBlocks[blockType]) {
-        if (blockType === 'custom_procedures_defreturn' || blockType === 'custom_procedures_defnoreturn') {
+        if (blockType === 'custom_functions_defreturn' || blockType === 'custom_functions_defnoreturn') {
             const functionName = currentBlock.getFieldValue('NAME');
             return `function:${functionName}`;
         }
