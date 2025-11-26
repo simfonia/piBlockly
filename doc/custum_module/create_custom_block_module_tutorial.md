@@ -1,10 +1,10 @@
-# 如何在 piBlockly 中建立自訂積木模組
+# 如何在 πBlockly 中建立自訂積木模組
 
-本教學將引導您如何在 `piblockly/media/user_modules/` 目錄下建立一個自訂的 Blockly 積木模組。這將允許您擴展 piBlockly 的功能，添加自己的積木和程式碼產生器。
+本教學將引導您如何在 `piblockly/media/user_modules/` 目錄下建立一個自訂的 Blockly 積木模組。這將允許您擴展 πBlockly 的功能，添加自己的積木和程式碼產生器。
 
 ## 1. 簡介
 
-piBlockly 支援透過模組化的方式擴展其積木庫。您可以將相關的積木、其程式碼產生邏輯、工具箱配置和多語言翻譯組織成一個獨立的模組。本教學將建立一個名為 `my_new_module` 的範例模組。
+πBlockly 支援透過模組化的方式擴展其積木庫。您可以將相關的積木、其程式碼產生邏輯、工具箱配置和多語言翻譯組織成一個獨立的模組。本教學將建立一個名為 `my_new_module` 的範例模組。
 
 ## 2. 先決條件
 
@@ -199,7 +199,7 @@ export const MSG_MY_NEW_MODULE_ZH_HANT = {
 
 ### 步驟 6: 註冊您的模組 (`user_modules_config.json`)
 
-當您在 `piblockly/media/user_modules/` 下建立好自己的模組資料夾後，您需要編輯 `piblockly/media/user_modules/user_modules_config.json` 檔案來註冊它，讓 piBlockly 能夠載入您的模組。
+當您在 `piblockly/media/user_modules/` 下建立好自己的模組資料夾後，您需要編輯 `piblockly/media/user_modules/user_modules_config.json` 檔案來註冊它，讓 πBlockly 能夠載入您的模組。
 
 例如，如果您複製了範例模組並命名為 `my_custom_block_set/`，則 `user_modules_config.json` 會看起來像這樣：
 
