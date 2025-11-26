@@ -14,10 +14,10 @@ Although this is a VS Code extension, it can also run within Arduino IDE 2, leve
 -   **Two Block Styles: Engineer and Angel:** The Engineer style closely mirrors native C++ syntax, providing a smooth transition for newcomers to the C++ world. The Angel style uses more colloquial descriptions while retaining technical semantics. For example, Arduino I/O pin Read and Write are expressed as "read in" and "write out," clearly indicating signal flow direction and the original API design vocabulary.
 
     Engineer Style Example:
-    ![Engineer Style](./assets/demo_Engineer_en.png)
+    [![Engineer Style](./assets/demo_Engineer_en.png)](./assets/demo_Engineer_en.png)
 
     Angel Style Example:
-    ![Angel Style](./assets/demo_Angel_en.png)
+    [![Angel Style](./assets/demo_Angel_en.png)](./assets/demo_Angel_en.png)
 -   **Arduino C++ Code Generation:** Automatically converts Blockly blocks into clean and fully functional Arduino C++ code.
 -   **Flexibility:** Not limited to specific development boards, it also includes a set of advanced programming blocks for "Coding." If you encounter situations without a specific block, you can improvise. Of course, debugging is up to you.
 -   **Custom Extension Blocks:** πBlockly supports high customizability. You can extend the block library by creating your own modules in the `media/user_modules` directory. Each custom module includes its unique block definitions, code generators, toolbox configurations, and multilingual support.
@@ -33,7 +33,7 @@ Although this is a VS Code extension, it can also run within Arduino IDE 2, leve
     *   Go to `C:\Users\[user name]\.arduinoIDE\plugins` (create this folder if it doesn't exist, note the 's' in 'plugins') and delete all `piblockly-x.x.x.vsix` files.
 3.  **Download the latest `piblockly-x.x.x.vsix` file.**
     *   Place the downloaded `.vsix` file into `C:\Users\[user name]\.arduinoIDE\plugins` (create this folder if it doesn't exist, note the 's' in 'plugins').
-4.  Launch Arduino IDE 2. You should see a pink π icon in the top right corner. Click it to start the piBlockly editor.
+4.  Launch Arduino IDE 2 (may require restarting twice). You should see a pink π icon in the top right corner. Click it to start the piBlockly editor.
 
 ## Usage
 

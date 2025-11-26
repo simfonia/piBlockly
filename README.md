@@ -1,6 +1,6 @@
 # πBlockly
 
-[English](README_en.md) | [繁體中文](README.md)
+[English](README_en.md) | [正體中文](README.md)
 
 ## 適用於 Visual Studio Code / Arduino IDE 2 的 Blockly 延伸套件
 
@@ -14,10 +14,10 @@
 -   **兩套風格的積木 Engineer 與 Angel ：** Engineer 貼近 C++ 原汁原味的語法，讓剛進入 C++ 世界的新手有個平順的過渡期。 Angel 使用口語化的描述，但保留技術層面的語意，例如把 Arduino IO 腳位的 Read 與 Write 表達為讀入與寫出，明確指出訊號流動方向與原 API 設計的語彙。
 
     Engineer 風格範例：
-    ![Engineer 風格](./assets/demo_Engineer_zh-hants.png)
+    [![Engineer 風格](./assets/demo_Engineer_zh-hants.png)](./assets/demo_Engineer_zh-hants.png)
 
     Angel 風格範例：
-    ![Angel 風格](./assets/demo_Angel_zh-hants.png)
+    [![Angel 風格](./assets/demo_Angel_zh-hants.png)](./assets/demo_Angel_zh-hants.png)
 -   **Arduino C++ 程式碼生成：** 自動將 Blockly 積木轉換為簡潔且功能完善的 Arduino C++ 程式碼。
 -   **彈性：** 除了不限特定開發板，還包含一組進階程式設計的積木 Coding，遇到沒有積木的情況，您完全可以即興發揮。當然，除錯得靠自己。
 -   **自訂擴充積木：** πBlockly 支援高度客製化。您可以透過在 `media/user_modules` 目錄中建立自己的模組，來擴展積木庫。每個自訂模組都包含其獨特的積木定義、程式碼產生器、工具箱配置和多語言支援。
@@ -34,7 +34,7 @@
     *   進入 `C:\Users\[user name]\.arduinoIDE\plugins`（如果此資料夾不存在，請建立它，注意 'plugins' 中的 's'）並刪除所有 `piblockly-x.x.x.vsix` 檔案。
 3.  **下載最新的 `piblockly-x.x.x.vsix` 檔案。**
     *   將下載的 `.vsix` 檔案放入 `C:\Users\[user name]\.arduinoIDE\plugins`（如果此資料夾不存在，請建立它，注意 'plugins' 中的 's'）。
-4.  啟動 Arduino IDE 2。您應該會在右上角看到一個粉紅色的 π 圖示。點擊它即可啟動 piBlockly 編輯器。
+4.  啟動 Arduino IDE 2(可能要重啟2次)。您應該會在右上角看到一個粉紅色的 π 圖示。點擊它即可啟動 piBlockly 編輯器。
 
 ## 使用方式
 
