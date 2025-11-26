@@ -694,6 +694,78 @@ function updateOrphanBlocks(event) {
     }
 }
 
+// =============================================================================
+// --- UPDATE CHECKER ---
+// =============================================================================
+
+/**
+ * Compares two semantic version strings (e.g., "1.10.0" vs "1.9.0").
+ * @param {string} newVersion The version to check.
+ * @param {string} oldVersion The current version.
+ * @returns {boolean} True if newVersion is greater than oldVersion.
+ */
+function isNewerVersion(newVersion, oldVersion) {
+    if (!newVersion || !oldVersion) {
+        return false;
+    }
+    const newParts = newVersion.split('.').map(Number);
+    const oldParts = oldVersion.split('.').map(Number);
+
+    for (let i = 0; i < Math.max(newParts.length, oldParts.length); i++) {
+        const newPart = newParts[i] || 0;
+        const oldPart = oldParts[i] || 0;
+        if (newPart > oldPart) return true;
+        if (newPart < oldPart) return false;
+    }
+    return false;
+}
+
+/**
+ * Checks for a new version of the extension on GitHub.
+ */
+async function checkForUpdates() {
+    const updateButton = document.getElementById('updateButton');
+    const localVersion = document.body.dataset.extensionVersion;
+    
+    // Hardcoded repository info
+    const repoOwner = 'simfonia';
+    const repoName = 'piBlockly';
+
+    const releasesUrl = `https://github.com/${repoOwner}/${repoName}/releases`;
+    const packageJsonUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/master/package.json`;
+
+    if (!updateButton || !localVersion) {
+        console.error('Update check could not run. Missing button or version attribute.');
+        return;
+    }
+    
+    // Always set the link to the releases page
+    updateButton.href = releasesUrl;
+
+    try {
+        const response = await fetch(packageJsonUrl, { cache: 'no-store' }); // Use no-store to always get the latest
+        if (!response.ok) {
+            throw new Error(`Failed to fetch package.json: ${response.statusText}`);
+        }
+        const remotePackage = await response.json();
+        const latestVersion = remotePackage.version;
+
+        if (isNewerVersion(latestVersion, localVersion)) {
+            updateButton.classList.add('is-update-available');
+            updateButton.title = window.localization.updateAvailable
+                .replace('%1', latestVersion)
+                .replace('%2', localVersion);
+        } else {
+            updateButton.classList.remove('is-update-available');
+            updateButton.title = window.localization.updateLatest
+                .replace('%1', localVersion);
+        }
+
+    } catch (error) {
+        console.error('Error checking for updates:', error);
+        updateButton.title = window.localization.updateFailed;
+    }
+}
 
 
 // =============================================================================
@@ -850,6 +922,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     workspace.addChangeListener(updateOrphanBlocks);
+    
+    // Check for updates when the webview is loaded
+    checkForUpdates();
 
     // Signal to the extension that the webview is ready to be initialized.
     vscode.postMessage({ command: 'webviewReady' });

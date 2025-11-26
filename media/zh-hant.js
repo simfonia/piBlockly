@@ -9,6 +9,11 @@
     "BKY_TOOLBAR_NEW_TOOLTIP": "新增專案",
     "BKY_TOOLBAR_OPEN_TOOLTIP": "開啟專案",
 
+    // Update Button Tooltips
+    "BKY_TOOLBAR_UPDATE_AVAILABLE_TOOLTIP": "發現新版本 v%1！(您目前為 v%2) 點此前往下載頁面",
+    "BKY_TOOLBAR_UPDATE_LATEST_TOOLTIP": "目前為最新版 (v%1)",
+    "BKY_TOOLBAR_UPDATE_CHECK_FAILED_TOOLTIP": "檢查更新失敗",
+
     // Toolbar Theme Labels
     "BKY_TOOLBAR_ENGINEER_LABEL": "Engineer",
     "BKY_TOOLBAR_ANGEL_LABEL": "Angel",

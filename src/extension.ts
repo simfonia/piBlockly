@@ -360,8 +360,10 @@ async function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: 
 
 
 
+    const extensionVersion = context.extension.packageJSON.version;
+
     // Set the webview's initial HTML content.
-    panel.webview.html = await getWebviewContent(panel.webview, context.extensionUri, context.extensionPath);
+    panel.webview.html = await getWebviewContent(panel.webview, context.extensionUri, context.extensionPath, extensionVersion);
 
     // Handle messages from the webview.
     panel.webview.onDidReceiveMessage(
@@ -691,7 +693,7 @@ function getNonce() {
  * @param extensionPath The file path of the extension's root directory.
  * @returns The full HTML string for the webview.
  */
-async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, extensionPath: string) {
+async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, extensionPath: string, extensionVersion: string) {
     const mediaPath = vscode.Uri.joinPath(extensionUri, 'media');
     const nonce = getNonce();
 
@@ -753,6 +755,15 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     const newIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'new_24dp_FE2F89.svg'));
     const openIconHoverUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'icons', 'open_24dp_FE2F89.svg'));
 
+    // Get the localized tooltips for the update button
+    const updateAvailableTooltip = messages['BKY_TOOLBAR_UPDATE_AVAILABLE_TOOLTIP'] || '';
+    const updateLatestTooltip = messages['BKY_TOOLBAR_UPDATE_LATEST_TOOLTIP'] || '';
+    const updateFailedTooltip = messages['BKY_TOOLBAR_UPDATE_CHECK_FAILED_TOOLTIP'] || '';
+
+    // Read the content of the update icon SVG
+    const updateIconPath = path.join(extensionPath, 'media', 'icons', 'published_with_changes_24dp_1F1F1F.svg');
+    const updateIconSvg = await fs.promises.readFile(updateIconPath, 'utf8');
+
     const toolboxPath = path.join(extensionPath, 'media', 'toolbox.xml');
     const toolboxXml = await fs.promises.readFile(toolboxPath, 'utf8');
 
@@ -762,7 +773,7 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
 <head>
     <meta charset="UTF-8">
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data: https://blockly-demo.appspot.com; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource:; connect-src ${webview.cspSource} vscode-webview-resource: https://simfonia.github.io;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data: https://blockly-demo.appspot.com; script-src 'nonce-${nonce}' ${webview.cspSource} vscode-webview-resource:; connect-src ${webview.cspSource} vscode-webview-resource: https://simfonia.github.io https://raw.githubusercontent.com;">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>piBlockly 編輯器</title>
@@ -808,8 +819,31 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
             height: 24px;
             margin-right: 10px;
         }
+        #updateButton {
+            margin-left: auto; /* Pushes the update and close buttons to the right */
+        }
+        #updateButton svg {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        #updateButton #update-icon-path {
+            fill: #1F1F1F; /* Default black color */
+            transition: fill 0.2s ease;
+        }
+        #updateButton:hover #update-icon-path {
+            fill: #75FB4C; /* Green on hover */
+        }
+        @keyframes flash-green {
+            0%, 100% { fill: #1F1F1F; } /* Black */
+            50% { fill: #75FB4C; } /* Green */
+        }
+        .is-update-available #update-icon-path {
+            animation: flash-green 1.5s infinite;
+        }
         #closeButton {
-            margin-left: auto; /* Pushes the button to the right */
+            /* margin-left: auto; Pushes the button to the right */
         }
         /* Theme Switch Styles */
         .theme-switch-wrapper {
@@ -864,7 +898,7 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     </style>
     <link href="${styleUri}" rel="stylesheet">
 </head>
-<body>
+<body data-extension-version="${extensionVersion}">
     <div id="loading-overlay">載入中...</div>
     <div id="inactive-overlay" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); color: white; font-size: 2em; z-index: 1000; text-align: center; padding: 20px;"></div>
     <div id="toolbar">
@@ -880,6 +914,9 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
             </label>
             <label>${angelLabel}</label>
         </div>
+        <a id="updateButton" href="#" target="_blank" title="檢查更新...">
+            ${updateIconSvg.replace('<path d=', '<path id="update-icon-path" d=')}
+        </a>
         <img id="closeButton" src="${dangerousIconUri}" data-src="${dangerousIconUri}" data-hover-src="${dangerousIconHoverUri}" alt="${closeTooltip}" title="${closeTooltip}">
     </div>
     <div id="blocklyDiv" style="height: calc(100vh - 40px); width: 100vw;"></div>
@@ -901,6 +938,11 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
         window.remoteModulesManifestUri = "${remoteModulesManifestUri}";
         window.userModulesConfigUri = "${userModulesConfigUri}";
         window.currentLocale = "${locale}"; // Pass the current locale
+        window.localization = {
+            updateAvailable: "${updateAvailableTooltip}",
+            updateLatest: "${updateLatestTooltip}",
+            updateFailed: "${updateFailedTooltip}"
+        };
     </script>
     <script nonce="${nonce}" type="module" src="${mainUri}"></script>
 </body>

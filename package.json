@@ -10,7 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:arduino"
+    "onStartup"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -30,7 +30,7 @@
         {
           "command": "piblockly.start",
           "group": "navigation@1",
-          "when": "!piblockly.panelOpen"
+          "when": "(resourceLangId == arduino || resourceLangId == cpp) && !piblockly.panelOpen"
         }
       ]
     },

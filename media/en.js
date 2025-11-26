@@ -9,6 +9,11 @@
     "BKY_TOOLBAR_NEW_TOOLTIP": "New Project",
     "BKY_TOOLBAR_OPEN_TOOLTIP": "Open Project",
 
+    // Update Button Tooltips
+    "BKY_TOOLBAR_UPDATE_AVAILABLE_TOOLTIP": "New version v%1 available! (You are on v%2) Click to download.",
+    "BKY_TOOLBAR_UPDATE_LATEST_TOOLTIP": "You are currently using the latest version (v%1).",
+    "BKY_TOOLBAR_UPDATE_CHECK_FAILED_TOOLTIP": "Update check failed.",
+
     // Toolbar Theme Labels
     "BKY_TOOLBAR_ENGINEER_LABEL": "Engineer",
     "BKY_TOOLBAR_ANGEL_LABEL": "Angel",
