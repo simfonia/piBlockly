@@ -239,11 +239,17 @@
     "PICAR_NO_TONE": "Stop tone on pin %1",
     "PICAR_NO_TONE_TOOLTIP": "Stops the tone playing on the specified pin. The default buzzer is on pin 22.",
     "PICAR_NOTE_NAME_REST": "Rest",
+    "PICAR_PLAY_MELODY_STRING_MESSAGE": "Play Melody String", // Modify existing message
+    "PICAR_PLAY_MELODY_STRING_MESSAGE_PIN": "Play melody on pin", // New key
+    "PICAR_PLAY_MELODY_STRING_MESSAGE_MELODY": "Melody:", // New key
+    "PICAR_PLAY_MELODY_STRING_TOOLTIP": "Plays a melody defined by a string (e.g., C4Q,D4Q,E4H). Use R for rests, _T for triplets. Usage details in code comments.",
 
     // *********************************************************
     // Coding
     // *********************************************************
     // Engineer
+    "BKY_CODING_COMMENT_MSG_ENGINEER": "// %1",
+    "BKY_CODING_INCLUDE_MSG_ENGINEER": "#include %1",
     "BKY_CODING_RAW_STATEMENT_ENGINEER": "code: %1",
     "BKY_CODING_RAW_INPUT_ENGINEER": "expression: %1",
     "BKY_CODING_RAW_DEFINITION_ENGINEER": "global code %1",
@@ -251,6 +257,8 @@
     "BKY_CODING_RAW_WRAPPER_TOP_ENGINEER": "begin: %1",
     "BKY_CODING_RAW_WRAPPER_BOTTOM_ENGINEER": "end: %1",
     // Angel
+    "BKY_CODING_COMMENT_MSG_ANGEL": "Comment %1",
+    "BKY_CODING_INCLUDE_MSG_ANGEL": "include library %1",
     "BKY_CODING_RAW_STATEMENT_ANGEL": "Do Code %1",
     "BKY_CODING_RAW_INPUT_ANGEL": "Get Value %1",
     "BKY_CODING_RAW_DEFINITION_ANGEL": "Define Global %1",
@@ -258,6 +266,8 @@
     "BKY_CODING_RAW_WRAPPER_TOP_ANGEL": "Start: %1",
     "BKY_CODING_RAW_WRAPPER_BOTTOM_ANGEL": "End: %1",
     // Tooltip
+    "CODING_COMMENT_TOOLTIP": "Add a multiline comment to the code. Supports multiple lines.",
+    "CODING_INCLUDE_TOOLTIP": "Includes a library or header file. Always placed at the top of the generated code.",
     "CODING_RAW_STATEMENT_TOOLTIP": "Allows entering any code as a statement.",
     "CODING_RAW_INPUT_TOOLTIP": "Allows entering code that returns any value (e.g., Number, String, Boolean).",
     "CODING_RAW_DEFINITION_TOOLTIP": "Allows entering global definitions, includes, or custom functions.",

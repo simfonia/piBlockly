@@ -1,5 +1,48 @@
 export function registerBlocks(Blockly) {
 // Coding Blocks
+
+Blockly.Blocks['coding_comment'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_CODING_COMMENT_MESSAGE}", // Use generic message key with BKY_ prefix
+      "args0": [
+        {
+          "type": "field_multilineinput", // Registered custom field type
+          "name": "COMMENT",
+          "text": ""
+        }
+      ],
+      "inputsInline": false,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "#037a2d", 
+      "tooltip": "%{BKY_CODING_COMMENT_TOOLTIP}", 
+      "helpUrl": ""
+    });
+  }
+};
+
+Blockly.Blocks['coding_include'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": "%{BKY_CODING_INCLUDE_MESSAGE}", // Use generic message key with BKY_ prefix
+      "args0": [
+        {
+          "type": "field_textinput", // Standard field type
+          "name": "PATH",
+          "text": "<Arduino.h>"
+        }
+      ],
+      "inputsInline": false,
+      "previousStatement": true,
+      "nextStatement": true,
+      "colour": "%{BKY_CODING_HUE}", // Use coding hue language key for consistency
+      "tooltip": "%{BKY_CODING_INCLUDE_TOOLTIP}", // Tooltip using language key
+      "helpUrl": ""
+    });
+  }
+};
+
 Blockly.Blocks['coding_raw_statement'] = {
   init: function() {
     this.jsonInit({

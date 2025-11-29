@@ -147,6 +147,13 @@
             </shadow>
         </value>
     </block>
+    <block type="picar_play_melody_string">
+        <value name="PIN">
+            <shadow type="arduino_pin_shadow">
+                <field name="PIN">22</field>
+            </shadow>
+        </value>
+    </block>
     <block type="picar_note_to_frequency"></block>
     <block type="picar_tone">
         <value name="PIN">
@@ -174,6 +181,8 @@
     </block>
 </category>
 <category id="category_coding" name="%{BKY_CODING_CATEGORY}" categorystyle="coding_category">
+    <block type="coding_comment"></block>
+    <block type="coding_include"></block>
     <block type="coding_raw_statement"></block>
     <block type="coding_raw_input"></block>
     <block type="coding_raw_definition"></block>

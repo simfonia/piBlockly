@@ -1,4 +1,3 @@
-export function registerGenerators(Blockly) {
 // =============================================================================
 // PICAR DEPENDENCY MANAGEMENT
 // =============================================================================
@@ -60,20 +59,25 @@ const ensurePiCarServoDependencies = () => {
 };
 
 const ensureMusicDependencies = () => {
-  Blockly.Arduino.definitions_['define_g_tempo_bpm'] = 'int g_tempo_bpm = 120; // Default tempo in BPM';
-  Blockly.Arduino.definitions_['define_g_quarter_note_ms'] = 'int g_quarter_note_ms = 500; // Default quarter note duration in ms (120 BPM)';
+  // Declare global variables for tempo and quarter note duration
+  // Default values will be handled by the picar_set_tempo block if not explicitly set elsewhere.
+  Blockly.Arduino.definitions_['define_g_tempo_bpm'] = 'int g_tempo_bpm = 120; // Tempo in BPM';
+  Blockly.Arduino.definitions_['define_g_quarter_note_ms'] = 'float g_quarter_note_ms = 500.0; // Quarter note duration in ms (120 BPM)';
   Blockly.Arduino.definitions_['define_playNote'] =
-    'void playNote(int pin, int frequency, int duration_ms, int pause_ms) {\n' +
+    'void playNote(int pin, int frequency, int total_duration_ms) {\n' +
     '  if (frequency == 0) { // Rest\n' +
     '    noTone(pin);\n' +
-    '    delay(duration_ms);\n' +
+    '    delay(total_duration_ms);\n' +
     '  } else {\n' +
-    '    tone(pin, frequency, duration_ms);\n' +
-    '    delay(pause_ms); // Pause after playing the note\n' +
+    '    int tone_duration = total_duration_ms * 0.9; // Play tone for 90% of duration for a slight staccato effect\n' +
+    '    tone(pin, frequency, tone_duration);\n' +
+    '    delay(total_duration_ms); // Wait for the full note duration\n' +
     '  }\n' +
-    '  noTone(pin); // Ensure tone stops\n' +
+    '  noTone(pin); // Ensure tone stops after each note/rest\n' +
     '}\n';
 };
+
+export function registerGenerators(Blockly) {
 
 // =============================================================================
 // PICAR BLOCK GENERATORS
@@ -380,12 +384,161 @@ Blockly.Arduino.forBlock['picar_play_note'] = function(block) {
     duration_ms_code += ' * (2.0 / 3.0)'; // Triplet reduces duration to 2/3 of its normal value
   }
 
-  // Pause between notes (e.g., 1.3 times the note duration)
-  var pause_ms_code = '(' + duration_ms_code + ') * 1.30';
-
-  var code = 'playNote(' + pin + ', ' + frequency + ', (int)(' + duration_ms_code + '), (int)(' + pause_ms_code + '));\n';
+  // Now, duration_ms_code represents the total duration for the note
+  var code = 'playNote(' + pin + ', ' + frequency + ', (int)(' + duration_ms_code + '));\n';
   return code;
 };
+
+// =============================================================================
+// HELPER FUNCTIONS FOR MELODY PARSING
+// =============================================================================
+
+// Converts pitch string (C, C#, Db, etc.) and octave to frequency (Hz)
+const getFrequencyFromPitchOctave = (pitchStr, octave) => {
+    const C0_FREQ = 16.35; // Frequency of C0
+    let semitonesFromC = 0;
+    let effectivePitch = pitchStr;
+
+    // Handle flats and sharps consistently
+    if (pitchStr.length > 1 && (pitchStr.endsWith('#') || pitchStr.endsWith('b'))) {
+        effectivePitch = pitchStr.substring(0, pitchStr.length - 1);
+        const accidental = pitchStr.endsWith('#') ? 1 : -1;
+        switch (effectivePitch) {
+            case 'C': semitonesFromC = 0 + accidental; break;
+            case 'D': semitonesFromC = 2 + accidental; break;
+            case 'E': semitonesFromC = 4 + accidental; break;
+            case 'F': semitonesFromC = 5 + accidental; break;
+            case 'G': semitonesFromC = 7 + accidental; break;
+            case 'A': semitonesFromC = 9 + accidental; break;
+            case 'B': semitonesFromC = 11 + accidental; break;
+            default: return 0; // Invalid pitch
+        }
+    } else {
+        switch (pitchStr) {
+            case 'C': semitonesFromC = 0; break;
+            case 'D': semitonesFromC = 2; break;
+            case 'E': semitonesFromC = 4; break;
+            case 'F': semitonesFromC = 5; break;
+            case 'G': semitonesFromC = 7; break;
+            case 'A': semitonesFromC = 9; break;
+            case 'B': semitonesFromC = 11; break;
+            default: return 0; // Invalid pitch
+        }
+    }
+    
+    // Adjust for negative semitones (e.g., Db is C#)
+    if (semitonesFromC < 0) {semitonesFromC += 12;}
+    if (semitonesFromC >= 12) {semitonesFromC -= 12;}
+
+    return C0_FREQ * Math.pow(2, octave + (semitonesFromC / 12.0));
+};
+
+// Converts duration char (W, H, Q, E, S, T) to a ratio of a quarter note
+const getNoteValueRatio = (durationChar) => {
+    switch (durationChar) {
+        case 'W': return 4.0;   // Whole note
+        case 'H': return 2.0;   // Half note
+        case 'Q': return 1.0;   // Quarter note
+        case 'E': return 0.5;   // Eighth note
+        case 'S': return 0.25;  // Sixteenth note
+        case 'T': return 0.125; // Thirty-second note
+        default: return 1.0;    // Default to quarter note if unknown
+    }
+};
+
+// =============================================================================
+// PICAR_PLAY_MELODY_STRING GENERATOR
+// =============================================================================
+
+Blockly.Arduino.forBlock['picar_play_melody_string'] = function(block) {
+  ensurePiCarBuzzerDependencies();
+  ensureMusicDependencies(); // Ensure g_tempo_bpm, g_quarter_note_ms, and playNote() are defined
+
+  let code = '';
+  code += `// Melody String Syntax:\n`;
+  code += `// Format: [Note/Rest][Octave][Duration][. (Dotted)][_T (Triplet)]\n`;
+  code += `// Each note/rest is separated by a comma (e.g., "C4Q,D4Q,E4H").\n`;
+  code += `//\n`;
+  code += `// Pitches: C, D, E, F, G, A, B. Can include sharps (#) or flats (b) e.g., C#, Eb.\n`;
+  code += `// Octaves: Numbers 0-8. (e.g., C4 is middle C)\n`;
+  code += `// Durations: W (Whole), H (Half), Q (Quarter), E (Eighth), S (Sixteenth), T (Thirty-second).\n`;
+  code += `// Dotted: Add '.' after duration for dotted notes (e.g., Q. for dotted quarter).\n`;
+  code += `// Triplet: Add '_T' after duration (and optional dot) for triplets. Each note in a triplet group should have _T (e.g., E_T, E_T, F_T).\n`;
+  code += `// Rests: Start with 'R' followed by duration (e.g., RQ for quarter rest). Can be dotted or triplet (e.g., RE._T).\n`;
+  code += `// Examples: "C4Q, D4Q, E4H", "C#5E., RQH, D3S_T, E3S_T, F3S_T"\n\n`;
+
+  const melodyString = block.getFieldValue('MELODY_STRING');
+  const pin = Blockly.Arduino.valueToCode(block, 'PIN', Blockly.Arduino.ORDER_ATOMIC) || 'pinBuzzer'; // Get PIN from input, default to 'pinBuzzer'
+
+  const notes = melodyString.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+  // Sanitize melodyString for multi-line comments in C++
+  const sanitizedMelodyString = melodyString.replace(/\n/g, '\n// ');
+
+  code += `// Generated melody from: ${sanitizedMelodyString}\n`; // Use sanitized string
+  code += `{\n`;
+  code += `  float current_quarter_note_ms = g_quarter_note_ms; // Use float for precision\n`;
+
+  notes.forEach(noteStr => {
+    let match;
+    // Regex to capture: (Optional: Pitch + Accidental) (Optional: Octave) (Duration) (Optional: Dotted) (Optional: Triplet)
+    // Examples: C4Q, C#5E., RQH, D3S_T
+    const noteRegex = /^([A-G][#b]?)?([0-8])?([WHQEST])(\.)?(_T)?$/i;
+    
+    // Handle Rest explicitly first
+    if (noteStr.toUpperCase().startsWith('R')) {
+        const restPart = noteStr.substring(1); // Get duration part after 'R'
+        // For rest, the regex for duration/dotted/triplet is just match[1], match[2], match[3]
+        match = restPart.match(/^([WHQEST])(\.)?(_T)?$/i); 
+        if (match) {
+            let durationChar = match[1].toUpperCase();
+            let isDotted = !!match[2]; // Index 2 for '.'
+            let isTriplet = !!match[3]; // Index 3 for '_T'
+            
+            let durationRatio = getNoteValueRatio(durationChar);
+            if (isDotted) {durationRatio *= 1.5;}
+            if (isTriplet) {durationRatio *= (2.0 / 3.0);}
+            
+            code += `  playNote(${pin}, 0, (int)(current_quarter_note_ms * ${durationRatio})); // Rest\n`;
+        } else {
+            code += `  // WARNING: Invalid rest format: ${noteStr}\n`;
+            code += `  delay(250); // Default short rest\n`;
+        }
+        return; // Move to next note
+    }
+
+    // Handle actual notes
+    match = noteStr.match(noteRegex);
+
+    if (match) {
+        let pitch = match[1] ? match[1].toUpperCase() : 'C'; // Default pitch
+        let octave = match[2] ? parseInt(match[2], 10) : 4; // Default octave
+        let durationChar = match[3].toUpperCase();
+        let isDotted = !!match[4]; // Correct index for '.'
+        let isTriplet = !!match[5]; // Correct index for '_T'
+
+        let frequency = getFrequencyFromPitchOctave(pitch, octave);
+        let durationRatio = getNoteValueRatio(durationChar);
+        if (isDotted) {durationRatio *= 1.5;}
+        if (isTriplet) {durationRatio *= (2.0 / 3.0);}
+        
+        // Ensure frequency is not 0 for notes
+        if (frequency === 0) { // Fallback for unhandled pitch cases
+            code += `  // WARNING: Invalid pitch or octave for note: ${noteStr}\n`;
+            frequency = 440; // Default to A4
+        }
+        
+        code += `  playNote(${pin}, (int)${frequency.toFixed(0)}, (int)(current_quarter_note_ms * ${durationRatio}));\n`;
+    } else {
+        code += `  // WARNING: Invalid note format: ${noteStr}\n`;
+        code += `  playNote(${pin}, 440, (int)(current_quarter_note_ms)); // Play a default note for error\n`;
+    }
+  });
+  code += `}\n`; // End of melody block
+  return code;
+};
+
+
 
 Blockly.Arduino.forBlock['picar_note_to_frequency'] = function(block) {
   var noteName = block.getFieldValue('NOTE_NAME');

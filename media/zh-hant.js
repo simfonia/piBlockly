@@ -239,11 +239,17 @@
     "PICAR_NO_TONE": "停止在腳位 %1 上的音調",
     "PICAR_NO_TONE_TOOLTIP": "停止在指定腳位上播放的音調。預設蜂鳴器位於腳位 22。",
     "PICAR_NOTE_NAME_REST": "休止符",
+    "PICAR_PLAY_MELODY_STRING_MESSAGE": "播放旋律字串", // 修改現有訊息
+    "PICAR_PLAY_MELODY_STRING_MESSAGE_PIN": "播放旋律於腳位", // 新鍵
+    "PICAR_PLAY_MELODY_STRING_MESSAGE_MELODY": "旋律:", // 新鍵
+    "PICAR_PLAY_MELODY_STRING_TOOLTIP": "播放由字串定義的旋律 (例如：C4Q,D4Q,E4H)。使用 R 代表休止符，_T 代表三連音。用法詳見程式碼中的註解。",
 
     // *********************************************************
     // Coding
     // *********************************************************
     // Engineer
+    "BKY_CODING_COMMENT_MSG_ENGINEER": "// %1",
+    "BKY_CODING_INCLUDE_MSG_ENGINEER": "#include %1",
     "BKY_CODING_RAW_STATEMENT_ENGINEER": "code: %1",
     "BKY_CODING_RAW_INPUT_ENGINEER": "expression: %1",
     "BKY_CODING_RAW_DEFINITION_ENGINEER": "global code %1",
@@ -251,6 +257,8 @@
     "BKY_CODING_RAW_WRAPPER_TOP_ENGINEER": "begin: %1",
     "BKY_CODING_RAW_WRAPPER_BOTTOM_ENGINEER": "end: %1",
     // Angel
+    "BKY_CODING_COMMENT_MSG_ANGEL": "註解 %1",
+    "BKY_CODING_INCLUDE_MSG_ANGEL": "引用函式庫 %1",
     "BKY_CODING_RAW_STATEMENT_ANGEL": "執行程式碼 %1",
     "BKY_CODING_RAW_INPUT_ANGEL": "取得數值 %1",
     "BKY_CODING_RAW_DEFINITION_ANGEL": "在全域區定義 %1",
@@ -258,6 +266,8 @@
     "BKY_CODING_RAW_WRAPPER_TOP_ANGEL": "開始: %1",
     "BKY_CODING_RAW_WRAPPER_BOTTOM_ANGEL": "結束: %1",
     // Tooltip
+    "CODING_COMMENT_TOOLTIP": "新增註解到程式碼中，支援多行。",
+    "CODING_INCLUDE_TOOLTIP": "引用函式庫或標頭檔。總是被放置在生成的程式碼的頂部。",
     "CODING_RAW_STATEMENT_TOOLTIP": "可填入任意程式碼作為一個指令",
     "CODING_RAW_INPUT_TOOLTIP": "可填入任意回傳值 (如：數字、文字、布林) 的程式碼",
     "CODING_RAW_DEFINITION_TOOLTIP": "可填入全域定義、函式庫引用或自訂函式等程式碼",
@@ -456,6 +466,7 @@
     "BKY_CUSTOM_FUNCTIONS_MUTATORCONTAINER_MSG_ANGEL": "函式輸入",
     "BKY_CUSTOM_FUNCTIONS_MUTATORARG_MSG_ANGEL": "參數",
     "BKY_CUSTOM_FUNCTIONS_RETURN_MSG_ANGEL": "傳回 %1",
+
     // Tooltip
     "FUNCTIONS_DEFNORETURN_TOOLTIP": "建立一個沒有輸出的函式。",
     "FUNCTIONS_DEFRETURN_TOOLTIP": "建立一個有輸出的函式。",
@@ -463,8 +474,9 @@
     "FUNCTIONS_CALLRETURN_TOOLTIP": "執行使用者定義的函式，並使用其輸出。",
     "FUNCTIONS_IFRETURN_TOOLTIP": "從函式傳回一個值。",
     "FUNCTIONS_MUTATORARG_TOOLTIP": "為函式添加一個輸入參數。",
-    "FUNCTIONS_CALLNORETURN_TITLE": "呼叫 ",
-    "FUNCTIONS_CALLRETURN_TITLE": "取得函式回傳值 ",
+
+    "FUNCTIONS_CALLNORETURN_TITLE": "Call ",
+    "FUNCTIONS_CALLRETURN_TITLE": "Get Value from ",
     "FUNCTIONS_RETURN_TOOLTIP": "從函式傳回一個值。",
 
   });

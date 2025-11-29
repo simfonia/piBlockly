@@ -333,7 +333,8 @@ async function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: 
             localResourceRoots: [
                 vscode.Uri.joinPath(context.extensionUri, 'media'),
                 vscode.Uri.joinPath(context.extensionUri, 'node_modules'),
-                vscode.Uri.joinPath(context.extensionUri, 'media', 'user_modules') // Allow access to user_modules
+                vscode.Uri.joinPath(context.extensionUri, 'media', 'user_modules'),
+                vscode.Uri.file(path.join(context.extensionPath, '..', 'piBlockly-modules')) // Allow access to the sibling modules project
             ],
             enableForms: true, // Required for Blockly dialogs
             retainContextWhenHidden: true // Keep the webview state even when not visible
@@ -697,6 +698,8 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     const mediaPath = vscode.Uri.joinPath(extensionUri, 'media');
     const nonce = getNonce();
 
+    const coreExtensionManifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'core_extension_manifest.json')).with({ query: `nonce=${nonce}` });
+
     // Determine which language files to load based on VS Code's locale
     const locale = vscode.env.language;
     let blocklyLangFilePath; // Path for core blockly language file relative to extension root
@@ -720,10 +723,21 @@ async function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.U
     const fieldMultilineInputUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'blockly', 'plugins', 'field-multilineinput.js')).with({ query: `nonce=${nonce}` });
     const mainUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'main.js')).with({ query: `nonce=${nonce}` });
     // Base URL for remote modules hosted on GitHub Pages
-    const REMOTE_MODULES_BASE_URL = 'https://simfonia.github.io/piBlockly-modules/';
+    // Dynamically determine the base URL for modules.
+    // If a sibling 'piBlockly-modules' directory exists, use it for local development.
+    // Otherwise, fall back to the remote GitHub Pages URL.
+    const localModulesPath = path.join(extensionPath, '..', 'piBlockly-modules');
+    let modulesBaseUrl;
+    if (fs.existsSync(localModulesPath)) {
+        // Local development environment
+        const localModulesUri = vscode.Uri.file(localModulesPath);
+        modulesBaseUrl = webview.asWebviewUri(localModulesUri).toString() + '/';
+    } else {
+        // Production environment
+        modulesBaseUrl = 'https://simfonia.github.io/piBlockly-modules/';
+    }
 
-    const coreExtensionManifestUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'core_extension_manifest.json')).with({ query: `nonce=${nonce}` });
-    const remoteModulesManifestUri = REMOTE_MODULES_BASE_URL + 'manifest.json';
+    const remoteModulesManifestUri = modulesBaseUrl + 'manifest.json';
     const userModulesConfigUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaPath, 'user_modules', 'user_modules_config.json')).with({ query: `nonce=${nonce}` });
 
     // Read the content of the custom language file to get toolbar translations

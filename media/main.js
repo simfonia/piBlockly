@@ -21,6 +21,12 @@ if (FieldMultilineInput) {
     Blockly.registry.register('field', 'field_multilineinput', FieldMultilineInput);
 }
 
+// Register standard FieldTextInput for jsonInit compatibility
+const FieldTextInput = window.FieldTextInput || window.Blockly.FieldTextInput;
+if (FieldTextInput) {
+    Blockly.registry.register('field', 'field_textinput', FieldTextInput);
+}
+
 // =============================================================================
 // --- THEME DEFINITIONS ---
 // =============================================================================
@@ -59,6 +65,8 @@ const blockMessageStylesMap = {
         'ARDUINO_SERIAL_READ_MSG': 'BKY_ARDUINO_SERIAL_READ_MSG_ENGINEER',
 
         // Coding
+        'CODING_COMMENT_MESSAGE': 'BKY_CODING_COMMENT_MSG_ENGINEER',
+        'CODING_INCLUDE_MESSAGE': 'BKY_CODING_INCLUDE_MSG_ENGINEER',
         'CODING_RAW_STATEMENT_MESSAGE': 'BKY_CODING_RAW_STATEMENT_ENGINEER',
         'CODING_RAW_INPUT_MESSAGE': 'BKY_CODING_RAW_INPUT_ENGINEER',
         'CODING_RAW_DEFINITION_MESSAGE': 'BKY_CODING_RAW_DEFINITION_ENGINEER',
@@ -139,6 +147,8 @@ const blockMessageStylesMap = {
         'ARDUINO_SERIAL_READ_MSG': 'BKY_ARDUINO_SERIAL_READ_MSG_ANGEL',
 
         // Coding
+        'CODING_COMMENT_MESSAGE': 'BKY_CODING_COMMENT_MSG_ANGEL',
+        'CODING_INCLUDE_MESSAGE': 'BKY_CODING_INCLUDE_MSG_ANGEL',
         'CODING_RAW_STATEMENT_MESSAGE': 'BKY_CODING_RAW_STATEMENT_ANGEL',
         'CODING_RAW_INPUT_MESSAGE': 'BKY_CODING_RAW_INPUT_ANGEL',
         'CODING_RAW_DEFINITION_MESSAGE': 'BKY_CODING_RAW_DEFINITION_ANGEL',
@@ -256,7 +266,7 @@ function applyStyle(themeName, isInitialLoad = false) {
             }
         }
     });
-    
+
     // 5. Update the toolbox.
     workspace.updateToolbox(newToolbox);
 
@@ -333,7 +343,7 @@ async function loadExternalModules() {
     for (const source of allModules) {
         const loadPromises = source.modules.map(async (modConfig) => {
             const currentBaseUrl = source.baseUrl;
-            
+
             if (modConfig.url.endsWith('/')) {
                 // --- It's a DIRECTORY module ---
                 const module = {};
@@ -359,7 +369,7 @@ async function loadExternalModules() {
                 if (blocksModule && blocksModule.registerBlocks) {
                     module.registerBlocks = blocksModule.registerBlocks;
                 }
-                
+
                 if (finalGeneratorsModule && finalGeneratorsModule.registerGenerators) {
                     module.registerGenerators = finalGeneratorsModule.registerGenerators;
                 }
@@ -417,7 +427,7 @@ async function loadExternalModules() {
         if (module.toolbox) {
             const cleanXml = module.toolbox.replace(/>\s+</g, '><').trim();
             const tempDom = Blockly.utils.xml.textToDom(cleanXml);
-            
+
             // tempDom.children is a collection of the top-level nodes from the module's toolbox XML
             // (e.g., the <category> elements).
             const moduleNodes = tempDom.children;
@@ -466,12 +476,15 @@ let workspace; // Declare workspace globally
 const scopeDefiningRootBlocks = [
     'initializes_setup',
     'initializes_loop',
-    'custom_functions_defreturn',
-    'custom_functions_defnoreturn',
+    'coding_include',
+    'coding_comment',
     'coding_raw_definition',
     'array_declare_global',
-    'variables_declare_global'
+    'variables_declare_global',
+    'custom_functions_defreturn',
+    'custom_functions_defnoreturn'
 ];
+Blockly.Arduino.scopeDefiningRootBlocks = scopeDefiningRootBlocks; // Expose to Blockly.Arduino
 
 /**
  * Generates Arduino code from the workspace and sends it to the extension.
@@ -576,10 +589,10 @@ window.addEventListener('message', event => {
 
                 workspace.clear();
                 const xml = Blockly.utils.xml.textToDom(message.xml);
-                                                        Blockly.Xml.domToWorkspace(xml, workspace);                // Store metadata from the extension.
+                Blockly.Xml.domToWorkspace(xml, workspace);                // Store metadata from the extension.
                 window.currentInoUri = message.inoUri;
                 window.currentXmlName = message.xmlName ? message.xmlName.split(/[\\/]/).pop() : '未命名專案';
-                
+
                 // Reset the dirty state.
                 isDirty = false;
                 vscode.postMessage({ command: 'dirtyStateChanged', isDirty: false });
@@ -714,8 +727,8 @@ function isNewerVersion(newVersion, oldVersion) {
     for (let i = 0; i < Math.max(newParts.length, oldParts.length); i++) {
         const newPart = newParts[i] || 0;
         const oldPart = oldParts[i] || 0;
-        if (newPart > oldPart) return true;
-        if (newPart < oldPart) return false;
+        if (newPart > oldPart) { return true; }
+        if (newPart < oldPart) { return false; }
     }
     return false;
 }
@@ -726,7 +739,7 @@ function isNewerVersion(newVersion, oldVersion) {
 async function checkForUpdates() {
     const updateButton = document.getElementById('updateButton');
     const localVersion = document.body.dataset.extensionVersion;
-    
+
     // Hardcoded repository info
     const repoOwner = 'simfonia';
     const repoName = 'piBlockly';
@@ -738,7 +751,7 @@ async function checkForUpdates() {
         console.error('Update check could not run. Missing button or version attribute.');
         return;
     }
-    
+
     // Always set the link to the releases page
     updateButton.href = releasesUrl;
 
@@ -859,7 +872,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'arduino_serial_block': { 'colourPrimary': Blockly.Msg.ANGEL_ARDUINO_SERIAL_HUE },
             'logic_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOGIC_HUE },
             'loop_blocks': { 'colourPrimary': Blockly.Msg.ANGEL_LOOPS_HUE },
-            
+
             // Keep existing Angel styles, including user-specified exceptions
             'picar_block': { 'colourPrimary': Blockly.Msg.PICAR_HUE }, // Exception: Keep engineer color
             'coding_block': { 'colourPrimary': Blockly.Msg.ANGEL_CODING_HUE },
@@ -922,7 +935,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     workspace.addChangeListener(updateOrphanBlocks);
-    
+
     // Check for updates when the webview is loaded
     checkForUpdates();
 

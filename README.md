@@ -32,7 +32,7 @@
 2.  **移除舊版本：**
     *   進入 `C:\Users\[user name]\.arduinoIDE\deployedPlugins` 並刪除所有 `piblockly-x.x.x` 資料夾。
     *   進入 `C:\Users\[user name]\.arduinoIDE\plugins`（如果此資料夾不存在，請建立它，注意 'plugins' 中的 's'）並刪除所有 `piblockly-x.x.x.vsix` 檔案。
-3.  **下載最新的 `piblockly-x.x.x.vsix` 檔案。**
+3.  **[下載](https://github.com/simfonia/piBlockly/releases)最新的 `piblockly-x.x.x.vsix` 檔案。**
     *   將下載的 `.vsix` 檔案放入 `C:\Users\[user name]\.arduinoIDE\plugins`（如果此資料夾不存在，請建立它，注意 'plugins' 中的 's'）。
 4.  啟動 Arduino IDE 2(可能要重啟2次)。您應該會在右上角看到一個粉紅色的 ![](./media/icons/icon.png) 圖示。點擊它即可啟動 πBlockly 編輯器。
 

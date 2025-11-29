@@ -7,6 +7,7 @@
  * Used by processDefinitionStack to identify which blocks to process together.
  */
 const DEFINITION_BLOCK_TYPES = ['variables_declare_global', 'coding_raw_definition'];
+Blockly.Arduino.DEFINITION_BLOCK_TYPES = DEFINITION_BLOCK_TYPES; // Expose to Blockly.Arduino
 
 /**
  * Processes a stack of connected definition blocks (e.g., global variables, raw definitions).

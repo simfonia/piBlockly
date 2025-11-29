@@ -31,7 +31,7 @@ Although this is a VS Code extension, it can also run within Arduino IDE 2, leve
 2.  **Remove Old Versions:**
     *   Go to `C:\Users\[user name]\.arduinoIDE\deployedPlugins` and delete all `piblockly-x.x.x` folders.
     *   Go to `C:\Users\[user name]\.arduinoIDE\plugins` (create this folder if it doesn't exist, note the 's' in 'plugins') and delete all `piblockly-x.x.x.vsix` files.
-3.  **Download the latest `piblockly-x.x.x.vsix` file.**
+3.  **[Download](https://github.com/simfonia/piBlockly/releases) the latest `piblockly-x.x.x.vsix` file.**
     *   Place the downloaded `.vsix` file into `C:\Users\[user name]\.arduinoIDE\plugins` (create this folder if it doesn't exist, note the 's' in 'plugins').
 4.  Launch Arduino IDE 2 (may require restarting twice). You should see a pink ![](./media/icons/icon.png) icon in the top right corner. Click it to start the piBlockly editor.
 
