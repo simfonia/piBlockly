@@ -383,6 +383,7 @@ async function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: 
                 case 'updateCode':
                     if (associatedEditor) {
                         const code = message.code;
+                        const xml = message.xml;
                         try {
                             const doc = associatedEditor.document;
                             const currentContent = doc.getText();
@@ -407,6 +408,16 @@ async function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: 
 
                             // Update the hash to reflect the new content.
                             currentPanel.lastGeneratedCodeHash = crypto.createHash('sha256').update(code).digest('hex');
+
+                            // --- AUTO-SAVE XML ---
+                            if (xml && currentPanel.xmlName) {
+                                fs.writeFileSync(currentPanel.xmlName, xml);
+                                // Since we auto-saved, we can clear the dirty state
+                                if (currentPanel.isDirty) {
+                                    currentPanel.isDirty = false;
+                                    panel.webview.postMessage({ command: 'saveComplete' });
+                                }
+                            }
 
                         } catch (error) {
                             vscode.window.showErrorMessage(getLocalizedMessage('updateCodeFailed', String(error)));

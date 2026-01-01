@@ -345,40 +345,8 @@ const CUSTOM_FUNCTIONS_DEF_COMMON = {
     if (this.isInFlyout) {
       return;
     }
-    const option = {enabled: true};
-    const name = this.getFieldValue('NAME');
-    option.text = Blockly.Msg['FUNCTIONS_CREATE_DO'].replace('%1', name);
-    const xmlMutation = document.createElement('mutation');
-    xmlMutation.setAttribute('name', name);
-    for (let i = 0; i < this.arguments_.length; i++) {
-      const xmlArg = document.createElement('arg');
-      xmlArg.setAttribute('name', this.arguments_[i]);
-      xmlArg.setAttribute('type', this.argTypes_[i]); // Custom
-      xmlMutation.appendChild(xmlArg);
-    }
-    const xmlBlock = document.createElement('block');
-    xmlBlock.setAttribute('type', this.callType_);
-    xmlBlock.appendChild(xmlMutation);
-    option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
-    options.push(option);
-
-    if (!this.isCollapsed()) {
-      for (let i = 0; i < this.argumentVarModels_.length; i++) {
-        const argOption = {enabled: true};
-        const argVar = this.argumentVarModels_[i];
-        const argName = argVar.name;
-        argOption.text = Blockly.Msg['VARIABLES_SET_CREATE_GET'].replace('%1', argName);
-
-        const argXmlField = Blockly.Variables.generateVariableFieldDom(argVar);
-        const argXmlBlock = document.createElement('block');
-        argXmlBlock.setAttribute('type', 'variables_get');
-        argXmlBlock.appendChild(argXmlField);
-        argOption.callback = Blockly.ContextMenu.callbackFactory(this, argXmlBlock);
-        options.push(argOption);
-      }
-    }
+    // Context menu features (Create Call Block / Create Variable) are disabled per user request.
   },
-  callType_: 'functions_callnoreturn',
 };
 
 Blockly.Blocks['custom_functions_defnoreturn'] =

@@ -242,7 +242,7 @@
     "PICAR_PLAY_MELODY_STRING_MESSAGE": "播放旋律字串", // 修改現有訊息
     "PICAR_PLAY_MELODY_STRING_MESSAGE_PIN": "播放旋律於腳位", // 新鍵
     "PICAR_PLAY_MELODY_STRING_MESSAGE_MELODY": "旋律:", // 新鍵
-    "PICAR_PLAY_MELODY_STRING_TOOLTIP": "播放由字串定義的旋律 (例如：C4Q,D4Q,E4H)。使用 R 代表休止符，_T 代表三連音。用法詳見程式碼中的註解。",
+    "PICAR_PLAY_MELODY_STRING_TOOLTIP": "播放由字串定義的旋律 (例如：C4Q,D4Q,E4H)。支援空白或逗號分隔，建議每小節換行。使用 R 代表休止符，_T 代表三連音。大小寫皆可。",
 
     // *********************************************************
     // Coding

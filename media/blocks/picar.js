@@ -545,61 +545,40 @@ export function registerBlocks(Blockly) {
     const pin = 'pinBuzzer'; // Assuming a default buzzer pin from ensurePiCarBuzzerDependencies
 
     let code = '';
-    const notes = melodyString.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    // Robust splitting: Replace commas and newlines with spaces before splitting by any whitespace
+    const cleanStr = melodyString.replace(/[,\r\n]/g, ' ');
+    const notes = cleanStr.split(/\s+/).map(s => s.trim()).filter(s => s.length > 0);
 
-    code += `// Generated melody from: ${melodyString}\n`;
+    code += `// Generated melody from: ${melodyString.replace(/\n/g, ' ')}\n`;
     code += `{\n`;
     code += `  float current_quarter_note_ms = g_quarter_note_ms; // Use float for precision\n`;
 
     notes.forEach(noteStr => {
       let match;
-      // Regex to capture: (Optional: Pitch + Accidental) (Optional: Octave) (Duration) (Optional: Dotted) (Optional: Triplet)
-      // Examples: C4Q, C#5E., RQH, D3S_T
-      const noteRegex = /^([A-G][#b]?)?([0-8])?([WHQEST])(\\.?|_T)?$/i;
+      // Regex: (Rest R)? (Pitch+Accidental)? (Octave)? (Duration) (Dotted .)? (Triplet _T)?
+      const noteRegex = /^(R)?([A-G][#b]?)?([0-8])?([WHQEST])(\\.?|_T)?$/i;
 
-      // Handle Rest explicitly first
-      if (noteStr.toUpperCase().startsWith('R')) {
-        const restPart = noteStr.substring(1); // Get duration part after 'R'
-        match = restPart.match(/^([WHQEST])(\\.?|_T)?$/i);
-        if (match) {
-          let durationChar = match[1].toUpperCase();
-          let isDotted = !!match[2];
-          let isTriplet = !!match[3];
-
-          let durationRatio = getNoteValueRatio(durationChar);
-          if (isDotted) { durationRatio *= 1.5; }
-          if (isTriplet) { durationRatio *= (2.0 / 3.0); }
-
-          code += `  playNote(${pin}, 0, (int)(current_quarter_note_ms * ${durationRatio}), (int)(current_quarter_note_ms * ${durationRatio} * 0.1)); // Rest\n`;
-        } else {
-          code += `  // WARNING: Invalid rest format: ${noteStr}\n`;
-          code += `  delay(250); // Default short rest\n`;
-        }
-        return; // Move to next note
-      }
-
-      // Handle actual notes
       match = noteStr.match(noteRegex);
 
       if (match) {
-        let pitch = match[1] ? match[1].toUpperCase() : 'C'; // Default pitch
-        let octave = match[2] ? parseInt(match[2], 10) : 4; // Default octave
-        let durationChar = match[3].toUpperCase();
-        let isDotted = !!match[4];
-        let isTriplet = !!match[5];
+        const isRest = !!match[1];
+        let pitch = match[2] ? match[2].toUpperCase() : 'C'; // Default pitch
+        let octave = match[3] ? parseInt(match[3], 10) : 4; // Default octave
+        let durationChar = match[4].toUpperCase();
+        let isDotted = match[5] === '.';
+        let isTriplet = match[5] === '_T';
 
-        let frequency = getFrequencyFromPitchOctave(pitch, octave);
         let durationRatio = getNoteValueRatio(durationChar);
         if (isDotted) { durationRatio *= 1.5; }
         if (isTriplet) { durationRatio *= (2.0 / 3.0); }
 
-        // Ensure frequency is not 0 for notes
-        if (frequency === 0) { // Fallback for unhandled pitch cases
-          code += `  // WARNING: Invalid pitch or octave for note: ${noteStr}\n`;
-          frequency = 440; // Default to A4
+        if (isRest) {
+          code += `  playNote(${pin}, 0, (int)(current_quarter_note_ms * ${durationRatio}), (int)(current_quarter_note_ms * ${durationRatio} * 0.1)); // Rest\n`;
+        } else {
+          let frequency = getFrequencyFromPitchOctave(pitch, octave);
+          if (frequency === 0) frequency = 440;
+          code += `  playNote(${pin}, (int)${frequency.toFixed(0)}, (int)(current_quarter_note_ms * ${durationRatio}), (int)(current_quarter_note_ms * ${durationRatio} * 0.1));\n`;
         }
-
-        code += `  playNote(${pin}, (int)${frequency.toFixed(0)}, (int)(current_quarter_note_ms * ${durationRatio}), (int)(current_quarter_note_ms * ${durationRatio} * 0.1));\n`;
       } else {
         code += `  // WARNING: Invalid note format: ${noteStr}\n`;
         code += `  playNote(${pin}, 440, (int)(current_quarter_note_ms), (int)(current_quarter_note_ms * 0.1)); // Play a default note for error\n`;
