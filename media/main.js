@@ -486,6 +486,15 @@ const scopeDefiningRootBlocks = [
 ];
 Blockly.Arduino.scopeDefiningRootBlocks = scopeDefiningRootBlocks; // Expose to Blockly.Arduino
 
+// Define which block types create a new scope (function, setup, loop).
+// These are the blocks we want to find when determining where a block is located.
+const scopeContainerBlocks = [
+    'initializes_setup',
+    'initializes_loop',
+    'custom_functions_defreturn',
+    'custom_functions_defnoreturn'
+];
+
 /**
  * Generates Arduino code from the workspace and sends it to the extension.
  * This function is debounced to prevent excessive updates during rapid block changes.
@@ -514,14 +523,18 @@ function updateCode(event, suppressDirty = false) {
         vscode.postMessage({ command: 'dirtyStateChanged', isDirty: true });
     }
 
-    // Debounce the code generation.
+    // Debounce the code generation and auto-save.
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         const code = Blockly.Arduino.workspaceToCode(workspace);
+        const xmlDom = Blockly.Xml.workspaceToDom(workspace);
+        const xmlText = Blockly.Xml.domToText(xmlDom);
+
         vscode.postMessage({
             command: 'updateCode',
             code: code,
-            inoUri: window.currentInoUri // Include the URI of the associated .ino file.
+            xml: xmlText, // Add the XML for auto-saving
+            inoUri: window.currentInoUri
         });
     }, 250);
 }
@@ -539,11 +552,11 @@ function getBlockScopeIdentifier(block) {
     let currentBlock = block;
     let parentBlock = block.getParent();
 
-    // Traverse up the parent chain until we find a scope-defining root block
+    // Traverse up the parent chain until we find a scope-defining container block
     // or we reach a block with no parent (meaning it's a top-level block itself).
     while (parentBlock) {
-        if (scopeDefiningRootBlocks.includes(parentBlock.type)) {
-            currentBlock = parentBlock; // This is the scope-defining parent.
+        if (scopeContainerBlocks.includes(parentBlock.type)) {
+            currentBlock = parentBlock; // This is the scope container.
             break; // Stop traversing.
         }
         currentBlock = parentBlock;
@@ -551,7 +564,7 @@ function getBlockScopeIdentifier(block) {
     }
 
     // Now currentBlock is either the original block (if it's a root),
-    // or the first scope-defining ancestor.
+    // or the scope container we found.
 
     const blockType = currentBlock.type;
 
@@ -941,6 +954,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Signal to the extension that the webview is ready to be initialized.
     vscode.postMessage({ command: 'webviewReady' });
+
+    /**
+     * Helper function to save the current workspace.
+     */
+    function saveWorkspace() {
+        if (!workspace) return;
+        const xml = Blockly.Xml.workspaceToDom(workspace);
+        const xmlText = Blockly.Xml.domToText(xml);
+        vscode.postMessage({
+            command: 'saveProject',
+            xml: xmlText,
+            inoUri: window.currentInoUri
+        });
+    }
+
+    // Handle Undo/Redo/Save keyboard shortcuts within the webview.
+    window.addEventListener('keydown', (event) => {
+        // Use event.code for cross-layout compatibility
+        const isCtrl = event.ctrlKey || event.metaKey;
+        const isShift = event.shiftKey;
+
+        // Ctrl + Z (Undo)
+        if (isCtrl && event.code === 'KeyZ' && !isShift) {
+            if (workspace) {
+                workspace.undo(false);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        } 
+        // Ctrl + Y or Ctrl + Shift + Z (Redo)
+        else if (isCtrl && (event.code === 'KeyY' || (event.code === 'KeyZ' && isShift))) {
+            if (workspace) {
+                workspace.undo(true);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }
+        // Ctrl + S (Save)
+        else if (isCtrl && event.code === 'KeyS') {
+            event.preventDefault();
+            event.stopPropagation();
+            saveWorkspace();
+        }
+    }, true); // Use capture phase to intercept before Blockly if needed
 });
 
 // Bind toolbar button click events to post messages to the extension.
@@ -953,6 +1010,7 @@ document.getElementById('openButton').addEventListener('click', () => {
 });
 
 document.getElementById('saveButton').addEventListener('click', () => {
+    // Logic moved to a helper function if needed, but keeping it direct for now or using the helper
     const xml = Blockly.Xml.workspaceToDom(workspace);
     const xmlText = Blockly.Xml.domToText(xml);
     vscode.postMessage({

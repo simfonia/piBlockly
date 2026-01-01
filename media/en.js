@@ -242,7 +242,7 @@
     "PICAR_PLAY_MELODY_STRING_MESSAGE": "Play Melody String", // Modify existing message
     "PICAR_PLAY_MELODY_STRING_MESSAGE_PIN": "Play melody on pin", // New key
     "PICAR_PLAY_MELODY_STRING_MESSAGE_MELODY": "Melody:", // New key
-    "PICAR_PLAY_MELODY_STRING_TOOLTIP": "Plays a melody defined by a string (e.g., C4Q,D4Q,E4H). Use R for rests, _T for triplets. Usage details in code comments.",
+    "PICAR_PLAY_MELODY_STRING_TOOLTIP": "Plays a melody defined by a string (e.g., C4Q,D4Q,E4H). Supports spaces or commas as delimiters; suggested newline every measure. Use R for rests, _T for triplets. Case-insensitive.",
 
     // *********************************************************
     // Coding

@@ -1,0 +1,259 @@
+工作日誌 (piblockly/work.log)
+  日期： 2025年11月15日
+
+  問題：
+  當拖曳 array_get 積木並使其滑過其他陣列相關積木的連接點時，如果該連接點上已經有非影子積木，則會觸發 a.getAttribute is
+  not a function 的錯誤。這個錯誤會導致被「擠開」的積木無法歸位，甚至讓系統無法使用。
+
+  根本原因：
+  經過多次測試和排查，我們發現問題的根源在於 piblockly/media/blocks/array.js 中，陣列相關積木（array_declare_global,
+  array_declare_local, array_get,
+  array_set）使用程式碼（connection.setShadowDom()）來定義其輸入框的影子積木。這種程式化的定義方式，在特定的拖曳互動情
+  境下，與 Blockly 內部的影子積木重新生成邏輯產生了衝突，導致了錯誤。
+
+  解決方案：
+   1. 將影子積木定義從程式碼移至 XML： 我們將所有陣列積木的影子積木定義，從 piblockly/media/blocks/array.js
+      中的程式碼（setShadowDom 呼叫）中移除。
+   2. 在 `piblockly/media/toolbox.xml` 中宣告定義： 相反地，我們將這些影子積木的定義以標準的 XML 格式（<value><shadow
+      type="math_number"><field name="NUM">...</field></shadow></value>）加入到 piblockly/media/toolbox.xml
+      檔案中。這種宣告式的方法是 Blockly 定義影子積木的標準且更穩健的方式。
+   3. 清理多餘程式碼： 移除了 array.js 中不再需要的 shadow 和 field 元素建立程式碼。
+
+
+
+  日期： 2025年10月22日
+
+  已完成的任務：
+
+   1. 啟動邏輯與專案管理 (todo.log 項目 #8)：
+       * 實作了「新增專案」和「開啟專案」的工作流程。
+       * 確保了「安全優先」的行為：總是建立一個新的未命名文件作為程式碼輸出目標，絕不覆蓋現有檔案。
+       * 修正了 panelCounter is not defined 錯誤。
+       * 修正了 TypeError: NlsBundlerPlugin is not a constructor 和相關的 webpack 問題。
+       * 修正了 Cannot find module 'vscode' 錯誤。
+       * 修正了 localize 函式的型別錯誤。
+       * 修正了 engines.vscode 版本不匹配的問題。
+       * 修正了「儲存時面板標題未更新」和「開啟專案時面板標題未更新」的問題。
+       * 修正了「關閉時儲存」的邏輯 (競爭條件、webview 被銷毀)。
+       * 修正了「第二次關閉」時提示未出現的錯誤。
+       * 修正了重新開啟編輯器時的位置問題。
+       * 移除了 webview 中的「開啟專案」按鈕。
+       * 將未命名文件的標題設定為 Untitled-X (解決了 temp.ino 的標題問題)。
+
+   2. 積木風格修改 - 邏輯 (Logic) 類別：
+       * logic_compare：顯示 C/C++ 運算符 (==, != 等)。
+       * logic_operation：顯示 C/C++ 運算符 (&& (and), || (or))。
+       * logic_negate：顯示 !(not)。
+       * logic_boolean：顯示 true, false (小寫)。
+       * logic_null：顯示 NULL。
+       * logic_ternary：顯示 (condition ? value1 : value2)。
+       * 根據使用者決定，移除了 logic_null 和 logic_ternary 的覆寫定義。
+
+   3. 積木風格修改 - 迴圈 (Loops) 類別：
+       * controls_repeat_ext：已從 toolbox.xml 中移除 (根據使用者決定)。
+       * controls_whileUntil：顯示 while (condition) { ... } (並移除了 until 選項)。
+       * controls_for：顯示 for (int VAR = FROM; VAR <= TO; VAR += BY) { ... }，並修正了變數名稱的動態顯示和運算符的動態更新。
+       * controls_flow_statements：顯示 break; 和 continue;。
+
+   4. 積木風格修改 - 文字 (Text) 類別：
+       * text：維持原樣。
+       * text_join：顯示 String(...) + String(...) + ...。
+       * text_append：顯示 VAR += TEXT;。
+       * text_length：顯示 VALUE.length()。
+       * 已將 text_length 加入 toolbox.xml。
+       * 已為 text_length 加入程式碼生成器。
+       * 修正了 Serial.begin() 程式碼生成順序的問題。
+
+  待處理的任務：
+
+   1. 國際化 (i18n)：
+       * 目前已將所有對話框提示直接改為正體中文 (臨時措施)。
+       * 完整的 vscode-nls 整合 (包括 webpack.config.js 和 package.json 的最終設定，以及 Webview 的國際化) 仍待實作。
+
+   2. 剩餘積木風格修改：
+       * 其他類別 (例如 Math, Variables, Functions 等) 的積木風格調整。
+
+
+
+  日期： 2025年10月19日
+  
+> 麻煩你再把目前我們啟動、開檔、存檔及頁面切換的流程再整理一遍給我
+
+✦ 好的，這段時間我們對流程做了很多改進，我將目前最終版本的運作流程整理如下：
+
+  1. 啟動 piBlockly (執行 piBlockly: Start 命令)
+
+  這是所有操作的起點，目標是安全地建立一個積木編輯環境。
+
+   1. 選擇模式：首先，你會看到一個選擇框，讓你選擇要「新增專案」還是「開啟專案」。
+   2. 處理專案檔 (`.xml`)：
+       * 如果選擇「新增專案」：
+           1. 會先跳出一個「另存新檔」的對話框，讓你決定新專案 .xml 檔案的名稱與儲存位置。
+           2. 接著，程式會將預設的 setup 和 loop 積木內容寫入這個新的 .xml 檔。
+       * 如果選擇「開啟專案」：
+           1. 會跳出一個「開啟檔案」的對話框，讓你選擇一個已經存在的 .xml 檔案。
+   3. 建立安全輸出環境：
+       * 無論是新增還是開啟，完成上述步驟後，程式必定會建立一個全新的、未命名的分頁 (例如 Untitled-1)
+         作為程式碼的輸出目標。這確保了你的任何既有檔案都不會被意外覆蓋。
+   4. 啟動面板：
+       * 積木面板會在右側出現，並自動與剛剛建立的「未命名分頁」進行綁定。
+       * 接著，它會載入 .xml 的積木內容，並將對應的程式碼產生到這個新的「未命名分頁」中。
+
+  2. 從面板中「開啟專案」
+
+  當你已經在一個編輯環境中，想切換到另一個專案時：
+
+   1. 點擊積木面板上方的「開啟專案」按鈕。
+   2. 程式會提示你選擇一個新的 .xml 檔案。
+   3. 選擇後，為了確保環境乾淨，程式會關閉當前的積木面板，然後執行與上述第 1
+      點完全相同的啟動流程，為新專案建立一個全新的、安全的編輯環境 (一個新的未命名分頁 + 一個新的積木面板)。
+
+  3. 儲存專案
+
+   1. 點擊積木面板上方的「儲存專案」按鈕。
+   2. 程式會跳出「另存新檔」對話框，讓你儲存 .xml 積木檔案。
+   3. 如果你是開啟現有專案，它會很智慧地預設使用你當初開啟的檔名。
+   4. 注意：此操作只會儲存 .xml 積木檔，左側的 .ino 程式碼分頁需要你自己決定是否要手動儲存。
+
+  4. 視窗互動與安全機制
+
+  我們建立了兩個核心的自動化機制來確保流程順暢且安全：
+
+   1. 當你關閉「程式碼分頁」時：
+       * 程式會偵測到這個操作，並檢查你的積木是否有未儲存的變更。
+       * 如果有，會跳出提示框，讓你選擇「儲存」(Save)、「不儲存」(Don't Save) 或「取消」(Cancel)。
+           * 儲存：會提示你儲存 .xml 檔，然後關閉積木面板。
+           * 不儲存：直接關閉積木面板。
+           * 取消：會自動重新打開剛剛被你關閉的程式碼分頁，一切恢復原狀，操作被中斷。
+       * 如果沒有未儲存的變更，積木面板會跟著程式碼分頁一起被安靜地關閉。
+
+   2. 當你關閉程式碼分頁後，又點擊「積木面板」時：
+       * 程式會偵測到積木面板的「輸出目標」已經消失。
+       * 它會提示你「關聯的編輯器已關閉」，並詢問是否要建立一個新的輸出目標。
+       * 如果你選擇「OK」，它會再次為你建立一個全新的、未命名的分頁，並將面板與之重新綁定，然後立刻產生程式碼。這確保了積木面板永遠
+         不會因為找不到輸出目標而失效。
+
+  以上就是目前完整且穩定的運作流程。
+
+
+
+  日期： 2025年10月18日
+
+  存檔/載入功能與面板管理重構
+
+  已完成事項：
+
+   * 存檔/載入功能實作：
+       * 在 Webview 工具列中新增了「儲存專案」和「開啟專案」按鈕。
+       * 實作了 main.js 中的按鈕點擊事件處理器，用於獲取 Blockly XML 和生成的 Arduino 程式碼，並發送命令到 extension.ts。
+       * 在 extension.ts 中實作了 saveProject 命令，使用 vscode.window.showSaveDialog 儲存 .ino 和 .xml 檔案。
+       * 在 extension.ts 中實作了 loadProject 命令，使用 vscode.window.showOpenDialog 載入 .xml 檔案，並將其內容發送回 main.js。
+       * 在 main.js 中，修改了 initializeWorkspace 邏輯，在載入新 XML 前先清除工作區，確保積木被替換而非增加。
+       * 為「開啟專案」功能增加了「載入前確認是否覆蓋」的提示對話框。
+
+   * Blockly 介面優化：
+       * 啟用了 Blockly 內建的縮放控制按鈕 (zoom.controls: true)。
+       * 配置了滑鼠滾輪行為，使其用於捲動畫面而非縮放 (move.wheel: true, zoom.wheel: false)，並啟用了水平捲軸
+         (move.scrollbars.horizontal: true)。
+
+
+  日期： 2025年10月18日
+
+  孤兒積木處理與系統優化
+
+  已完成事項：
+   * 實現孤兒積木失效邏輯：
+       * 在 main.js 中建立了 updateOrphanBlocks 函式，用於處理未連接到根積木（如 setup, loop）的孤兒積木。
+       * 經歷多次迭代，最終的邏輯為：在工作區發生變動時，先啟用所有積木，再找出真正的孤兒積木（不被允許的頂層
+         積木），並明確地將其本身及其所有子積木都設為停用狀態。
+
+   * 修正 `variables_declare` 積木的根積木規則：
+       * 更新了 updateOrphanBlocks 函式，增加了對 variables_declare 積木的特殊判斷。
+       * 現在只有當其 SCOPE 欄位為 GLOBAL 時，它才能作為一個合法的根積木存在；若為
+         LOCAL，則會被視為孤兒積木而失效。
+
+   * 修正「定義型」積木的連接點問題：
+       * 為了解決全域定義積木下方可拼接陳述句積木的邏輯問題，修改了 blocks.js 中的積木定義。
+       * `variables_declare`：改為動態形狀，當 SCOPE 為 GLOBAL 時，透過 onchange 事件監聽，以程式碼
+         setNextStatement(false) 移除下方接點。
+       * `coding_raw_definition`：發現 jsonInit 中使用 "nextStatement": null 無法移除接點，最終透過完全刪除
+         `nextStatement` 屬性的方式成功解決了問題。
+
+   * 修正 `coding` 積木的根積木規則：
+       * 根據您的最終決策，將 coding_raw_statement 與 coding_raw_wrapper
+         從允許的根積木清單中移除，它們現在必須依附於其他積木才能生效。
+
+  解決的重大問題：
+   * 修正了無限迴圈導致的系統崩潰：
+       * 問題原因：updateOrphanBlocks
+         函式會回應「積木改變」事件，但其自身的「停用/啟用」操作又會觸發此事件，導致無限迴圈。
+       * 解決方案：修改了 main.js 中的事件監聽器，讓它明確忽略由 disabled
+         狀態改變所觸發的事件，從而斬斷了迴圈。
+
+   * 診斷並解決了 `blocks.js` 修改不生效的頑固快取問題：
+       * 透過將檔案重新命名 (blocks.js -> blocks_new.js)，確認了問題並非 Webpack 打包或 nonce
+         快取清除失敗，而是與檔案本身有關。
+       * 在重新命名過程中發現了全形/半形底線的打字錯誤，修正後成功載入新檔案。
+       * 最終確認 replace 工具的修改是成功的，但 Blockly 對 jsonInit 中 nextStatement: null
+         的解析行為不如預期，必須直接刪除該屬性才能解決問題。
+
+
+  日期：2025年10月18日
+
+  已完成事項：
+   * 修正 Functions 積木的程式碼產生器： 解決了 custom_procedures_defnoreturn 和 custom_procedures_defreturn
+     積木在 custom_generator.js 中因換行符逸出問題導致的「Unterminated string literal」錯誤。
+   * 新增手動呼叫函式積木： 根據使用者需求，在 toolbox.xml 中新增了 custom_procedures_callnoreturn_manual 和
+     custom_procedures_callreturn_manual 積木。
+   * 定義手動呼叫函式積木的外觀與行為： 在 media/custom/blocks.js 中定義了
+     custom_procedures_callnoreturn_manual 和 custom_procedures_callreturn_manual
+     積木，包括函數名稱輸入欄位和參數變異器。
+   * 定義手動呼叫函式積木的程式碼產生器： 在 media/custom/custom_generator.js 中定義了
+     custom_procedures_callnoreturn_manual 和 custom_procedures_callreturn_manual
+     積木的程式碼產生器，使其能正確生成 C++ 函數呼叫。
+
+  討論與解決方案：
+   * Functions 積木呼叫問題： 由於 Blockly 預設的 Blockly.Procedures.flyoutCategory
+     可能與自訂程序積木不完全相容，且動態生成呼叫積木較為複雜，因此改為提供手動輸入函數名稱的呼叫積木。
+   * VSIX 版本更新問題： 說明了 VSIX 版本號碼由 package.json 控制，並提供了更新 VSIX
+     的正確步驟（解除安裝舊版、重啟 IDE、安裝新版、再次重啟 IDE）。
+   * Blockly 數學函數與 Arduino 相容性： 解釋了 Blockly 的數學函數積木在 Arduino (C++)
+     環境中大多可以直接使用，但需注意資料型別和資源限制。
+
+
+日期： 2025年10月17日
+  錯誤訊息：
+  第一個積木拉進時，在覆寫警告視窗按yes確定覆蓋時:
+  Tried to start the same gesture twice.
+
+  問題分析：
+  這個錯誤的根源在於：
+   1. 當您拖曳積木時，Blockly 內部會啟動一個「手勢 (gesture)」。
+   2. 拖曳積木的動作觸發了 updateCode 事件，進而彈出了「覆寫確認」對話框。
+   3. 這個對話框是模態的，它會暫停所有 UI 互動。
+   4. 當您點擊「是」關閉對話框後，Blockly
+      的手勢系統可能因為被中斷而混亂，導致它嘗試重新啟動一個已經在進行中的手勢，從而拋出錯誤。
+
+  解決方案：
+  最直接的解決方法是，在拖曳積木的過程中，不要觸發 `updateCode` 事件。
+
+  Blockly 提供了 workspace.isDragging() 這個方法來判斷目前是否有拖曳手勢正在進行。我將修改 main.js 中的
+  updateCode 函式，在發送 updateCode 訊息之前，先檢查 workspace.isDragging()。如果正在拖曳，就暫時不發送更新
+  訊息。這樣可以避免對話框在不恰當的時機彈出，干擾手勢。
+
+  
+   * 問題描述：Tried to start the same gesture twice 錯誤及積木跳移現象。
+   * 根本原因：
+       1. Blockly API 變更 (Blockly.Mutator -> Blockly.icons.MutatorIcon)。
+       2. validateName_ 函式過早觸發 Blockly.Procedures.rename 導致事件衝突。
+       3. domToMutation 函式中錯誤呼叫 Blockly.Procedures.mutateCallers。
+       4. Webview 初始化流程與使用者操作之間的競爭條件。
+   * 解決方案：
+       1. 更新 Blockly.Mutator 的使用方式。
+       2. 從 domToMutation 中移除 Blockly.Procedures.mutateCallers 呼叫。
+       3. 在 updateCode 函式中加入 workspace.isDragging() 檢查。
+       4. 重新設計 Webview 初始化流程，確保 shouldConfirmOverwrite 旗標的正確傳遞與使用。
+   * 其他修正：
+       * TypeError: Blockly.Xml.textToDom is not a function 的修正。
+       * ReferenceError: Cannot access 'shouldConfirmOverwrite' before initialization 的修正。
+       * 「無回傳值」函式積木外觀問題的修正。
