@@ -116,6 +116,14 @@ const messages = {
     cancelOverwrite: { // Using a different key to avoid conflict with general 'cancel'
         'zh': '取消',
         'en': 'Cancel'
+    },
+    yes: {
+        'zh': '是',
+        'en': 'Yes'
+    },
+    no: {
+        'zh': '否',
+        'en': 'No'
     }
 };
 
@@ -391,11 +399,13 @@ async function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: 
 
                             // Check if the user has manually edited the .ino file since the last code generation.
                             if (currentPanel.lastGeneratedCodeHash && currentHash !== currentPanel.lastGeneratedCodeHash) {
-                                                            const overwriteChoice = await vscode.window.showWarningMessage(
-                                                                getLocalizedMessage('codeManuallyModified'),
-                                                                { modal: true },
-                                                                getLocalizedMessage('continueOverwrite')
-                                                            );                                if (overwriteChoice !== '繼續覆蓋') {
+                                const overwriteChoice = await vscode.window.showWarningMessage(
+                                    getLocalizedMessage('codeManuallyModified'),
+                                    { modal: true },
+                                    getLocalizedMessage('continueOverwrite')
+                                );
+
+                                if (overwriteChoice !== getLocalizedMessage('continueOverwrite')) {
                                     return; // User cancelled
                                 }
                             }
@@ -433,8 +443,10 @@ async function createAndShowPanel(context: vscode.ExtensionContext, xmlContent: 
 
                 // The webview is requesting a confirmation dialog.
                 case 'confirm':
-                    const choice = await vscode.window.showWarningMessage(message.message, { modal: true }, '是', '否');
-                    panel.webview.postMessage({ command: 'confirmResponse', value: choice === '是' });
+                    const yesLabel = getLocalizedMessage('yes');
+                    const noLabel = getLocalizedMessage('no');
+                    const choice = await vscode.window.showWarningMessage(message.message, { modal: true }, yesLabel, noLabel);
+                    panel.webview.postMessage({ command: 'confirmResponse', value: choice === yesLabel });
                     return;
 
                 // The webview has reported a block selection.

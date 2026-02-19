@@ -149,6 +149,16 @@
   [*] 立即從 img-src 中移除 https:，因為它的風險最高且可能非必要。
   [*] 考慮將所有內聯樣式移至 .css 檔案，並從 style-src 中移除 'unsafe-inline'。(Blockly需要，無法移除)
   [*] 移除 script-src 中的 blob。
+[ ] 20. 實作「隱形範圍標記定位」技術 (對齊 Cocoya 技術)
+    *   **隱形範圍標記 (Invisible Range Markers)**：
+        - [ ] 修改 `_core.js` 產生器：在 C++ 註解中注入包含零寬字元 (`\u200B`) 的 `S_ID` / `E_ID`。
+        - [ ] 確保標記在 Arduino IDE 中可正確編譯且肉眼不可見。
+    *   **Monaco 原生高亮整合 (Native Decoration)**：
+        - [ ] 實作 Extension Host 端的 Monaco Decoration 邏輯：掃描 `.ino` 檔案中的隱形標記並隱藏 `//` 註解。
+        - [ ] 實作「積木 -> .ino 視窗」的選取同步：點擊積木時，原生編輯器自動捲動並高亮對應代碼區間。
+    *   **高亮策略優化**：
+        - [ ] 陳述句 (Statements)：支援整段區塊高亮。
+        - [ ] 運算式 (Expressions)：預設定位至其父層陳述句行，確保代碼純淨。
 
 未來規畫：
 [X] * extension 對話框 i18n
