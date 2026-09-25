@@ -164,7 +164,10 @@
 [X] * extension 對話框 i18n
 [ ] * 使用VS Code Custom Editor API 打造 webview, 以處理面板關閉事件(https://vscode.com.tw/api/extension-guides/custom-editors)
 [?] - 畫面分割成1:2 (VS code 目前不支援API，作罷。)
+<<<<<<< HEAD
 
 ## 2025-07-18 工作記錄
 - [x] 了解 piBlockly 專案現況與架構
 - [x] 創建 piBlockly AGENTS.md 專案規範檔 (參考 cocoya 專案格式)
+=======
+>>>>>>> 93951c72686fa5aeff4694324ac256c06882582c
